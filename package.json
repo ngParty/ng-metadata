@@ -1,0 +1,32 @@
+{
+  "name": "ng-metadata",
+  "version": "1.0.0-beta.0",
+  "description": "Angular 2 style decorators and utils for Angular 1.x",
+  "main": "ng-metadata.js",
+  "typings": "./ng-metadata.d.ts",
+  "scripts": {
+    "prepublish": "tsc",
+    "tsc": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ngParty/ng-metadata.git"
+  },
+  "keywords": [
+    "angularjs",
+    "typescript",
+    "decorators"
+  ],
+  "author": "Martin Hochel <hochelmartin@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ngParty/ng-metadata/issues"
+  },
+  "homepage": "https://github.com/ngParty/ng-metadata#readme",
+  "devDependencies": {
+    "systemjs": "0.19.5",
+    "systemjs-builder": "0.14.10",
+    "typescript": "1.6.2"
+  }
+}

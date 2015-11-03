@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "noImplicitAny": true,
+    "sourceMap": true,
+    "experimentalDecorators": true,
+    "declaration": true
+  },
+  "files": [
+    "ng-metadata.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
