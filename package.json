@@ -1,6 +1,6 @@
 {
   "name": "ng-metadata",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0-alpha.0",
   "description": "Angular 2 style decorators and utils for Angular 1.x",
   "main": "ng-metadata.js",
   "typings": "./ng-metadata.d.ts",
@@ -27,6 +27,10 @@
   "devDependencies": {
     "systemjs": "0.19.5",
     "systemjs-builder": "0.14.10",
+    "tsd": "0.6.5",
     "typescript": "1.6.2"
+  },
+  "dependencies": {
+    "object-assign": "4.0.1"
   }
 }

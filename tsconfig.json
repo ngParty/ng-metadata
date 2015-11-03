@@ -2,13 +2,14 @@
   "compilerOptions": {
     "module": "commonjs",
     "target": "es5",
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "sourceMap": true,
     "experimentalDecorators": true,
     "declaration": true
   },
   "files": [
-    "ng-metadata.ts"
+    "ng-metadata.ts",
+    "typings/tsd.d.ts"
   ],
   "exclude": [
     "node_modules"
