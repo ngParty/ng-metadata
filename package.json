@@ -5,8 +5,9 @@
   "main": "ng-metadata.js",
   "typings": "./ng-metadata.d.ts",
   "scripts": {
+    "postinstall": "tsd reinstall -so",
     "prepublish": "tsc",
-    "tsc": "tsc",
+    "start": "tsc -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
