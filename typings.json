@@ -1,0 +1,13 @@
+{
+  "name": "ng-metadata",
+  "main": "ng-metadata.d.ts",
+  "dependencies": {},
+  "devDependencies": {
+  },
+  "ambientDependencies": {
+    "chai": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/chai/chai.d.ts",
+    "mocha": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/mocha/mocha.d.ts",
+    "angular": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/angularjs/angular.d.ts",
+    "jquery": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/jquery/jquery.d.ts"
+  }
+}

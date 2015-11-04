@@ -10,7 +10,7 @@
   "files": [
     "ng-metadata.ts",
     "ng-metadata.test.ts",
-    "typings/tsd.d.ts"
+    "typings/main.d.ts"
   ],
   "exclude": [
     "node_modules"
