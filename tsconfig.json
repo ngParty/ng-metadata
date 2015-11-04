@@ -9,6 +9,7 @@
   },
   "files": [
     "ng-metadata.ts",
+    "ng-metadata.test.ts",
     "typings/tsd.d.ts"
   ],
   "exclude": [

@@ -13,6 +13,15 @@
     },
     "object-assign/object-assign.d.ts": {
       "commit": "0dd29bf8253536ae24e61c109524e924ea510046"
+    },
+    "chai/chai.d.ts": {
+      "commit": "0dd29bf8253536ae24e61c109524e924ea510046"
+    },
+    "assertion-error/assertion-error.d.ts": {
+      "commit": "0dd29bf8253536ae24e61c109524e924ea510046"
+    },
+    "mocha/mocha.d.ts": {
+      "commit": "0dd29bf8253536ae24e61c109524e924ea510046"
     }
   }
 }

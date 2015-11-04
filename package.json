@@ -8,7 +8,8 @@
     "postinstall": "tsd reinstall -so",
     "prepublish": "tsc",
     "start": "tsc -w",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ng-metadata.test.js",
+    "test:live": "mocha ng-metadata.test.js -w"
   },
   "repository": {
     "type": "git",
@@ -26,6 +27,8 @@
   },
   "homepage": "https://github.com/ngParty/ng-metadata#readme",
   "devDependencies": {
+    "chai": "3.4.0",
+    "mocha": "2.3.3",
     "systemjs": "0.19.5",
     "systemjs-builder": "0.14.10",
     "tsd": "0.6.5",
