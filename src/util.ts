@@ -4,9 +4,7 @@ const ATTRS_BOUNDARIES = /\[|\]/g;
 const COMPONENT_SELECTOR = /^\[?[\w|-]*\]?$/;
 const SKEWER_CASE = /-(\w)/g;
 
-export function makeSelector( Type: any ): string {
-
-  const selector: string = Type.selector;
+export function makeSelector( selector: string ): string {
 
   if ( !selector.match( COMPONENT_SELECTOR ) ) {
     throw new Error(
@@ -27,13 +25,22 @@ export function makeSelector( Type: any ): string {
 }
 
 export function stringify( obj: any ): string {
-  if ( isPipe(obj) ) {
-    return obj.pipeName;
-  }
+
   if ( typeof obj == 'function' ) {
     return obj.name || obj.toString();
   }
   return '' + obj;
+
+}
+
+export function provide( Type: any ) {
+
+  if ( isPipe( Type ) ) {
+    return Type.pipeName;
+  }
+
+  return stringify( Type );
+
 }
 
 export function controllerKey( name: string ): string {
