@@ -32,9 +32,11 @@ export function stringify( obj: any ): string {
   return '' + obj;
 
 }
-export function provide( Type: any, {as}:{
-  as?: string
-}={} ) {
+export function provide(
+  Type: any, {as}:{
+    as?: string
+  }={}
+) {
 
   if ( isPipe( Type ) ) {
     return Type.pipeName;
@@ -45,7 +47,7 @@ export function provide( Type: any, {as}:{
 
   return _provideService( Type, as );
 
-  function _provideService(Type, alias?:string){
+  function _provideService( Type, alias?: string ) {
 
     if ( alias ) {
 
@@ -55,6 +57,34 @@ export function provide( Type: any, {as}:{
 
     const serviceName = stringify( Type );
     return serviceName.charAt( 0 ).toLowerCase() + serviceName.substring( 1 );
+
+  }
+
+}
+
+export type AppRootArg = string | Element | Document;
+export function bootstrap(
+  ngModule: ng.IModule,
+  {element=document,strictDi=true}:{
+    element?: AppRootArg,
+    strictDi?: boolean
+  }
+) {
+
+  const appRoot = _getAppRoot( element );
+
+  angular.element( document ).ready( ()=> {
+    angular.bootstrap( appRoot, [ ngModule.name ], {
+      strictDi: true
+    } )
+  } );
+
+  function _getAppRoot( element: AppRootArg ): Element {
+
+    if ( typeof element === 'string' ) {
+      return document.querySelector( element );
+    }
+    return element as Element;
 
   }
 

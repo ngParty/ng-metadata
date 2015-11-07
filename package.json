@@ -27,6 +27,7 @@
   },
   "homepage": "https://github.com/ngParty/ng-metadata#readme",
   "devDependencies": {
+    "angular": "1.4.7",
     "chai": "3.4.0",
     "mocha": "2.3.3",
     "systemjs": "0.19.5",
