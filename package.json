@@ -5,7 +5,7 @@
   "main": "ng-metadata.js",
   "typings": "./ng-metadata.d.ts",
   "scripts": {
-    "postinstall": "typings install --name ng-metadata",
+    "typings": "typings install --name ng-metadata",
     "prepublish": "tsc",
     "start": "tsc -w",
     "test": "mocha ng-metadata.test.js",
