@@ -67,6 +67,13 @@ export function makePipe( Type: any ) {
 
 }
 
+// custom type guards
 export function isPipe( Type ) {
-  return typeof Type.pipeName === 'string' && typeof Type.pipePure === 'boolean';
+  return is( Type, 'pipeName' );
+}
+export function isDirective( Type ) {
+  return is( Type, 'selector' );
+}
+function is( Type:any, attribute: string ) {
+  return typeof Type[attribute] === 'string' && Type[attribute] !== undefined;
 }

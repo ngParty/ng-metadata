@@ -1,4 +1,4 @@
-import {isPipe} from './directives';
+import {isPipe,isDirective} from './directives';
 
 const ATTRS_BOUNDARIES = /\[|\]/g;
 const COMPONENT_SELECTOR = /^\[?[\w|-]*\]?$/;
@@ -32,14 +32,31 @@ export function stringify( obj: any ): string {
   return '' + obj;
 
 }
-
-export function provide( Type: any ) {
+export function provide( Type: any, {as}:{
+  as?: string
+}={} ) {
 
   if ( isPipe( Type ) ) {
     return Type.pipeName;
   }
+  if ( isDirective( Type ) ) {
+    return makeSelector( Type.selector );
+  }
 
-  return stringify( Type );
+  return _provideService( Type, as );
+
+  function _provideService(Type, alias?:string){
+
+    if ( alias ) {
+
+      return alias;
+
+    }
+
+    const serviceName = stringify( Type );
+    return serviceName.charAt( 0 ).toLowerCase() + serviceName.substring( 1 );
+
+  }
 
 }
 
