@@ -6,7 +6,7 @@
   "typings": "./ng-metadata.d.ts",
   "scripts": {
     "typings": "typings install --name ng-metadata",
-    "prepublish": "tsc",
+    "prepublish": "npm run typings && tsc",
     "start": "tsc -w",
     "test": "mocha ng-metadata.test.js",
     "test:live": "mocha ng-metadata.test.js -w"
