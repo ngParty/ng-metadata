@@ -26,6 +26,9 @@ function _getLifecycleMethod( hook: number ): string {
   return firstLowerCase( lifeCycleHookName );
 }
 
+type Binding = {[key:string]:string};
+const BINDING_TOKENS = { attr: '@', prop: '=', onExpr: '&' };
+
 
 interface DirectiveFactory {
   (
@@ -38,6 +41,7 @@ interface DirectiveConfigStatic {
   selector: string,
   _ddo: ng.IDirective
 }
+const DDO_NAME = '_ddo';
 
 export function Directive(
   {selector, legacy={}}:{
@@ -128,7 +132,7 @@ export function Component(
       controller: Type,
       controllerAs: 'ctrl',
       scope: {},
-      bindToController: {},
+      bindToController: _getTypeBindings( Type ) || {},
       transclude: true,
       require: _initRequire( selector ),
       link: _postLinkFactory( false )
@@ -136,8 +140,8 @@ export function Component(
 
     if ( attrs || inputs || outputs ) {
 
-      const {attr,input,output} = _createBindings( inputs, attrs, outputs );
-      ddoInternal.bindToController = angular.extend( {}, attr, input, output );
+      const {attr,input,output} = _createBindings( { inputs, attrs, outputs } );
+      ddoInternal.bindToController = angular.extend( {}, ddoInternal.bindToController, attr, input, output );
 
     }
     if ( legacy.require ) {
@@ -158,6 +162,73 @@ export function Component(
 
 }
 
+enum ComponentPropertyDecorators{
+  output,
+  input,
+  attr
+}
+function _getPropertyDecoratorType( type: number ): string {
+  return ComponentPropertyDecorators[ type ];
+}
+export function Output( bindingPropertyName?: string ): PropertyDecorator {
+  return _propertyDecoratorFactoryCreator( bindingPropertyName, _getPropertyDecoratorType( ComponentPropertyDecorators.output ) );
+  //return _outputDecoratorFactory;
+  //function _outputDecoratorFactory( target: any, propertyKey: string ) {
+  //
+  //  const Type = target.constructor;
+  //  const existingBindings = _getTypeBindings(Type);
+  //
+  //  const outputsFormat = _createArrayMapFromPropertyDecorator(propertyKey,bindingPropertyName);
+  //  const {output} = _createBindings( { outputs: outputsFormat } );
+  //
+  //  if ( existingBindings ) {
+  //    angular.extend( existingBindings, output );
+  //  } else {
+  //    Type._ddo = { bindToController: output };
+  //  }
+  //
+  //}
+}
+export function Input( bindingPropertyName?: string ): PropertyDecorator {
+  return _propertyDecoratorFactoryCreator( bindingPropertyName, _getPropertyDecoratorType( ComponentPropertyDecorators.input ) );
+}
+export function Attr( bindingPropertyName?: string ): PropertyDecorator {
+  return _propertyDecoratorFactoryCreator( bindingPropertyName, _getPropertyDecoratorType( ComponentPropertyDecorators.attr ) );
+}
+function _propertyDecoratorFactoryCreator( bindingPropertyName: string, propertyType: string ) {
+
+  return _propertyDecoratorFactory;
+
+  function _propertyDecoratorFactory( target: Object, propertyKey: string ) {
+
+    const Type = target.constructor;
+    const existingBindings = _getTypeBindings( Type );
+
+    const format = _createArrayMapFromPropertyDecorator( propertyKey, bindingPropertyName );
+    const binding = _createBindings( { [`${propertyType}s`]: format } )[ propertyType ];
+
+    if ( existingBindings ) {
+      angular.extend( existingBindings, binding );
+    } else {
+      Type[ DDO_NAME ] = { bindToController: binding };
+    }
+
+  }
+
+}
+function _createArrayMapFromPropertyDecorator( propertyKey: string, bindingName?: string ): string[] {
+
+  return bindingName
+    ? [ `${propertyKey}:${bindingName}` ]
+    : [ propertyKey ];
+
+}
+function _hasTypeBindings( Type ): boolean {
+  return Type._ddo !== undefined && typeof Type._ddo.bindToController === 'object';
+}
+function _getTypeBindings( Type ): {} {
+  return (Type._ddo && Type._ddo.bindToController) || null;
+}
 function _decorateDirectiveType( Type, selector, legacy, ddoCreator: Function ) {
   const ddo = ddoCreator( Type );
   const _ddo = angular.extend( {}, ddo, legacy );
@@ -193,34 +264,36 @@ function _postLinkFactory( isDirective: boolean ) {
 
 }
 
-function _createBindings( inputs: string[], attrs: string[], outputs: string[] ) {
+function _createBindings(
+  {inputs, attrs, outputs}:{
+    inputs?: string[],
+    attrs?: string[],
+    outputs?: string[]
+  }
+) {
 
-  type Binding = {[key:string]:string};
-
-  const BINDING_TOKENS = { attr: '@', prop: '=', onExpr: '&' };
-
-  const attr = _parseFields( attrs, 'attr' );
-  const input = _parseFields( inputs, 'prop' );
-  const output = _parseFields( outputs, 'onExpr' );
+  const attr = (attrs && _parseFields( attrs, 'attr' )) || {};
+  const input = (inputs && _parseFields( inputs, 'prop' )) || {};
+  const output = (outputs && _parseFields( outputs, 'onExpr' )) || {};
 
   return { attr, input, output };
 
-  function _parseFields( fields: string[], type: string ): Binding {
+}
 
-    if ( BINDING_TOKENS[ type ] === undefined ) {
-      throw Error( `<${type}> doesn't exist, please provide one of : <${Object.keys( BINDING_TOKENS )}>` )
-    }
+function _parseFields( fields: string[], type: string ): Binding {
 
-    return fields.reduce( ( acc, binding )=> {
-
-      const {key,value} = _getBindingsMap( binding, BINDING_TOKENS[ type ] );
-      acc[ key ] = value;
-
-      return acc;
-
-    }, {} as Binding );
-
+  if ( BINDING_TOKENS[ type ] === undefined ) {
+    throw Error( `<${type}> doesn't exist, please provide one of : <${Object.keys( BINDING_TOKENS )}>` )
   }
+
+  return fields.reduce( ( acc, binding )=> {
+
+    const {key,value} = _getBindingsMap( binding, BINDING_TOKENS[ type ] );
+    acc[ key ] = value;
+
+    return acc;
+
+  }, {} as Binding );
 
 }
 
@@ -263,7 +336,7 @@ function _checkLifecycle( lifecycleHookMethod: string, ctrl, shouldThrow = true,
 
   const method: Function = ctrl[ lifecycleHookMethod ];
   const hasLifecycleHookImplemented = typeof method === 'function';
-  const hasRequiredCtrls = Boolean(requiredCtrls.length);
+  const hasRequiredCtrls = Boolean( requiredCtrls.length );
 
   if ( shouldThrow && !hasLifecycleHookImplemented ) {
     throw Error( `@Directive/@Component must implement #${lifecycleHookMethod} method` );

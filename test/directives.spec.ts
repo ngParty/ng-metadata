@@ -1,9 +1,9 @@
 import {expect} from 'chai';
-import {Component,Directive,makeDirective,AfterContentInit} from '../src/directives';
+import {Component,Directive,Output,Input,Attr,makeDirective,AfterContentInit} from '../src/directives';
 
 describe( 'directives', function () {
 
-  function _invokeLink(controllers, linkFn){
+  function _invokeLink( controllers, linkFn ) {
 
     const instances = controllers.map( ( constructorFn )=>new constructorFn() );
 
@@ -15,38 +15,38 @@ describe( 'directives', function () {
 
     it( 'should throw error when you try make directive/component from non directive Type', function () {
 
-      class ImNotWhatYouThink{
+      class ImNotWhatYouThink {
 
-        static toString(){
-          return ImNotWhatYouThink['name'];
+        static toString() {
+          return ImNotWhatYouThink[ 'name' ];
         }
 
       }
-      function _willThrow(){
-        makeDirective(ImNotWhatYouThink);
+      function _willThrow() {
+        makeDirective( ImNotWhatYouThink );
       }
 
-      expect(_willThrow).to.throw(`ImNotWhatYouThink must be @Component/@Directive`);
+      expect( _willThrow ).to.throw( `ImNotWhatYouThink must be @Component/@Directive` );
 
     } );
 
     it( 'should create directive factory when correct Type provided', function () {
 
-      @Component({
-        selector:'yes',
-        template:'Yay pirate!'
-      })
-      class YesCmp{
+      @Component( {
+        selector: 'yes',
+        template: 'Yay pirate!'
+      } )
+      class YesCmp {
 
       }
 
-      function _willThrow(){
-        makeDirective(YesCmp);
+      function _willThrow() {
+        makeDirective( YesCmp );
       }
 
       expect( _willThrow ).to.not.throw();
       expect( typeof makeDirective( YesCmp ) ).to.equal( 'function' );
-      expect( Object.keys(makeDirective( YesCmp )()) ).to.deep.equal( [
+      expect( Object.keys( makeDirective( YesCmp )() ) ).to.deep.equal( [
         'restrict',
         'controller',
         'controllerAs',
@@ -56,7 +56,119 @@ describe( 'directives', function () {
         'require',
         'link',
         'template'
-      ]);
+      ] );
+
+    } );
+
+  } );
+
+  describe( 'property Decorators', function () {
+
+    describe( 'Output', function () {
+
+      it( 'should register expression binding on component via @Output applied on property', function () {
+
+        @Component( {
+          selector: 'my-cmp',
+          outputs: [ 'onFoo' ]
+        } )
+        class MyCmp {
+
+          @Output() onNameChange: Function;
+          @Output( 'onType' ) onInput: Function;
+
+        }
+        const _ddo = MyCmp[ '_ddo' ];
+
+        expect( _ddo.bindToController ).to.deep.equal( {
+          'onFoo': '&',
+          'onNameChange': '&',
+          'onInput': '&onType'
+        } );
+
+      } );
+
+    } );
+    describe( 'Input', function () {
+
+      it( 'should register expression binding on component via @Output applied on property', function () {
+
+        @Component( {
+          selector: 'my-cmp',
+          inputs: [ 'name' ]
+        } )
+        class MyCmp {
+
+          @Input() surname: string;
+          @Input( 'broName' ) nickname: string;
+
+        }
+        const _ddo = MyCmp[ '_ddo' ];
+
+        expect( _ddo.bindToController ).to.deep.equal( {
+          'name': '=',
+          'surname': '=',
+          'nickname': '=broName'
+        } );
+
+      } );
+
+    } );
+    describe( 'Attr', function () {
+
+      it( 'should register expression binding on component via @Output applied on property', function () {
+
+        @Component( {
+          selector: 'my-cmp',
+          attrs: [ 'foo' ]
+        } )
+        class MyCmp {
+
+          @Attr() bar: string;
+          @Attr( 'heyYa' ) baz: string;
+
+        }
+        const _ddo = MyCmp[ '_ddo' ];
+
+        expect( _ddo.bindToController ).to.deep.equal( {
+          'foo': '@',
+          'bar': '@',
+          'baz': '@heyYa'
+        } );
+
+      } );
+
+    } );
+    describe( 'Output/Input/Attr together', function () {
+
+      it( 'should correctly create bindings via Output,Input,Attr or Component bindings', function () {
+
+
+        @Component( {
+          selector: 'my-cmp',
+          attrs: [ 'foo' ],
+          inputs: [ 'name' ],
+          outputs: [ 'onMoo' ]
+        } )
+        class MyCmp {
+
+          @Attr() bar: string;
+          @Input() surname: string;
+          @Output() onNameChange: Function;
+
+        }
+        const _ddo = MyCmp[ '_ddo' ];
+
+        expect( _ddo.bindToController ).to.deep.equal( {
+          'foo': '@',
+          'bar': '@',
+          'name': '=',
+          'surname': '=',
+          'onMoo': '&',
+          'onNameChange': '&'
+        } );
+
+      } );
 
     } );
 
@@ -91,14 +203,14 @@ describe( 'directives', function () {
       @Directive( {
         selector: '[my-attr]',
         legacy: {
-          require: ['NgModel','^someFoo']
+          require: [ 'NgModel', '^someFoo' ]
         }
       } )
       class MyAttr {
       }
 
       const _ddo = MyAttr[ '_ddo' ];
-      expect( _ddo.require ).to.deep.equal( [ 'myAttr','NgModel', '^someFoo' ] );
+      expect( _ddo.require ).to.deep.equal( [ 'myAttr', 'NgModel', '^someFoo' ] );
 
     } );
 
@@ -129,10 +241,10 @@ describe( 'directives', function () {
         @Directive( {
           selector: '[my-attr]',
           legacy: {
-            require: ['NgModel','^someFoo']
+            require: [ 'NgModel', '^someFoo' ]
           }
         } )
-        class MyAttr implements AfterContentInit{
+        class MyAttr implements AfterContentInit {
           static called = false;
 
           afterContentInit() {
@@ -153,10 +265,10 @@ describe( 'directives', function () {
         @Directive( {
           selector: '[my-attr]',
           legacy: {
-            require: ['NgModel','^someFoo']
+            require: [ 'NgModel', '^someFoo' ]
           }
         } )
-        class MyAttr{
+        class MyAttr {
           static called = false;
         }
         const _ddo: ng.IDirective = MyAttr[ '_ddo' ];
@@ -166,19 +278,21 @@ describe( 'directives', function () {
           _invokeLink( [ MyAttr ], postLink )
         }
 
-        expect( _willThrow ).to.throw(`@Directive/@Component must implement #afterContentInit method`);
+        expect( _willThrow ).to.throw( `@Directive/@Component must implement #afterContentInit method` );
 
       } );
 
       it( 'should throw error when controllers are required and afterContentInit dosnt have correct method signature', function () {
 
-        class SomeFoo{}
-        class NgModel{}
+        class SomeFoo {
+        }
+        class NgModel {
+        }
 
         @Directive( {
           selector: '[my-attr]',
           legacy: {
-            require: ['NgModel','^someFoo']
+            require: [ 'NgModel', '^someFoo' ]
           }
         } )
         class MyAttr implements AfterContentInit {
@@ -245,7 +359,7 @@ describe( 'directives', function () {
       }
 
       const _ddo = MyCmp[ '_ddo' ];
-      expect( _ddo.require ).to.deep.equal( [ 'myCmp','^foo' ] );
+      expect( _ddo.require ).to.deep.equal( [ 'myCmp', '^foo' ] );
 
     } );
 
@@ -274,9 +388,9 @@ describe( 'directives', function () {
 
       @Component( {
         selector: 'my-cmp',
-        inputs: ['name', 'internal:publicApi'],
-        attrs: ['nickName'],
-        outputs: ['onNameChange', 'internalOnFoo:publicOnFoo'],
+        inputs: [ 'name', 'internal:publicApi' ],
+        attrs: [ 'nickName' ],
+        outputs: [ 'onNameChange', 'internalOnFoo:publicOnFoo' ],
         template: `hello world`,
       } )
       class MyCmp {
@@ -298,9 +412,9 @@ describe( 'directives', function () {
 
         @Component( {
           selector: '[my-name]',
-          template:`hello`
+          template: `hello`
         } )
-        class MyCmp implements AfterContentInit{
+        class MyCmp implements AfterContentInit {
           static called = false;
 
           afterContentInit() {
@@ -320,9 +434,9 @@ describe( 'directives', function () {
 
         @Component( {
           selector: '[my-name]',
-          template:`hello`
+          template: `hello`
         } )
-        class MyCmp{
+        class MyCmp {
           static called = false;
         }
         const _ddo: ng.IDirective = MyCmp[ '_ddo' ];
@@ -332,20 +446,22 @@ describe( 'directives', function () {
           _invokeLink( [ MyCmp ], postLink )
         }
 
-        expect( _willThrow ).to.not.throw(`@Directive/@Component must implement #afterContentInit method`);
+        expect( _willThrow ).to.not.throw( `@Directive/@Component must implement #afterContentInit method` );
 
       } );
 
       it( 'should throw error when controllers are required and afterContentInit doesnt have correct method signature', function () {
 
-        class SomeFoo{}
-        class NgModel{}
+        class SomeFoo {
+        }
+        class NgModel {
+        }
 
         @Component( {
           selector: '[my-name]',
-          template:`hello`,
+          template: `hello`,
           legacy: {
-            require: ['NgModel','^someFoo']
+            require: [ 'NgModel', '^someFoo' ]
           }
         } )
         class MyCmp implements AfterContentInit {
