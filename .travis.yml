@@ -1,5 +1,15 @@
 language: node_js
+
 node_js:
   - '4.2.1'
+
+install:
+  # Install npm dependecies
+  - npm install
+
 before_script:
+  # Install external definitions
   - npm run typings
+
+script:
+  - npm test
