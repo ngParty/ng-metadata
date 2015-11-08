@@ -98,3 +98,11 @@ export function controllerKey( name: string ): string {
 export function hasInjectables( Type ) {
   return (Array.isArray( Type.$inject ) && Type.$inject.length !== 0);
 }
+
+
+export function firstLowerCase( value: string ): string {
+  return value.charAt( 0 ).toLocaleLowerCase() + value.substr( 1 );
+}
+export function firstUpperCase( value: string ): string {
+  return value.charAt( 0 ).toUpperCase() + value.substr( 1 );
+}
