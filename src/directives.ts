@@ -111,7 +111,7 @@ export function Component(
     attrs?: string[],
     legacy?: ng.IDirective
   }
-) {
+): ClassDecorator {
 
   return _componentDecorator;
 
