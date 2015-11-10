@@ -13,7 +13,7 @@ describe( 'provide', ()=> {
   it( 'should create name from optional as argument', function () {
 
     class MyHeroSvc{}
-    expect( provide( MyHeroSvc,{ as: 'MyHero'} ) ).to.equal( 'MyHero' );
+    expect( provide( MyHeroSvc, { useAlias: 'MyHero' } ) ).to.equal( 'MyHero' );
 
   } );
   it( 'should return Pipe registered name if the Type is Pipe', function () {
@@ -21,11 +21,11 @@ describe( 'provide', ()=> {
     class Pipe{
       static pipeName='hello';
     }
-    expect(provide(Pipe)).to.equal('hello');
+    expect(provide( Pipe )).to.equal('hello');
 
     class NoPipe{}
     // will execute default logic which is meant for service
-    expect(provide(NoPipe)).to.equal('noPipe');
+    expect(provide( NoPipe )).to.equal('noPipe');
 
   } );
   it( 'should create camelCased name from selector property if Type is Directive/Component', function () {

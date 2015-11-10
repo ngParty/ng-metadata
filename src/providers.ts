@@ -1,4 +1,4 @@
-import {stringify,makeSelector} from './util';
+import {stringify,makeSelector,firstLowerCase} from './util';
 import {isDirective} from './directives';
 import {isPipe} from './pipe';
 
@@ -8,14 +8,12 @@ export {makePipe} from './pipe';
 /**
  * angular container methods name registrator
  * @param {Class} Type
- * @param {{as?:string}} [as={}]
+ * @param {{useAlias?:string}} [useAlias={}]
  * @returns {string}
  */
-export function provide(
-  Type: any, {as}:{
-    as?: string
-  }={}
-): string {
+export function provide( Type: any, {useAlias}: {
+  useAlias?: string
+}={} ): string {
 
   if ( isPipe( Type ) ) {
     return Type.pipeName;
@@ -24,7 +22,7 @@ export function provide(
     return makeSelector( Type.selector );
   }
 
-  return _provideService( Type, as );
+  return _provideService( Type, useAlias );
 
   function _provideService( Type, alias?: string ) {
 
@@ -35,7 +33,7 @@ export function provide(
     }
 
     const serviceName = stringify( Type );
-    return serviceName.charAt( 0 ).toLowerCase() + serviceName.substring( 1 );
+    return firstLowerCase(serviceName);
 
   }
 
