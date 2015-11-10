@@ -1,5 +1,6 @@
 import {expect} from 'chai';
-import {Component,Directive,Output,Input,Attr,makeDirective,AfterContentInit} from '../src/directives';
+import {AfterContentInit} from '../src/life_cycle';
+import {Component,Directive,Output,Input,Attr,makeDirective} from '../src/directives';
 
 describe( 'directives', function () {
 
@@ -61,7 +62,6 @@ describe( 'directives', function () {
     } );
 
   } );
-
   describe( 'property Decorators', function () {
 
     describe( 'Output', function () {
@@ -173,7 +173,6 @@ describe( 'directives', function () {
     } );
 
   } );
-
   describe( 'Directive', function () {
 
     it( 'should decorate a class with selector and proper ddo static properties specific for directive', function () {
@@ -282,33 +281,39 @@ describe( 'directives', function () {
 
       } );
 
-      it( 'should throw error when controllers are required and afterContentInit dosnt have correct method signature', function () {
+      it( 'should throw error when controllers are required and afterContentInit dosnt have correct method signature',
+        ()=> {
 
-        class SomeFoo {
-        }
-        class NgModel {
-        }
-
-        @Directive( {
-          selector: '[my-attr]',
-          legacy: {
-            require: [ 'NgModel', '^someFoo' ]
+          class SomeFoo {
           }
-        } )
-        class MyAttr implements AfterContentInit {
-
-          afterContentInit() {
+          class NgModel {
           }
 
-        }
-        const _ddo: ng.IDirective = MyAttr[ '_ddo' ];
-        const postLink = _ddo.link;
+          @Directive( {
+            selector: '[my-attr]',
+            legacy: {
+              require: [ 'NgModel', '^someFoo' ]
+            }
+          } )
+          class MyAttr implements AfterContentInit {
 
-        function _willThrow() {
-          _invokeLink( [ MyAttr, NgModel, SomeFoo ], postLink )
-        }
+            afterContentInit() {
+            }
 
-        expect( _willThrow ).to.throw();
+          }
+          const _ddo: ng.IDirective = MyAttr[ '_ddo' ];
+          const postLink = _ddo.link;
+
+          function _willThrow() {
+            _invokeLink( [ MyAttr, NgModel, SomeFoo ], postLink )
+          }
+
+          expect( _willThrow ).to.throw();
+
+        }
+      );
+      it( 'should call #onInit from postLink on $scope.$destroy if defined', ()=> {
+
 
       } );
 
@@ -450,36 +455,37 @@ describe( 'directives', function () {
 
       } );
 
-      it( 'should throw error when controllers are required and afterContentInit doesnt have correct method signature', function () {
+      it( 'should throw error when controllers are required and afterContentInit doesnt have correct method signature',
+        function () {
 
-        class SomeFoo {
-        }
-        class NgModel {
-        }
-
-        @Component( {
-          selector: '[my-name]',
-          template: `hello`,
-          legacy: {
-            require: [ 'NgModel', '^someFoo' ]
+          class SomeFoo {
           }
-        } )
-        class MyCmp implements AfterContentInit {
-
-          afterContentInit() {
+          class NgModel {
           }
 
-        }
-        const _ddo: ng.IDirective = MyCmp[ '_ddo' ];
-        const postLink = _ddo.link;
+          @Component( {
+            selector: '[my-name]',
+            template: `hello`,
+            legacy: {
+              require: [ 'NgModel', '^someFoo' ]
+            }
+          } )
+          class MyCmp implements AfterContentInit {
 
-        function _willThrow() {
-          _invokeLink( [ MyCmp, NgModel, SomeFoo ], postLink )
-        }
+            afterContentInit() {
+            }
 
-        expect( _willThrow ).to.throw();
+          }
+          const _ddo: ng.IDirective = MyCmp[ '_ddo' ];
+          const postLink = _ddo.link;
 
-      } );
+          function _willThrow() {
+            _invokeLink( [ MyCmp, NgModel, SomeFoo ], postLink )
+          }
+
+          expect( _willThrow ).to.throw();
+
+        } );
 
     } );
 

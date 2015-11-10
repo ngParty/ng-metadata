@@ -1,14 +1,20 @@
 export * from './src/di';
+export { Pipe } from './src/pipe';
 export {
-  AfterContentInit,
-  OnDestroy,
   Component,
   Directive,
-  Pipe,
   Input,
   Output,
-  Attr,
-  makeDirective,
-  makePipe
+  Attr
 } from './src/directives';
-export {bootstrap,provide} from './src/util';
+export {
+  AfterContentInit,
+  OnInit,
+  OnDestroy
+} from './src/life_cycle';
+export {
+  provide,
+  makePipe,
+  makeDirective
+} from './src/providers';
+export {bootstrap} from './src/bootstrap';

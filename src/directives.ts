@@ -1,30 +1,7 @@
 import angular from './facade';
-import {hasInjectables,makeSelector,firstLowerCase} from './util';
+import {hasInjectables,makeSelector,firstLowerCase,is} from './util';
 
-
-export interface OnInit { onInit( args? );
-}
-export interface OnDestroy { onDestroy( args? );
-}
-export interface AfterContentInit { afterContentInit( args?: any[] );
-}
-export enum LifecycleHooks {
-  OnInit,
-  OnDestroy,
-  AfterContentInit
-}
-/**
- * @internal
- */
-export var LIFECYCLE_HOOKS_VALUES = [
-  LifecycleHooks.OnInit,
-  LifecycleHooks.OnDestroy,
-  LifecycleHooks.AfterContentInit
-];
-function _getLifecycleMethod( hook: number ): string {
-  const lifeCycleHookName = LifecycleHooks[ hook ];
-  return firstLowerCase( lifeCycleHookName );
-}
+import {getLifecycleMethod,LifecycleHooks} from './life_cycle';
 
 type Binding = {[key:string]:string};
 const BINDING_TOKENS = { attr: '@', prop: '=', onExpr: '&' };
@@ -171,29 +148,22 @@ function _getPropertyDecoratorType( type: number ): string {
   return ComponentPropertyDecorators[ type ];
 }
 export function Output( bindingPropertyName?: string ): PropertyDecorator {
-  return _propertyDecoratorFactoryCreator( bindingPropertyName, _getPropertyDecoratorType( ComponentPropertyDecorators.output ) );
-  //return _outputDecoratorFactory;
-  //function _outputDecoratorFactory( target: any, propertyKey: string ) {
-  //
-  //  const Type = target.constructor;
-  //  const existingBindings = _getTypeBindings(Type);
-  //
-  //  const outputsFormat = _createArrayMapFromPropertyDecorator(propertyKey,bindingPropertyName);
-  //  const {output} = _createBindings( { outputs: outputsFormat } );
-  //
-  //  if ( existingBindings ) {
-  //    angular.extend( existingBindings, output );
-  //  } else {
-  //    Type._ddo = { bindToController: output };
-  //  }
-  //
-  //}
+  return _propertyDecoratorFactoryCreator(
+    bindingPropertyName,
+    _getPropertyDecoratorType( ComponentPropertyDecorators.output )
+  );
 }
 export function Input( bindingPropertyName?: string ): PropertyDecorator {
-  return _propertyDecoratorFactoryCreator( bindingPropertyName, _getPropertyDecoratorType( ComponentPropertyDecorators.input ) );
+  return _propertyDecoratorFactoryCreator(
+    bindingPropertyName,
+    _getPropertyDecoratorType( ComponentPropertyDecorators.input )
+  );
 }
 export function Attr( bindingPropertyName?: string ): PropertyDecorator {
-  return _propertyDecoratorFactoryCreator( bindingPropertyName, _getPropertyDecoratorType( ComponentPropertyDecorators.attr ) );
+  return _propertyDecoratorFactoryCreator(
+    bindingPropertyName,
+    _getPropertyDecoratorType( ComponentPropertyDecorators.attr )
+  );
 }
 function _propertyDecoratorFactoryCreator( bindingPropertyName: string, propertyType: string ) {
 
@@ -248,15 +218,25 @@ function _postLinkFactory( isDirective: boolean ) {
 
     const [ownCtrl, ...requiredCtrls] = controller;
 
-    const afterContentInitMethod = _getLifecycleMethod( LifecycleHooks.AfterContentInit );
+    const afterContentInitMethod = getLifecycleMethod( LifecycleHooks.AfterContentInit );
 
     if ( requiredCtrls.length > 0 ) {
 
-      _checkLifecycle( afterContentInitMethod, ownCtrl, true, requiredCtrls ) && ownCtrl[ afterContentInitMethod ]( requiredCtrls );
+      _checkLifecycle(
+        afterContentInitMethod,
+        ownCtrl,
+        true,
+        requiredCtrls
+      ) && ownCtrl[ afterContentInitMethod ]();
 
     } else {
 
-      _checkLifecycle( afterContentInitMethod, ownCtrl, isDirective, requiredCtrls ) && ownCtrl[ afterContentInitMethod ]();
+      _checkLifecycle(
+        afterContentInitMethod,
+        ownCtrl,
+        isDirective,
+        requiredCtrls
+      ) && ownCtrl[ afterContentInitMethod ]();
 
     }
 
@@ -359,81 +339,8 @@ function _checkLifecycle( lifecycleHookMethod: string, ctrl, shouldThrow = true,
 }
 
 
-interface PipeFactory {
-  ( obj: {name: string, pure?: boolean} ): ClassDecorator;
-}
-
-interface PipeConfigStatic {
-  pipeName: string,
-  pipePure: boolean
-}
-interface PipeInstance {
-  transform( input: any, ...args ):any
-}
-/**
- *
- * @param {string}  name
- * @param {boolean?}  pure
- * @return {function(any): undefined}
- * @constructor
- */
-export function Pipe(
-  {name, pure=true}: {
-    name: string,
-    pure?: boolean
-  }
-): ClassDecorator {
-
-  if ( typeof name !== 'string' ) {
-    throw Error( `@Pipe: must have 'name' property` );
-  }
-
-  return _pipeDecorator;
-
-  function _pipeDecorator( Type: any ) {
-
-    if ( hasInjectables( Type ) && pure ) {
-      throw Error( '@Pipe: you provided Injectables but didnt specified pure:false' );
-    }
-
-    if ( typeof Type.prototype.transform !== 'function' ) {
-      throw Error( `@Pipe: must implement '#transform' method` );
-    }
-
-    const staticConfig: PipeConfigStatic = {
-      pipeName: name,
-      pipePure: pure
-    };
-
-    // remove angular and use Object.assign instead
-    angular.extend( Type, staticConfig );
-
-  }
-
-}
-
-export function makePipe( Type: any ) {
-
-  function filterFactory( $injector: ng.auto.IInjectorService ) {
-
-    const pipeInstance = $injector.instantiate<PipeInstance>( Type );
-    return Type.pipePure ? pipeInstance.transform : pipeInstance.transform.bind( pipeInstance );
-
-  }
-
-  filterFactory.$inject = [ '$injector' ];
-
-  return filterFactory;
-
-}
-
 // custom type guards
-export function isPipe( Type ) {
-  return is( Type, 'pipeName' );
-}
 export function isDirective( Type ) {
   return is( Type, 'selector' );
 }
-function is( Type: any, attribute: string ) {
-  return typeof Type[ attribute ] === 'string' && Type[ attribute ] !== undefined;
-}
+

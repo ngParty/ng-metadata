@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {makeSelector,stringify,hasInjectables,provide} from '../src/util';
+import {makeSelector,stringify,hasInjectables} from '../src/util';
 
 describe( 'utils', ()=> {
 
@@ -7,11 +7,9 @@ describe( 'utils', ()=> {
 
     it( 'should return name property if it exist on provided type', function () {
 
-      function foo() {
-      }
+      function foo() {}
 
-      class Moo {
-      }
+      class Moo {}
 
       expect( stringify( foo ) ).to.equal( 'foo' );
       expect( stringify( Moo ) ).to.equal( 'Moo' );
@@ -52,7 +50,6 @@ describe( 'utils', ()=> {
   } );
   describe( 'makeSelector', ()=> {
 
-
     it( 'should accept element selector and create camelCase from it', function () {
 
       const selector = 'hello-world';
@@ -75,48 +72,6 @@ describe( 'utils', ()=> {
 
       expect( willThrow ).to
         .throw( 'Only selectors matching element names or base attributes are supported, got: yabba daba' );
-
-    } );
-  } );
-  describe( 'provide', ()=> {
-
-    it( 'should create service camelCased name from class name', function () {
-
-      class MyHeroSvc{}
-
-      expect( provide( MyHeroSvc ) ).to.equal( 'myHeroSvc' );
-
-    } );
-    it( 'should create name from optional as argument', function () {
-
-      class MyHeroSvc{}
-      expect( provide( MyHeroSvc,{ as: 'MyHero'} ) ).to.equal( 'MyHero' );
-
-    } );
-    it( 'should return Pipe registered name if the Type is Pipe', function () {
-
-      class Pipe{
-        static pipeName='hello';
-      }
-      expect(provide(Pipe)).to.equal('hello');
-
-      class NoPipe{}
-      // will execute default logic which is meant for service
-      expect(provide(NoPipe)).to.equal('noPipe');
-
-    } );
-    it( 'should create camelCased name from selector property if Type is Directive/Component', function () {
-
-      class MyDirective {
-        static selector = '[my-foo]'
-      }
-      expect( provide( MyDirective ) ).to.equal( 'myFoo' );
-
-      class MyCmp {
-        static selector = 'my-boo'
-      }
-      expect( provide( MyCmp ) ).to.equal( 'myBoo' );
-
 
     } );
 

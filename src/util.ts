@@ -1,5 +1,3 @@
-import {isPipe,isDirective} from './directives';
-
 const ATTRS_BOUNDARIES = /\[|\]/g;
 const COMPONENT_SELECTOR = /^\[?[\w|-]*\]?$/;
 const SKEWER_CASE = /-(\w)/g;
@@ -32,77 +30,21 @@ export function stringify( obj: any ): string {
   return '' + obj;
 
 }
-export function provide(
-  Type: any, {as}:{
-    as?: string
-  }={}
-) {
-
-  if ( isPipe( Type ) ) {
-    return Type.pipeName;
-  }
-  if ( isDirective( Type ) ) {
-    return makeSelector( Type.selector );
-  }
-
-  return _provideService( Type, as );
-
-  function _provideService( Type, alias?: string ) {
-
-    if ( alias ) {
-
-      return alias;
-
-    }
-
-    const serviceName = stringify( Type );
-    return serviceName.charAt( 0 ).toLowerCase() + serviceName.substring( 1 );
-
-  }
-
-}
-
-export type AppRootArg = string | Element | Document;
-export function bootstrap(
-  ngModule: ng.IModule,
-  {element=document,strictDi=true}:{
-    element?: AppRootArg,
-    strictDi?: boolean
-  }
-) {
-
-  const appRoot = _getAppRoot( element );
-
-  angular.element( document ).ready( ()=> {
-    angular.bootstrap( appRoot, [ ngModule.name ], {
-      strictDi: true
-    } )
-  } );
-
-  function _getAppRoot( element: AppRootArg ): Element {
-
-    if ( typeof element === 'string' ) {
-      return document.querySelector( element );
-    }
-    return element as Element;
-
-  }
-
-}
 
 export function controllerKey( name: string ): string {
   return '$' + name + 'Controller';
 }
 
-
 export function hasInjectables( Type ) {
   return (Array.isArray( Type.$inject ) && Type.$inject.length !== 0);
 }
-
 
 export function firstLowerCase( value: string ): string {
   return value.charAt( 0 ).toLocaleLowerCase() + value.substr( 1 );
 }
 export function firstUpperCase( value: string ): string {
   return value.charAt( 0 ).toUpperCase() + value.substr( 1 );
+}
+export function is( Type: any, attribute: string ) {
+  return typeof Type[ attribute ] === 'string' && Type[ attribute ] !== undefined;
 }
