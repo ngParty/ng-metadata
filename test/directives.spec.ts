@@ -1,14 +1,39 @@
 import {expect} from 'chai';
 import {AfterContentInit} from '../src/life_cycle';
 import {Component,Directive,Output,Input,Attr,makeDirective} from '../src/directives';
+import {OnInit} from "../src/life_cycle";
+import {OnDestroy} from "../src/life_cycle";
 
 describe( 'directives', function () {
 
+  let scope;
+  let element;
+  let attrs;
+
+  beforeEach( function () {
+
+    scope = {
+      _cb: [],
+      $on( event: string, callback: Function ){
+        this._cb.push( callback );
+      },
+      $destroy(){
+        this._cb.forEach( ( cb )=>cb() );
+      }
+    };
+    element = {};
+    attrs = {};
+
+  } );
+
+  function _destroyLink(){
+    scope.$destroy();
+  }
   function _invokeLink( controllers, linkFn ) {
 
     const instances = controllers.map( ( constructorFn )=>new constructorFn() );
 
-    linkFn( null, null, null, instances );
+    linkFn( scope, element, attrs, instances );
 
   }
 
@@ -314,6 +339,28 @@ describe( 'directives', function () {
       );
       it( 'should call #onInit from postLink on $scope.$destroy if defined', ()=> {
 
+        @Directive( {
+          selector: '[my-attr]'
+        } )
+        class MyAttr implements AfterContentInit,OnDestroy {
+          static destroyed=false;
+          static called = false;
+          onDestroy() {
+            MyAttr.destroyed = true;
+          }
+          afterContentInit() {
+            MyAttr.called = true;
+          }
+        }
+        const _ddo: ng.IDirective = MyAttr[ '_ddo' ];
+        const postLink = _ddo.link;
+
+        _invokeLink( [ MyAttr ], postLink );
+        expect( MyAttr.called ).to.equal( true );
+        expect( MyAttr.destroyed ).to.equal( false );
+
+        _destroyLink();
+        expect( MyAttr.destroyed ).to.equal( true );
 
       } );
 

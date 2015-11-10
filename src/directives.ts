@@ -219,6 +219,7 @@ function _postLinkFactory( isDirective: boolean ) {
     const [ownCtrl, ...requiredCtrls] = controller;
 
     const afterContentInitMethod = getLifecycleMethod( LifecycleHooks.AfterContentInit );
+    const onDestroy = getLifecycleMethod( LifecycleHooks.OnDestroy );
 
     if ( requiredCtrls.length > 0 ) {
 
@@ -237,6 +238,19 @@ function _postLinkFactory( isDirective: boolean ) {
         isDirective,
         requiredCtrls
       ) && ownCtrl[ afterContentInitMethod ]();
+
+    }
+
+    if ( _checkLifecycle(
+        onDestroy,
+        ownCtrl,
+        false,
+        requiredCtrls
+      ) ) {
+
+      scope.$on( '$destroy', function _cleanup() {
+        ownCtrl[ onDestroy ]();
+      } );
 
     }
 
