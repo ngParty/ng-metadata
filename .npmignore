@@ -10,6 +10,7 @@ npm-debug.log
 *.ts
 !*.d.ts
 typings
+assets
 
 #################
 ## JetBrains
