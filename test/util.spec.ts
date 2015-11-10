@@ -1,5 +1,12 @@
 import {expect} from 'chai';
-import {makeSelector,stringify,hasInjectables} from '../src/util';
+import {
+  makeSelector,
+  stringify,
+  hasInjectables,
+  firstLowerCase,
+  firstUpperCase,
+  controllerKey
+} from '../src/util';
 
 describe( 'utils', ()=> {
 
@@ -76,18 +83,29 @@ describe( 'utils', ()=> {
     } );
 
   } );
+  describe( 'firstLowerCase', function () {
 
-  describe( 'bootstrap', function () {
+    it( 'should return string with first char lowercase', function () {
 
-    it( 'should bootstrap angular app on document by default', function () {
-
-    } );
-    it( 'should bootstrap angular on provided root element', function () {
-
+      expect( firstLowerCase( 'JediMaster' ) ).to.equal( 'jediMaster' );
 
     } );
-    it( 'should bootstrap angular app on provided css selector', function () {
 
+  } );
+  describe( 'firstUpperCase', function () {
+
+    it( 'should return string with first char uppercase', function () {
+
+      expect( firstUpperCase( 'jediMaster' ) ).to.equal( 'JediMaster' );
+
+    } );
+
+  } );
+  describe( 'controllerKey', function () {
+
+    it( 'should return controller name prefixed nas suffixed to get it from the angular', function () {
+
+      expect( controllerKey( 'MyFoo' ) ).to.equal( '$MyFooController' );
 
     } );
 

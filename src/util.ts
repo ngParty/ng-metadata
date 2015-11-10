@@ -34,16 +34,14 @@ export function stringify( obj: any ): string {
 export function controllerKey( name: string ): string {
   return '$' + name + 'Controller';
 }
-
-export function hasInjectables( Type ) {
+export function hasInjectables( Type ): boolean {
   return (Array.isArray( Type.$inject ) && Type.$inject.length !== 0);
 }
-
 export function firstLowerCase( value: string ): string {
-  return value.charAt( 0 ).toLocaleLowerCase() + value.substr( 1 );
+  return value.charAt( 0 ).toLocaleLowerCase() + value.substring( 1 );
 }
 export function firstUpperCase( value: string ): string {
-  return value.charAt( 0 ).toUpperCase() + value.substr( 1 );
+  return value.charAt( 0 ).toUpperCase() + value.substring( 1 );
 }
 export function is( Type: any, attribute: string ) {
   return typeof Type[ attribute ] === 'string' && Type[ attribute ] !== undefined;
