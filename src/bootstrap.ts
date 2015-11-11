@@ -8,10 +8,10 @@ export type AppRoot = string | Element | Document;
  */
 export function bootstrap(
   ngModule: ng.IModule,
-  {element=document,strictDi=true}:{
+  {element=document,strictDi=true}: {
     element?: AppRoot,
     strictDi?: boolean
-  }
+  }={}
 ) {
 
   const appRoot = _getAppRoot( element );
