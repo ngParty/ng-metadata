@@ -1,0 +1,42 @@
+declare module ngMetadata{
+
+  type AppRoot = string | Element | Document;
+  function bootstrap(ngModule: ng.IModule, {element, strictDi}?: {
+    element?: AppRoot;
+    strictDi?: boolean;
+  }): void;
+
+  function provide(Type: any, {useAlias}?: {
+    useAlias?: string;
+  }): string;
+  function makeDirective(Type: any): ng.IDirectiveFactory;
+  function makePipe(Type: any): ($injector: ng.auto.IInjectorService) => any;
+
+  function Directive({selector, legacy}: {
+    selector: string;
+    legacy?: ng.IDirective;
+  }): ClassDecorator;
+  function Component({selector, template, templateUrl, inputs, attrs, outputs, legacy}: {
+    selector: string;
+    template?: string;
+    templateUrl?: string;
+    inputs?: string[];
+    outputs?: string[];
+    attrs?: string[];
+    legacy?: ng.IDirective;
+  }): ClassDecorator;
+  function Output(bindingPropertyName?: string): PropertyDecorator;
+  function Input(bindingPropertyName?: string): PropertyDecorator;
+  function Attr(bindingPropertyName?: string): PropertyDecorator;
+
+  function Pipe({name, pure}?: {
+    name?: string;
+    pure?: boolean;
+  }): ClassDecorator;
+
+  function Inject(injectable: string): ParameterDecorator;
+
+}
+declare module "ng-metadata/ng-metadata" {
+  export = ngMetadata;
+}

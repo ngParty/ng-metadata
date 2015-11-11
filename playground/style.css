@@ -1,0 +1,27 @@
+.demo-container {
+  max-width: 1600px;
+  width: calc(100% - 16px);
+  margin: 0 auto;
+}
+
+.demo-content {
+  border-radius: 2px;
+  padding: 80px 56px;
+  margin-bottom: 80px;
+}
+.demo-list{
+  max-width: 80%;
+  list-style: none;
+  display: flex;
+  flex-flow: column;
+}
+.demo-list li{
+  padding-top: .3rem;
+  padding-bottom: .3rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+.demo-list li input[checked] + span{
+  text-decoration: line-through;
+}

@@ -11,6 +11,7 @@ npm-debug.log
 *.map
 *.d.ts
 !src/globals.d.ts
+!playground/ng-metadata.legacy.d.ts
 typings
 
 #################

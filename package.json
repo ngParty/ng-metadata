@@ -10,7 +10,8 @@
     "start": "tsc -w",
     "test": "mocha ng-metadata.test.js",
     "test:live": "mocha ng-metadata.test.js -w",
-    "commit": "git-cz"
+    "commit": "git-cz",
+    "playground": "tsc -p playground -w & live-server --no-browser"
   },
   "repository": {
     "type": "git",

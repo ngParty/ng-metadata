@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ng-metadata Todo App</title>
+  <link rel="stylesheet" href="https://storage.googleapis.com/code.getmdl.io/1.0.6/material.indigo-pink.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="style.css">
+  <script src="../node_modules/systemjs/dist/system.js"></script>
+  <script>
+    System.config( {
+      baseURL: '/',
+      paths: {
+        "npm:*": "../../node_modules/*"
+      },
+      //map tells the System loader where to look for things
+      map: {
+        angular: 'npm:angular/angular.js',
+        'ng-metadata/ng-metadata': '../../',
+        app: "./app"
+      },
+      //packages defines our app package
+      packages: {
+        app: {
+          main: './main',
+          defaultExtension: 'js'
+        },
+        'ng-metadata/ng-metadata': {
+          main: './ng-metadata',
+          defaultExtension: 'js'
+        }
+      }
+    } );
+  </script>
+  <script>
+    System.import( 'app' )
+      .catch( console.error.bind( console ) );
+  </script>
+</head>
+<body>
+<div class="mdl-layout__container has-scrolling-header">
+  <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
+    <header class="mdl-layout__header">
+      <div class="mdl-layout-icon"></div>
+      <div class="mdl-layout__header-row">
+        <span class="mdl-layout__title">TODO app</span>
+      </div>
+    </header>
+    <main class="mdl-layout__content">
+      <div class="mdl-grid">
+        <div class="mdl-cell mdl-cell--2-col mdl-cell--hide-tablet mdl-cell--hide-phone"></div>
+        <div
+          class="demo-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
+
+          <app style="display: block">
+            <div style="text-align: center"><div class="mdl-spinner mdl-js-spinner is-active"></div></div>
+          </app>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+
+</body>
+</html>
