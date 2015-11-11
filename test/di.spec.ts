@@ -1,5 +1,7 @@
 import {expect} from 'chai';
 import {Inject} from '../src/di';
+import {Pipe} from '../src/pipe';
+
 
 describe( 'Inject', ()=> {
 
@@ -23,6 +25,26 @@ describe( 'Inject', ()=> {
     }
 
     expect( Foo.hello.$inject ).to.deep.equal( [ 'jedi' ] );
+
+  } );
+
+  it( 'should allow DI via reference so no strings are needed', function () {
+
+    class HelloSvc{}
+
+    @Pipe( { name: 'foo' } )
+    class FooPipe {
+      transform(){}
+    }
+
+    class Foo {
+      constructor(
+        @Inject( HelloSvc ) helloSvc,
+        @Inject( FooPipe ) fooFilter
+      ) {}
+    }
+
+    expect( Foo.$inject ).to.deep.equal( [ 'helloSvc', 'foo' ] );
 
   } );
 

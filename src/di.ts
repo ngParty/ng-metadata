@@ -1,10 +1,11 @@
+import {provide} from './providers';
 /**
  * Constructor/Static Method Parameters Decorator
  * @param {string}  injectable DI service to be injected
  * @return {Function(target:Object, propertyName:string, argumentPosition:string)}
  * @constructor
  */
-export function Inject( injectable: string ): ParameterDecorator {
+export function Inject( injectable: string | Function ): ParameterDecorator {
 
   return _parameterDecorator;
   /**
@@ -17,13 +18,16 @@ export function Inject( injectable: string ): ParameterDecorator {
   function _parameterDecorator( target: Object, propertyKey: string, parameterIndex: number ) {
 
     // if property key is set we are injecting into static method not to constructor
-    let injectTo = propertyKey
+    let injectTo: any = propertyKey
       ? target[ propertyKey ]
       : target;
 
+    const injectableString = typeof injectable === 'string'
+      ? injectable
+      : provide( injectable );
 
     injectTo.$inject = injectTo.$inject || [];
-    injectTo.$inject[ parameterIndex ] = injectable;
+    injectTo.$inject[ parameterIndex ] = injectableString;
 
   }
 
