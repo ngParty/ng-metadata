@@ -25,9 +25,25 @@ export function makeSelector( selector: string ): string {
 export function stringify( obj: any ): string {
 
   if ( typeof obj == 'function' ) {
-    return obj.name || obj.toString();
+    return obj.name || _getFuncName( obj );
   }
   return '' + obj;
+
+}
+/**
+ *
+ * @param {Function}  func
+ * @returns {string}
+ * @private
+ */
+function _getFuncName( func: Function ): string {
+
+  const regexp = /function\s*([^\s(]+)/;
+  const match = func.toString().match( regexp );
+
+  return match
+    ? match[ 1 ]
+    : '';
 
 }
 

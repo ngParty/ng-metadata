@@ -16,18 +16,33 @@ describe( 'utils', ()=> {
 
       function foo() {}
 
+      function boo() {
+
+        return 'hello';
+
+      }
+
       class Moo {}
 
       expect( stringify( foo ) ).to.equal( 'foo' );
+      expect( stringify( boo ) ).to.equal( 'boo' );
       expect( stringify( Moo ) ).to.equal( 'Moo' );
 
     } );
 
-    it( 'should return string of provided type if it doesnt has name', function () {
+    it( 'should return empty string if the function is anonymous', function () {
+
+      let anonFn = function () {};
+
+      expect( stringify(anonFn) ).to.equal( '' );
+
+    } );
+
+    it( `should return string of provided type if it isn't a function`, function () {
 
       const obj = { hello: 'world' };
 
-      expect( stringify( function () {} ) ).to.equal( `function () { }` );
+      expect( stringify( [ 1, 2 ] ) ).to.equal( `1,2` );
       expect( stringify( obj ) ).to.equal( '[object Object]' );
 
     } );
