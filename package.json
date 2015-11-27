@@ -36,6 +36,5 @@
     "typings": "0.0.12"
   },
   "dependencies": {
-    "object-assign": "4.0.1"
   }
 }
