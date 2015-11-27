@@ -26,9 +26,10 @@ describe( 'directives', function () {
 
   } );
 
-  function _destroyLink(){
+  function _destroyLink() {
     scope.$destroy();
   }
+
   function _invokeLink( controllers, linkFn ) {
 
     const instances = controllers.map( ( constructorFn )=>new constructorFn() );
@@ -260,31 +261,44 @@ describe( 'directives', function () {
 
     describe( 'lifecycle hooks', function () {
 
-      it( 'should call afterContentInit from postLink', function () {
+      it( 'should call #afterContentInit from postLink', ()=> {
+
+        class SomeFoo {}
+        class Parent {}
 
         @Directive( {
           selector: '[my-attr]',
           legacy: {
-            require: [ 'NgModel', '^someFoo' ]
+            require: [ 'NgModel', '^someFoo', '^^parent' ]
           }
         } )
         class MyAttr implements AfterContentInit {
           static called = false;
+          static someFoo = null;
+          static parent = null;
 
-          afterContentInit() {
+          afterContentInit( controllers ) {
+
+            const [someFoo,parent] = controllers;
+
+            MyAttr.someFoo = someFoo;
+            MyAttr.parent = parent;
             MyAttr.called = true;
+
           }
         }
         const _ddo: ng.IDirective = MyAttr[ '_ddo' ];
         const postLink = _ddo.link;
 
-        _invokeLink( [ MyAttr ], postLink );
+        _invokeLink( [ MyAttr, SomeFoo, Parent ], postLink );
 
         expect( MyAttr.called ).to.equal( true );
+        expect( MyAttr.someFoo instanceof SomeFoo ).to.equal( true );
+        expect( MyAttr.parent instanceof Parent ).to.equal( true );
 
       } );
 
-      it( 'should throw error when afterContentInit is not defined', function () {
+      it( 'should throw error when requiring directive and #afterContentInit is not defined', function () {
 
         @Directive( {
           selector: '[my-attr]',
@@ -306,13 +320,11 @@ describe( 'directives', function () {
 
       } );
 
-      it( 'should throw error when controllers are required and afterContentInit dosnt have correct method signature',
+      it( `should throw error when controllers are required and afterContentInit doesn't have correct method signature`,
         ()=> {
 
-          class SomeFoo {
-          }
-          class NgModel {
-          }
+          class SomeFoo {}
+          class NgModel {}
 
           @Directive( {
             selector: '[my-attr]',
@@ -322,8 +334,7 @@ describe( 'directives', function () {
           } )
           class MyAttr implements AfterContentInit {
 
-            afterContentInit() {
-            }
+            afterContentInit() {}
 
           }
           const _ddo: ng.IDirective = MyAttr[ '_ddo' ];
@@ -337,17 +348,22 @@ describe( 'directives', function () {
 
         }
       );
-      it( 'should call #onInit from postLink on $scope.$destroy if defined', ()=> {
+
+      it( 'should call #onDestroy. if defined, from postLink on $scope.$destroy', ()=> {
+
+        class NgModel {}
 
         @Directive( {
           selector: '[my-attr]'
         } )
         class MyAttr implements AfterContentInit,OnDestroy {
-          static destroyed=false;
+          static destroyed = false;
           static called = false;
+
           onDestroy() {
             MyAttr.destroyed = true;
           }
+
           afterContentInit() {
             MyAttr.called = true;
           }
@@ -460,7 +476,7 @@ describe( 'directives', function () {
 
     describe( 'lifecycle hooks', function () {
 
-      it( 'should call afterContentInit from postLink', function () {
+      it( 'should call #afterContentInit from postLink if implemented', function () {
 
         @Component( {
           selector: '[my-name]',
@@ -482,7 +498,40 @@ describe( 'directives', function () {
 
       } );
 
-      it( 'should not throw error when afterContentInit is not defined and no require present', function () {
+      it( 'should call #afterContentInit with array of requires as argument', function () {
+
+        class Foo {}
+        class Bar {}
+
+        @Component( {
+          selector: '[my-name]',
+          template: `hello`,
+          legacy: {
+            require: [ 'foo', '^bar' ]
+          }
+        } )
+        class MyCmp implements AfterContentInit {
+          static foo = null;
+          static bar = null;
+
+          afterContentInit( controllers ) {
+            const [foo,bar] = controllers;
+            MyCmp.foo = foo;
+            MyCmp.bar = bar;
+          }
+
+        }
+        const _ddo: ng.IDirective = MyCmp[ '_ddo' ];
+        const postLink = _ddo.link;
+
+        _invokeLink( [ MyCmp, Foo, Bar ], postLink );
+
+        expect( MyCmp.foo instanceof Foo ).to.equal( true );
+        expect( MyCmp.bar instanceof Bar ).to.equal( true );
+
+      } );
+
+      it( 'should not throw error when #afterContentInit is not defined and no require present', function () {
 
         @Component( {
           selector: '[my-name]',
@@ -502,13 +551,11 @@ describe( 'directives', function () {
 
       } );
 
-      it( 'should throw error when controllers are required and afterContentInit doesnt have correct method signature',
-        function () {
+      it( `should throw error when controllers are required and #afterContentInit doesn't have correct method signature`,
+        ()=> {
 
-          class SomeFoo {
-          }
-          class NgModel {
-          }
+          class SomeFoo {}
+          class NgModel {}
 
           @Component( {
             selector: '[my-name]',
@@ -519,8 +566,7 @@ describe( 'directives', function () {
           } )
           class MyCmp implements AfterContentInit {
 
-            afterContentInit() {
-            }
+            afterContentInit() { }
 
           }
           const _ddo: ng.IDirective = MyCmp[ '_ddo' ];

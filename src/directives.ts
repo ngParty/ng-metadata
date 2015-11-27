@@ -228,7 +228,7 @@ function _postLinkFactory( isDirective: boolean ) {
         ownCtrl,
         true,
         requiredCtrls
-      ) && ownCtrl[ afterContentInitMethod ]();
+      ) && ownCtrl[ afterContentInitMethod ]( requiredCtrls );
 
     } else {
 
@@ -237,7 +237,7 @@ function _postLinkFactory( isDirective: boolean ) {
         ownCtrl,
         isDirective,
         requiredCtrls
-      ) && ownCtrl[ afterContentInitMethod ]();
+      ) && ownCtrl[ afterContentInitMethod ]( requiredCtrls );
 
     }
 
