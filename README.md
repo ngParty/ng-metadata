@@ -95,7 +95,7 @@ function HeroController($log){}
 angular.module('hero',[]);
 ```
 
-**TS+ng-metadata**
+**TS + ng-metadata**
 ```ts
 // hero.component.ts
 
@@ -167,7 +167,7 @@ function clickMeDirective($log){
 angular.module('clicker',[]);
 ```
 
-**TS+ng-metadata**
+**TS + ng-metadata**
 ```ts
 // clicker.directive.ts
 
@@ -240,7 +240,7 @@ function uppercase(){
 angular.module('filters',[]);
 ```
 
-**TS+ng-metadata**
+**TS + ng-metadata**
 ```ts
 // uppercase.filter.ts
 
@@ -410,7 +410,7 @@ angular
 > try to not to use `config` api, because there is no equivalent in Angular 2
 > use it only for routes/states definition
 
-** ES5 **
+**ES5**
 
 ```js
 
@@ -441,7 +441,7 @@ function stateConfig($stateProvider, $urlRouterProvider) {
 angular.module('app',[])
 ```
 
-** TS + ng-metadata **
+**TS + ng-metadata**
 
 ```ts
 
