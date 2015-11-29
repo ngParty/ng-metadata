@@ -7,8 +7,20 @@ manifest.mf
 build.xml
 node_modules/*
 npm-debug.log
+
 *.ts
+# allow only ambient type definitions
 !*.d.ts
+
+# ignore test files
+*.spec.ts
+*.spec.d.ts
+ng-metadata.test.ts
+ng-metadata.test.d.ts
+ng-metadata.test.js
+ng-metadata.test.js.map
+test
+
 typings
 assets
 
