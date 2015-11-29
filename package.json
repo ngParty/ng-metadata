@@ -9,7 +9,8 @@
     "prepublish": "npm run typings && tsc",
     "start": "tsc -w",
     "test": "mocha ng-metadata.test.js",
-    "test:live": "mocha ng-metadata.test.js -w"
+    "test:live": "mocha ng-metadata.test.js -w",
+    "commit": "git-cz"
   },
   "repository": {
     "type": "git",
@@ -29,12 +30,16 @@
   "devDependencies": {
     "angular": "1.4.7",
     "chai": "3.4.0",
+    "commitizen": "2.4.6",
+    "cz-conventional-changelog": "1.1.4",
     "mocha": "2.3.3",
     "systemjs": "0.19.5",
     "systemjs-builder": "0.14.10",
     "typescript": "1.6.2",
-    "typings": "0.0.12"
+    "typings": "0.2.3"
   },
-  "dependencies": {
+  "dependencies": {},
+  "czConfig":{
+    "path": "node_modules/cz-conventional-changelog"
   }
 }
