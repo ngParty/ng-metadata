@@ -5,7 +5,7 @@
   "main": "ng-metadata.js",
   "typings": "./ng-metadata.d.ts",
   "scripts": {
-    "typings": "typings install --name ng-metadata",
+    "typings": "typings install",
     "prepublish": "npm run typings && tsc",
     "start": "tsc -w",
     "test": "mocha ng-metadata.test.js",
@@ -28,18 +28,18 @@
   },
   "homepage": "https://github.com/ngParty/ng-metadata#readme",
   "devDependencies": {
-    "angular": "1.4.7",
-    "chai": "3.4.0",
+    "angular": "1.4.8",
+    "chai": "3.4.1",
     "commitizen": "2.4.6",
     "cz-conventional-changelog": "1.1.4",
-    "mocha": "2.3.3",
-    "systemjs": "0.19.5",
-    "systemjs-builder": "0.14.10",
-    "typescript": "1.6.2",
-    "typings": "0.2.3"
+    "mocha": "2.3.4",
+    "systemjs": "0.19.6",
+    "systemjs-builder": "0.14.11",
+    "typescript": "1.7.3",
+    "typings": "0.3.0"
   },
   "dependencies": {},
-  "czConfig":{
+  "czConfig": {
     "path": "node_modules/cz-conventional-changelog"
   }
 }
