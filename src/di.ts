@@ -1,11 +1,19 @@
+import {is} from './util';
 import {provide} from './providers';
+
+
+export interface InjectableServiceConfigStatic{
+  _name?: string
+}
+export type Injectable = string | Function | InjectableServiceConfigStatic;
+
 /**
  * Constructor/Static Method Parameters Decorator
  * @param {string}  injectable DI service to be injected
  * @return {Function(target:Object, propertyName:string, argumentPosition:string)}
  * @constructor
  */
-export function Inject( injectable: string | Function ): ParameterDecorator {
+export function Inject( injectable: Injectable ): ParameterDecorator {
 
   return _parameterDecorator;
   /**
@@ -31,4 +39,9 @@ export function Inject( injectable: string | Function ): ParameterDecorator {
 
   }
 
+}
+
+// custom type guards
+export function isInjectable( Type: any ): Type is InjectableServiceConfigStatic {
+  return is( Type, '_name' );
 }

@@ -14,7 +14,7 @@ interface DirectiveFactory {
     }
   ): ClassDecorator;
 }
-interface DirectiveConfigStatic {
+export interface DirectiveConfigStatic {
   selector: string,
   _ddo: ng.IDirective
 }
@@ -354,7 +354,7 @@ function _checkLifecycle( lifecycleHookMethod: string, ctrl, shouldThrow = true,
 
 
 // custom type guards
-export function isDirective( Type ) {
+export function isDirective( Type: any ): Type is DirectiveConfigStatic {
   return is( Type, 'selector' );
 }
 

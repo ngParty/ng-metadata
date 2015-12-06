@@ -48,4 +48,26 @@ describe( 'Inject', ()=> {
 
   } );
 
+  it( 'should use _name static property on injectable if exists during injection', function () {
+
+    class HelloSvc{
+      static _name = 'helloYo';
+    }
+
+    @Pipe( { name: 'foo' } )
+    class FooPipe {
+      transform(){}
+    }
+
+    class Foo {
+      constructor(
+        @Inject( HelloSvc ) helloSvc,
+        @Inject( FooPipe ) fooFilter
+      ) {}
+    }
+
+    expect( Foo.$inject ).to.deep.equal( [ 'helloYo', 'foo' ] );
+
+  } );
+
 } );

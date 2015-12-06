@@ -5,7 +5,7 @@ interface PipeFactory {
   ( obj: {name: string, pure?: boolean} ): ClassDecorator;
 }
 
-interface PipeConfigStatic {
+export interface PipeConfigStatic {
   pipeName: string,
   pipePure: boolean
 }
@@ -72,6 +72,6 @@ export function makePipe( Type: any ) {
 
 
 // custom type guards
-export function isPipe( Type ) {
+export function isPipe( Type: any ): Type is PipeConfigStatic {
   return is( Type, 'pipeName' );
 }

@@ -60,5 +60,5 @@ export function firstUpperCase( value: string ): string {
   return value.charAt( 0 ).toUpperCase() + value.substring( 1 );
 }
 export function is( Type: any, attribute: string ) {
-  return typeof Type[ attribute ] === 'string' && Type[ attribute ] !== undefined;
+  return typeof attribute === 'string' && Type[ attribute ] !== undefined;
 }

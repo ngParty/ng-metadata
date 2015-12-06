@@ -1,4 +1,4 @@
-export * from './src/di';
+export { Inject } from './src/di';
 export { Pipe } from './src/pipe';
 export {
   Component,
@@ -17,4 +17,4 @@ export {
   makePipe,
   makeDirective
 } from './src/providers';
-export {bootstrap} from './src/bootstrap';
+export { bootstrap } from './src/bootstrap';
