@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Inject} from '../src/di';
+import {Inject} from '../src/inject';
 import {Pipe,makePipe,isPipe} from '../src/pipe';
 
 describe( '@Pipe', function () {
@@ -17,7 +17,7 @@ describe( '@Pipe', function () {
       expect( _willThrow ).to.throw( `@Pipe: must have 'name' property` );
 
     } );
-    it( 'should throw error when class doenst implements transform method', function () {
+    it( 'should throw error when class doesnt implements transform method', function () {
 
       function _willThrow() {
 

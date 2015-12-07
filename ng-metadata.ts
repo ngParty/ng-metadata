@@ -1,4 +1,4 @@
-export { Inject } from './src/di';
+export { Inject } from './src/inject';
 export { Injectable } from './src/injectable';
 export { Pipe } from './src/pipe';
 export {
