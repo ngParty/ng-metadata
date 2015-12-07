@@ -1,9 +1,9 @@
-import {expect} from 'chai';
-import {Inject} from '../src/di';
-import {Pipe} from '../src/pipe';
+import { expect } from 'chai';
+import { Inject } from '../src/di';
+import { Pipe } from '../src/pipe';
 
 
-describe( 'Inject', ()=> {
+describe( '@Inject', ()=> {
 
   it( 'should add $inject property as array on constructor function', ()=> {
 

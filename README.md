@@ -58,6 +58,7 @@ Decorators(core):
 - [@Attr](https://github.com/ngParty/ng-metadata/blob/master/README.md#output)
 - [@Pipe](https://github.com/ngParty/ng-metadata/blob/master/README.md#pipe)
 - [@Inject](https://github.com/ngParty/ng-metadata/blob/master/README.md#inject)
+- [@Injectable](https://github.com/ngParty/ng-metadata/blob/master/README.md#injectable)
 
 
 ## bootstrap
@@ -503,6 +504,55 @@ Note:
 ###### Behind the Scenes
 
 The injectables are added to the $inject property of the class constructor function.
+
+
+## @Injectable
+
+A decorator that marks a class as injectable. It can then be injected into other annotated classes via the `@Inject` decorator.
+Optionally you can provide name, under which it will be registered during angular.service registration ( this prevents JIT name generation )
+
+_Example:_
+
+```ts
+import { Injectable, Inject } from 'ng-metadata/ng-metadata';
+
+@Injectable()
+class MyService {
+  getData() {}
+}
+
+@Injectable('fooSvc')
+class GoodService {
+  getData() {}
+}
+
+@Injectable()
+class MyOtherService {
+  constructor(
+    @Inject(MyService) myService: MyService,
+    @Inject(GoodService) goodService: GoodService
+  ) {
+    this.data = myService.getData();
+  }
+}
+
+expect($injector.get('myService') instanceOf MyService).to.equal(true)
+expect($injector.get('fooSvc') instanceOf GoodService).to.equal(true)
+expect($injector.get('myOtherService') instanceOf MyOtherService).to.equal(true)
+```
+
+###### Parameters
+
+| Parameter     | Type     | Description                               |
+| ------------- | ---------|------------------------------------------ |
+| **name?**  | `string` | explicitly provide name for service which will be used during angular registration |
+
+###### Behind the scenes:
+
+it gets name property from provided class if JS engine supports it, else uses stringify on function and extracts
+name from there. This string will be camel cased.
+If you explicitly provide name parameter, this will be used and saved as `_name` static property.
+
 
 
 ---

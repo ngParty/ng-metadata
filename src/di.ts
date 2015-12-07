@@ -1,11 +1,6 @@
 import {is} from './util';
 import {provide} from './providers';
-
-
-export interface InjectableServiceConfigStatic{
-  _name?: string
-}
-export type Injectable = string | Function | InjectableServiceConfigStatic;
+import {InjectableToken} from "./injectable";
 
 /**
  * Constructor/Static Method Parameters Decorator
@@ -13,7 +8,7 @@ export type Injectable = string | Function | InjectableServiceConfigStatic;
  * @return {Function(target:Object, propertyName:string, argumentPosition:string)}
  * @constructor
  */
-export function Inject( injectable: Injectable ): ParameterDecorator {
+export function Inject( injectable: InjectableToken ): ParameterDecorator {
 
   return _parameterDecorator;
   /**
@@ -41,7 +36,4 @@ export function Inject( injectable: Injectable ): ParameterDecorator {
 
 }
 
-// custom type guards
-export function isInjectable( Type: any ): Type is InjectableServiceConfigStatic {
-  return is( Type, '_name' );
-}
+

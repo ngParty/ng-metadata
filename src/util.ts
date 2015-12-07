@@ -62,3 +62,12 @@ export function firstUpperCase( value: string ): string {
 export function is( Type: any, attribute: string ) {
   return typeof attribute === 'string' && Type[ attribute ] !== undefined;
 }
+
+/**
+ * get camel cased name from class definition
+ * @param Type
+ * @returns {string}
+ */
+export function getInjectableName( Type: Function ): string {
+  return firstLowerCase( stringify( Type ) );
+}

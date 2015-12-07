@@ -1,7 +1,7 @@
-import {stringify,makeSelector,firstLowerCase} from './util';
+import {makeSelector, getInjectableName} from './util';
 import {isDirective,DirectiveConfigStatic} from './directives';
 import {isPipe,PipeConfigStatic} from './pipe';
-import {isInjectable, InjectableServiceConfigStatic} from "./di";
+import {isInjectable, InjectableServiceConfigStatic} from "./injectable";
 
 export {makeDirective} from './directives';
 export {makePipe} from './pipe';
@@ -59,7 +59,7 @@ export function provide(
     }
 
     // we create _name from service class name and augment provided class
-    const serviceName = firstLowerCase( stringify( Type ) );
+    const serviceName = getInjectableName( Type as Function );
     Type[ '_name' ] = serviceName;
 
     return serviceName;

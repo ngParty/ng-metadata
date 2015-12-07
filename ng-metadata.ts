@@ -1,4 +1,5 @@
 export { Inject } from './src/di';
+export { Injectable } from './src/injectable';
 export { Pipe } from './src/pipe';
 export {
   Component,
