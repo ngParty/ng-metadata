@@ -1,17 +1,19 @@
 declare var global;
 
-const angular = (()=> {
+const angular = ((win)=> {
 
-  if ( global ) {
-    // this is for Node
-    return {
-      extend: Object[ 'assign' ]
-    }
-  } else {
-    return window[ 'angular' ];
+  if ( win ) {
+
+    return win[ 'angular' ];
+
   }
 
-})();
+  // this is for Node
+  return {
+    extend: Object[ 'assign' ]
+  }
+
+})( window );
 
 
 export default angular;
