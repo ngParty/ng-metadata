@@ -1,6 +1,12 @@
 import { Inject, Directive, AfterContentInit } from 'ng-metadata/ng-metadata';
 
 
+type MDLcomponentHandler = {
+  upgradeAllRegistered()
+}
+
+const componentHandler: MDLcomponentHandler = window[ 'componentHandler' ];
+
 @Directive( {
   selector: '[element-ready]'
 } )
