@@ -9,19 +9,19 @@
   padding: 80px 56px;
   margin-bottom: 80px;
 }
-.demo-list{
+.demo-list li{
   max-width: 80%;
   list-style: none;
   display: flex;
   flex-flow: column;
 }
-.demo-list li{
+.demo-list todo-item{
   padding-top: .3rem;
   padding-bottom: .3rem;
   display: flex;
   justify-content: space-around;
   align-items: center;
 }
-.demo-list li input[checked] + span{
+.demo-list .todo__list--complete input+span{
   text-decoration: line-through;
 }

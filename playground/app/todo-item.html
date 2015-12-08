@@ -1,0 +1,15 @@
+<label for="{{ctrl.idx}}"
+       class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect"
+       ng-class="{'todo__list--complete': ctrl.todo.complete }"
+       element-ready>
+
+  <input
+    type="checkbox"
+    id="{{ctrl.idx}}"
+    class="mdl-checkbox__input"
+    ng-model="ctrl.todo.complete"
+    ng-change="ctrl.done(ctrl.todo)">
+  <span class="mdl-checkbox__label">{{ ctrl.todo.label }}</span>
+
+</label>
+<ng-transclude></ng-transclude>

@@ -29,7 +29,7 @@ export class ElementReadyDirective implements AfterContentInit {
 
     } );
 
-    this.$scope.$watch( componentHandler.upgradeAllRegistered )
+    //this.$scope.$watch( componentHandler.upgradeAllRegistered )
 
   }
 
