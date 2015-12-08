@@ -1,18 +1,35 @@
 <h1>Todos yo!</h1>
-<form name="ctrl.todos" novalidate>
-  <div class="mdl-textfield mdl-textfield--floating-label">
-    <input class="mdl-textfield__input" type="text" id="fname" placeholder="What needs to be done?">
-    <label class="mdl-textfield__label" for="fname"></label>
+<form name="ctrl.todosForm" novalidate ng-submit="ctrl.onSubmit($event);">
+
+  <h3>Todo List: ({{ ctrl.updateIncomplete() }} of {{ ctrl.todos.length }})</h3>
+
+  <div>
+    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+      <input class="mdl-textfield__input" type="text" id="sample3" ng-model="ctrl.label">
+      <label class="mdl-textfield__label" for="sample3">What needs to be done?</label>
+    </div>
+    <!-- Accent-colored raised button with ripple -->
+    <button type="submit" class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+      Add
+    </button>
   </div>
+
 </form>
 <ul class="demo-list">
-  <li>
-    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-1">
-      <input type="checkbox" id="checkbox-1" class="mdl-checkbox__input">
-      <span class="mdl-checkbox__label">Checkbox</span>
+  <li ng-repeat="item in ctrl.todos" ng-class="{'todo__list--complete': item.complete }">
+
+    <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-{{ $index }}">
+      <input type="checkbox" id="checkbox-{{ $index }}" class="mdl-checkbox__input" ng-model="item.complete">
+      <span class="mdl-checkbox__label">{{ item.label }}</span>
     </label>
+
+    <!-- Accent-colored flat button -->
+    <button class="mdl-button mdl-js-button mdl-button--accent" ng-click="ctrl.deleteItem($index)">
+      Remove
+    </button>
+
   </li>
-  <li>
+  <!--<li>
     <label class="mdl-checkbox mdl-js-checkbox mdl-js-ripple-effect" for="checkbox-2">
       <input type="checkbox" id="checkbox-2" class="mdl-checkbox__input" checked>
       <span class="mdl-checkbox__label">Checkbox</span>
@@ -23,5 +40,5 @@
       <input type="checkbox" id="checkbox-3" class="mdl-checkbox__input">
       <span class="mdl-checkbox__label">Checkbox</span>
     </label>
-  </li>
+  </li>-->
 </ul>
