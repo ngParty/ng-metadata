@@ -34,6 +34,7 @@
     "commitizen": "2.4.6",
     "cz-conventional-changelog": "1.1.4",
     "ghooks": "1.0.1",
+    "live-server": "0.8.2",
     "mocha": "2.3.4",
     "systemjs": "0.19.6",
     "systemjs-builder": "0.14.11",
