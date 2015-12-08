@@ -1,10 +1,10 @@
-import { Inject, Directive } from 'ng-metadata/ng-metadata';
+import { Inject, Directive, AfterContentInit } from 'ng-metadata/ng-metadata';
 
 
 @Directive( {
   selector: '[element-ready]'
 } )
-export class ElementReadyDirective {
+export class ElementReadyDirective implements AfterContentInit {
 
   constructor(
     @Inject( '$element' ) private $element: ng.IAugmentedJQuery,
@@ -23,7 +23,7 @@ export class ElementReadyDirective {
 
     } );
 
-    this.$scope.$watch(componentHandler.upgradeAllRegistered)
+    this.$scope.$watch( componentHandler.upgradeAllRegistered )
 
   }
 

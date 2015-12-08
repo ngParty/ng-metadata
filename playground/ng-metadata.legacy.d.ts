@@ -36,6 +36,18 @@ declare module ngMetadata{
 
   function Inject(injectable: string): ParameterDecorator;
 
+  function Injectable(name?: string): ClassDecorator;
+
+  interface OnInit {
+    onInit(args?: any): any;
+  }
+  interface OnDestroy {
+    onDestroy(args?: any): any;
+  }
+  interface AfterContentInit {
+    afterContentInit(args?: any[]): any;
+  }
+
 }
 declare module "ng-metadata/ng-metadata" {
   export = ngMetadata;

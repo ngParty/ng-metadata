@@ -1,10 +1,10 @@
-import {Component} from 'ng-metadata/ng-metadata';
+import { Component } from 'ng-metadata/ng-metadata';
 
 @Component( {
   selector: 'app',
   templateUrl: './app/app.html'
 } )
-export class AppCmp {
+export class AppCmp{
 
   todosForm: ng.IFormController;
 
