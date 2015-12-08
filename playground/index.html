@@ -18,7 +18,7 @@
       //map tells the System loader where to look for things
       map: {
         angular: 'npm:angular/angular.js',
-        'ng-metadata/ng-metadata': '../../',
+        'ng-metadata/ng-metadata': '/../../',
         app: "./app"
       },
       //packages defines our app package
@@ -36,7 +36,6 @@
   </script>
   <script>
     System.import( 'app' )
-//      .then( function(){ setTimeout(componentHandler.upgradeAllRegistered,100) } )
       .catch( console.error.bind( console ) );
   </script>
 </head>

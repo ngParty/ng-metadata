@@ -1,6 +1,5 @@
 import { Inject, Directive, AfterContentInit } from 'ng-metadata/ng-metadata';
 
-
 type MDLcomponentHandler = {
   upgradeAllRegistered()
 }

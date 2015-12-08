@@ -34,7 +34,16 @@ declare module ngMetadata{
     pure?: boolean;
   }): ClassDecorator;
 
-  function Inject(injectable: string): ParameterDecorator;
+
+  interface InjectableServiceConfigStatic {
+    _name?: string
+  }
+  /**
+   * Injectable type used for @Inject(Injectable) decorator
+   */
+  type InjectableToken = string | Function | InjectableServiceConfigStatic;
+
+  function Inject(injectable: InjectableToken): ParameterDecorator;
 
   function Injectable(name?: string): ClassDecorator;
 

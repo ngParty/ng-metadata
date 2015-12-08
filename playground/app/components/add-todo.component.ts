@@ -1,10 +1,9 @@
 import { Component, Output } from 'ng-metadata/ng-metadata';
-
-import { TodoModel } from './todo-app.component.ts';
+import { TodoModel } from '../stores/todoStore.service.ts';
 
 @Component({
   selector: 'add-todo',
-  templateUrl: './app/add-todo.html'
+  templateUrl: './app/components/add-todo.html'
 })
 export class AddTodoCmp{
 

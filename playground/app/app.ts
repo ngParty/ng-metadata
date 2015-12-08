@@ -1,20 +1,25 @@
 //import * as angular from 'angular';
 import 'angular';
 import { provide, makeDirective, makePipe } from 'ng-metadata/ng-metadata';
-import { TodoAppCmp } from './todo-app.component';
-import { AddTodoCmp } from './add-todo.component';
-import { TodoListCmp } from './todo-list.component';
-import { TodoItemCmp } from './todo-item.component';
-import { RemainingTodosPipe } from './remainingTodos.pipe';
 
-import { ElementReadyDirective } from './element-ready.directive';
+import { TodoAppCmp } from './components/todo-app.component';
+import { TodoItemCmp } from './components/todo-item.component';
+import { AddTodoCmp } from './components/add-todo.component';
+
+import { RemainingTodosPipe } from './pipes/remainingTodos.pipe';
+
+import { TodoStore } from './stores/todoStore.service';
+
+import { ElementReadyDirective } from './directives/element-ready.directive';
 
 export const AppModule = angular.module( 'app', [] )
+
   .directive( provide( TodoAppCmp ), makeDirective( TodoAppCmp ) )
   .directive( provide( AddTodoCmp ), makeDirective( AddTodoCmp ) )
-  .directive( provide( TodoListCmp ), makeDirective( TodoListCmp ) )
   .directive( provide( TodoItemCmp ), makeDirective( TodoItemCmp ) )
 
   .filter( provide( RemainingTodosPipe ), makePipe( RemainingTodosPipe ) )
+
+  .service( provide( TodoStore ), TodoStore )
 
   .directive( provide( ElementReadyDirective ), makeDirective( ElementReadyDirective ) );
