@@ -1,19 +1,7 @@
-declare var global;
+export function assign( destination: any, ...sources: any[] ): any {
 
-const angular = ((win)=> {
+  const innerAssign = Object[ 'assign' ] || window[ 'angular' ].extend;
 
-  if ( win ) {
+  return innerAssign( destination, ...sources );
 
-    return win[ 'angular' ];
-
-  }
-
-  // this is for Node
-  return {
-    extend: Object[ 'assign' ]
-  }
-
-})( window );
-
-
-export default angular;
+}

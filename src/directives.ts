@@ -1,4 +1,4 @@
-import angular from './facade';
+import { assign } from './facade';
 import {hasInjectables,makeSelector,firstLowerCase,is} from './util';
 
 import {getLifecycleMethod,LifecycleHooks} from './life_cycle';
@@ -118,7 +118,7 @@ export function Component(
     if ( attrs || inputs || outputs ) {
 
       const {attr,input,output} = _createBindings( { inputs, attrs, outputs } );
-      ddoInternal.bindToController = angular.extend( {}, ddoInternal.bindToController, attr, input, output );
+      ddoInternal.bindToController = assign( {}, ddoInternal.bindToController, attr, input, output );
 
     }
     if ( legacy.require ) {
@@ -178,7 +178,7 @@ function _propertyDecoratorFactoryCreator( bindingPropertyName: string, property
     const binding = _createBindings( { [`${propertyType}s`]: format } )[ propertyType ];
 
     if ( existingBindings ) {
-      angular.extend( existingBindings, binding );
+      assign( existingBindings, binding );
     } else {
       Type[ DDO_NAME ] = { bindToController: binding };
     }
@@ -201,13 +201,13 @@ function _getTypeBindings( Type ): {} {
 }
 function _decorateDirectiveType( Type, selector, legacy, ddoCreator: Function ) {
   const ddo = ddoCreator( Type );
-  const _ddo = angular.extend( {}, ddo, legacy );
+  const _ddo = assign( {}, ddo, legacy );
   const staticConfig: DirectiveConfigStatic = {
     selector,
     _ddo
   };
 
-  angular.extend( Type, staticConfig );
+  assign( Type, staticConfig );
 }
 
 function _postLinkFactory( isDirective: boolean ) {

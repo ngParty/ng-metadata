@@ -1,5 +1,8 @@
-import angular from './facade';
+//import angular from './facade';
 import {hasInjectables, is} from './util';
+import { assign } from "./facade";
+
+//const assign = assignFactory();
 
 interface PipeFactory {
   ( obj: {name: string, pure?: boolean} ): ClassDecorator;
@@ -48,7 +51,7 @@ export function Pipe(
     };
 
     // remove angular and use Object.assign instead
-    angular.extend( Type, staticConfig );
+    assign( Type, staticConfig );
 
   }
 
