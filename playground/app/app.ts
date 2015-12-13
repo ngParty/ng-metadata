@@ -1,5 +1,4 @@
-//import * as angular from 'angular';
-import 'angular';
+import * as angular from 'angular';
 import { provide, makeDirective, makePipe } from 'ng-metadata/ng-metadata';
 
 import { TodoAppCmp } from './components/todo-app.component';

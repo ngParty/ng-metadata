@@ -15,21 +15,28 @@
       paths: {
         "npm:*": "../../node_modules/*"
       },
+      meta: {
+        "npm:angular": {
+          "format": "global",
+          "exports": "angular"
+        }
+      },
       //map tells the System loader where to look for things
       map: {
-        angular: 'npm:angular/angular.js',
-        'ng-metadata/ng-metadata': '/../../',
-        app: "./app"
+        app: "./app",
+        angular: 'npm:angular',
+        'ng-metadata/ng-metadata': '/../../'
       },
       //packages defines our app package
       packages: {
         app: {
-          main: './main',
-          defaultExtension: 'js'
+          main: './main'
+        },
+        angular: {
+          main:'./angular'
         },
         'ng-metadata/ng-metadata': {
-          main: './ng-metadata',
-          defaultExtension: 'js'
+          main: './ng-metadata'
         }
       }
     } );

@@ -1,25 +1,29 @@
 # TODO app 
 
-Here is an example app, how to write component oriented code with angular 1 + Typescript + ng-metadata.
+Here is an example app, how to write component oriented code with Angular 1 + Typescript + ng-metadata.
 
-Architecture is separated on smart + dumb components + composition.
+Architecture is separated in smart + dumb components + composition.
+
+Smart component gets from Store and updates it back on internal changes via immutability. 
 
 There is only one Smart component: 
 - `todo-app`
 
-All others are dump.
+All others are dumb:
 - `<add-todo>`
-- `<todo-list>`
-- `todo-item`
+- `<todo-item>`
 
 We are using also pipe to showcase `@Pipe` usage. It could have been also component.
 - `remainigTodos`
 
-Here UI mockup with components described:
+We use service as Store ( Flux like )
+- `todoStore`
+
+Here is UI mockup with components described:
 
 ![TODO-app-mock](todo-app-components.png)
 
-## Getting Started
+## How to run this demo
 
 1. Clone this repo
 
@@ -27,5 +31,5 @@ Here UI mockup with components described:
 
 1. Open terminal and launch the app in the browser `npm run playground`
 
-1. Open `http://127.0.0.1:8080` and feel how the Force Awakens inside ( yes I love Star Wars )!
+1. Open `http://127.0.0.1:8080/playground` and feel how the Force Awakens inside ( yes I love Star Wars )!
  
