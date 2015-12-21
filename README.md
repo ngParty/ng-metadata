@@ -45,20 +45,20 @@ ng-metadata can be used as part of an upgrade strategy, which may also include *
 ## API
 
 Methods:
-- [bootstrap](https://github.com/ngParty/ng-metadata/blob/master/README.md#bootstrap)
-- [provide](https://github.com/ngParty/ng-metadata/blob/master/README.md#provide)
-- [makeDirective](https://github.com/ngParty/ng-metadata/blob/master/README.md#makedirective)
-- [makePipe](https://github.com/ngParty/ng-metadata/blob/master/README.md#makepipe)
+- [bootstrap](#bootstrap)
+- [provide](#provide)
+- [makeDirective](#makedirective)
+- [makePipe](#makepipe)
 
 Decorators(core):
-- [@Component](https://github.com/ngParty/ng-metadata/blob/master/README.md#component)
-- [@Directive](https://github.com/ngParty/ng-metadata/blob/master/README.md#directive)
-- [@Input](https://github.com/ngParty/ng-metadata/blob/master/README.md#input)
-- [@Output](https://github.com/ngParty/ng-metadata/blob/master/README.md#output)
-- [@Attr](https://github.com/ngParty/ng-metadata/blob/master/README.md#output)
-- [@Pipe](https://github.com/ngParty/ng-metadata/blob/master/README.md#pipe)
-- [@Inject](https://github.com/ngParty/ng-metadata/blob/master/README.md#inject)
-- [@Injectable](https://github.com/ngParty/ng-metadata/blob/master/README.md#injectable)
+- [@Component](#component)
+- [@Directive](#directive)
+- [@Input](#input)
+- [@Output](#output)
+- [@Attr](#output)
+- [@Pipe](#pipe)
+- [@Inject](#inject)
+- [@Injectable](#injectable)
 
 
 ## bootstrap
