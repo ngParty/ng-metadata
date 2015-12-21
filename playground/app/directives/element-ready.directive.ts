@@ -16,7 +16,7 @@ export class ElementReadyDirective implements AfterContentInit {
     @Inject( '$scope' ) private $scope: ng.IScope
   ) {}
 
-  afterContentInit() {
+  ngAfterContentInit() {
 
     this.$element.ready( ()=> {
 

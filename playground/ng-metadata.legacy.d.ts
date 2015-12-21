@@ -47,14 +47,41 @@ declare module ngMetadata{
 
   function Injectable(name?: string): ClassDecorator;
 
-  interface OnInit {
-    onInit(args?: any): any;
+  /**
+  * Lifecycle hooks are guaranteed to be called in the following order:
+  * - `OnInit` (from directive preLink),
+  * - `AfterContentInit` ( from directvie postLink -> all children are rendered and has scope resolved),
+  * - `OnDestroy` (at the very end before destruction, on $scope.$on('$destroy'))
+  */
+  /**
+  * Implement this interface to execute custom initialization logic after your directive's
+  * data-bound properties have been initialized.
+  *
+  * `ngOnInit` is called right after the directive's data-bound properties have been checked for the
+  * first time, and before any of its children have been checked.
+  * It is invoked only once when the directive is instantiated.
+  *
+  * In angular 1 terms, this method is invoked from `preLink`
+  * @TODO implement this @martin
+  */
+  export interface OnInit {
+      ngOnInit(args?: any): any;
   }
-  interface OnDestroy {
-    onDestroy(args?: any): any;
+  /**
+  * Implement this interface to get notified when your directive's content and view has been fully
+  * initialized.
+  */
+  export interface AfterContentInit {
+      ngAfterContentInit(controllers?: any[]): any;
   }
-  interface AfterContentInit {
-    afterContentInit(args?: any[]): any;
+  /**
+  * Implement this interface to get notified when your directive is destroyed.
+  *
+  * `ngOnDestroy` callback is typically used for any custom cleanup that needs to occur when the
+  * instance(directive) is destroyed
+  */
+  export interface OnDestroy {
+      ngOnDestroy(args?: any): any;
   }
 
 }
