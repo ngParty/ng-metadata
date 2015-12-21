@@ -1,5 +1,5 @@
 import { assign } from './facade';
-import {hasInjectables,makeSelector,firstLowerCase,is} from './util';
+import {hasInjectables,makeSelector,firstLowerCase,is,stringify} from './util';
 
 import {getLifecycleMethod,LifecycleHooks} from './life_cycle';
 
@@ -333,17 +333,22 @@ function _checkLifecycle( lifecycleHookMethod: string, ctrl, shouldThrow = true,
   const hasRequiredCtrls = Boolean( requiredCtrls.length );
 
   if ( shouldThrow && !hasLifecycleHookImplemented ) {
-    throw Error( `@Directive/@Component must implement #${lifecycleHookMethod} method` );
+    
+    const instanceCtorName = stringify(ctrl.constructor);    
+    throw Error( `@Directive/@Component ${instanceCtorName} must implement #${lifecycleHookMethod} method` );
+    
   }
+  
   if ( hasRequiredCtrls && hasLifecycleHookImplemented && method.length !== 1 ) {
+    
     throw Error( `
-    @Directive/@Component #${lifecycleHookMethod} method is missing argument definition, which should be type of requires.
-    ====
-    define it like:
-      ${lifecycleHookMethod}(controllers:[ng.IModelController,MyFooCtrl]){
-        const [ngModel,myFoo] = controllers;
-      }
-    ===
+      @Directive/@Component #${lifecycleHookMethod} method is missing argument definition, which should be type of requires.
+      ====
+      define it like:
+        ${lifecycleHookMethod}(controllers:[ng.IModelController,MyFooCtrl]){
+          const [ngModel,myFoo] = controllers;
+        }
+      ===
     ` );
 
   }

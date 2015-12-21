@@ -277,7 +277,7 @@ describe( 'directives', function () {
           static someFoo = null;
           static parent = null;
 
-          afterContentInit( controllers ) {
+          ngAfterContentInit( controllers ) {
 
             const [someFoo,parent] = controllers;
 
@@ -298,7 +298,7 @@ describe( 'directives', function () {
 
       } );
 
-      it( 'should throw error when requiring directive and #afterContentInit is not defined', function () {
+      it( 'should throw error when requiring directive and #ngAfterContentInit is not defined', function () {
 
         @Directive( {
           selector: '[my-attr]',
@@ -316,7 +316,7 @@ describe( 'directives', function () {
           _invokeLink( [ MyAttr ], postLink )
         }
 
-        expect( _willThrow ).to.throw( `@Directive/@Component must implement #afterContentInit method` );
+        expect( _willThrow ).to.throw( `@Directive/@Component MyAttr must implement #ngAfterContentInit method` );
 
       } );
 
@@ -334,7 +334,7 @@ describe( 'directives', function () {
           } )
           class MyAttr implements AfterContentInit {
 
-            afterContentInit() {}
+            ngAfterContentInit() {}
 
           }
           const _ddo: ng.IDirective = MyAttr[ '_ddo' ];
@@ -360,11 +360,11 @@ describe( 'directives', function () {
           static destroyed = false;
           static called = false;
 
-          onDestroy() {
+          ngOnDestroy() {
             MyAttr.destroyed = true;
           }
 
-          afterContentInit() {
+          ngAfterContentInit() {
             MyAttr.called = true;
           }
         }
@@ -485,7 +485,7 @@ describe( 'directives', function () {
         class MyCmp implements AfterContentInit {
           static called = false;
 
-          afterContentInit() {
+          ngAfterContentInit() {
             MyCmp.called = true;
           }
         }
@@ -514,7 +514,7 @@ describe( 'directives', function () {
           static foo = null;
           static bar = null;
 
-          afterContentInit( controllers ) {
+          ngAfterContentInit( controllers ) {
             const [foo,bar] = controllers;
             MyCmp.foo = foo;
             MyCmp.bar = bar;
@@ -566,7 +566,7 @@ describe( 'directives', function () {
           } )
           class MyCmp implements AfterContentInit {
 
-            afterContentInit() { }
+            ngAfterContentInit() { }
 
           }
           const _ddo: ng.IDirective = MyCmp[ '_ddo' ];

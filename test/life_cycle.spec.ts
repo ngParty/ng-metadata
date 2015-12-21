@@ -5,9 +5,9 @@ describe( 'Life Cycle', function () {
 
   it( 'should return life cycle method name', function () {
 
-    expect( getLifecycleMethod( LifecycleHooks.AfterContentInit ) ).to.equal( 'afterContentInit' );
-    expect( getLifecycleMethod( LifecycleHooks.OnDestroy ) ).to.equal( 'onDestroy' );
-    expect( getLifecycleMethod( LifecycleHooks.OnInit ) ).to.equal( 'onInit' );
+    expect( getLifecycleMethod( LifecycleHooks.AfterContentInit ) ).to.equal( 'ngAfterContentInit' );
+    expect( getLifecycleMethod( LifecycleHooks.OnDestroy ) ).to.equal( 'ngOnDestroy' );
+    expect( getLifecycleMethod( LifecycleHooks.OnInit ) ).to.equal( 'ngOnInit' );
 
   } );
 

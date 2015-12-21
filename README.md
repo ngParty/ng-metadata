@@ -1,6 +1,11 @@
 # ng-metadata
 
 [![Build Status](https://travis-ci.org/ngParty/ng-metadata.svg)](https://travis-ci.org/ngParty/ng-metadata)
+[![Dependencies Status](https://david-dm.org/ngParty/ng-metadata.svg)](https://david-dm.org/ngParty/ng-metadata)
+[![devDependency Status](https://david-dm.org/ngParty/ng-metadata/dev-status.svg)](https://david-dm.org/ngParty/ng-metadata#info=devDependencies)
+[![npm](https://img.shields.io/npm/v/ng-metadata.svg)](https://www.npmjs.com/package/ng-metadata)
+[![GitHub tag](https://img.shields.io/github/tag/ngParty/ng-metadata.svg)]()
+[![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/ngParty/ng-metadata/master/LICENSE)
 
 > Angular 2 style decorators for Angular 1.x
 
@@ -44,13 +49,15 @@ ng-metadata can be used as part of an upgrade strategy, which may also include *
 
 ## API
 
-Methods:
+Angular 1 container registration helper Methods:
+
 - [bootstrap](#bootstrap)
 - [provide](#provide)
 - [makeDirective](#makedirective)
 - [makePipe](#makepipe)
 
 Decorators(core):
+
 - [@Component](#component)
 - [@Directive](#directive)
 - [@Input](#input)
@@ -59,6 +66,12 @@ Decorators(core):
 - [@Pipe](#pipe)
 - [@Inject](#inject)
 - [@Injectable](#injectable)
+
+Lifecycle hooks:
+
+- [OnInit](#oninit)
+- [AfterContentInit](#aftercontentinit)
+- [OnDestroy](#ondestroy)
 
 
 ## bootstrap
@@ -276,9 +289,9 @@ const AppModule = angular.module('app', [])
 ###### DirectiveDefinitionObject:
 
 - `require?` If the component needs other components/directives(controllers). Syntax is the same as for [angular require](https://docs.angularjs.org/api/ng/service/$compile)
-If you use require, your component implements `AfterContentInit` interface which requires `afterContentInit` method to be implemented by your class.
+If you use require, your component implements `AfterContentInit` interface which requires `ngAfterContentInit` method to be implemented by your class.
 It has one argument: `controllers`: `Array[...ctrls]` which contains all controllers provided by you in *require* property.
-  - so if you have `require: ['ngModel','^^someFoo']`, `afterContentInit` controllers argument will be a tuple `[ngModelCtrl, someFooCtrl]`, use destructuring to get those values elegantly.  
+  - so if you have `require: ['ngModel','^^someFoo']`, `ngAfterContentInit` controllers argument will be a tuple `[ngModelCtrl, someFooCtrl]`, use destructuring to get those values elegantly.  
 ```ts
   @Component({ 
     selector:'foo',
@@ -288,7 +301,7 @@ It has one argument: `controllers`: `Array[...ctrls]` which contains all control
     }
   })
   class Foo implements AfterContentInit{
-    afterContentInit(controllers: [ng.INgModelController, SomeFoo]){
+    ngAfterContentInit(controllers: [ng.INgModelController, SomeFoo]){
       const [ngModel, someFoo] = controllers;
     }
   }
@@ -337,7 +350,7 @@ const AppModule = angular.module('app', [])
 | **legacy?**   | `Object<DirectiveDefinitionObject>`  |  striped angular 1 ddo, use it if you wanna use angular 1 specific API  |
 
 Note:
-- Directive must implement `afterContentInit` method, even if it doesn't use `legacy.require`, 
+- Directive must implement `ngAfterContentInit` method, even if it doesn't use `legacy.require`, 
 because this method is always called from postLink, so we can ensure that everything is compiled when logic of directive is executed.
 - It also best practice to execute directive logic when host and children DOM is ready ( compiled )
 
@@ -553,6 +566,67 @@ it gets name property from provided class if JS engine supports it, else uses st
 name from there. This string will be camel cased.
 If you explicitly provide name parameter, this will be used and saved as `_name` static property.
 
+
+## OnInit
+
+@TODO - not yet implemented 
+
+Implement this interface to execute custom initialization logic after your directive's
+data-bound properties have been initialized.
+
+`ngOnInit` is called right after the directive's data-bound properties have been checked for the
+first time, and before any of its children have been checked. 
+It is invoked only once when the directive is instantiated. 
+
+In angular 1 terms, this method is invoked from `preLink` 
+
+_Example:_
+
+```ts
+```
+
+###### Members
+
+- `ngOnInit()`
+
+
+## AfterContentInit
+
+Implement this interface to get notified when your directive's content and view has been fully initialized.
+
+`ngAfterContentInit` is called after all directive's view or content children hav been resolved and rendered. 
+
+It is invoked every time when the directive is instantiated. 
+
+In angular 1 terms, this method is invoked from `postLink`
+
+_Example:_
+
+```ts
+```
+
+###### Members
+
+- `ngAfterContentInit(controllers?: any[])`
+
+
+## OnDestroy
+
+Implement this interface to get notified when your directive is destroyed.
+
+`ngOnDestroy` callback is typically used for any custom cleanup that needs to occur when the
+instance(directive) is destroyed.
+
+In anglualr 1 terms, it's invoked when `$scope.$destroy()` is called.
+
+_Example:_
+
+```ts
+```
+
+###### Members
+
+- `ngOnDestroy()`
 
 
 ---
