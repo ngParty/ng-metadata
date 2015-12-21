@@ -22,7 +22,7 @@ Behind the scenes it uses ES7 decorators extended by Typescript( which add to th
 
 ## Installation
 
-`npm i --save ng-metadata`
+`npm i --save ng-metadata@beta`
 
 You have to allow nodeJs module resolution style in your `tsconfig.json`
 
