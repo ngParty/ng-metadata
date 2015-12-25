@@ -1,5 +1,7 @@
-export { Inject } from './src/inject';
-export { Injectable } from './src/injectable';
+export { Optional } from './src/di/optional';
+export { Host } from './src/di/host';
+export { Inject } from './src/di/inject';
+export { Injectable } from './src/di/injectable';
 export { Pipe } from './src/pipe';
 export {
   Component,

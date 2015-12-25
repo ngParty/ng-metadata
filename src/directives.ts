@@ -1,6 +1,6 @@
-import { assign } from './facade';
+import { assign,noop } from './facade/lang';
 import {hasInjectables,makeSelector,firstLowerCase,is,stringify} from './util';
-
+import {REQUIRE_METADATA_KEY,RequireMetadata,OPTIONAL_REQUIRE_SIGN,PARENT_REQUIRE_SIGN} from './di/host';
 import {getLifecycleMethod,LifecycleHooks} from './life_cycle';
 
 type Binding = {[key:string]:string};
@@ -18,7 +18,11 @@ export interface DirectiveConfigStatic {
   selector: string,
   _ddo: ng.IDirective
 }
-const DDO_NAME = '_ddo';
+/**
+ * @internal
+ * @type {string}
+ */
+export const DDO_METADATA_KEY = '_ddo';
 
 export function Directive(
   {selector, legacy={}}:{
@@ -35,17 +39,17 @@ export function Directive(
 
   function _directiveDecorator( Type: any ) {
 
-    _decorateDirectiveType( Type, selector, legacy, _createDdo );
+    _decorateDirectiveType( Type, selector, legacy, _createDirectiveDdo );
 
   }
 
-  function _createDdo( Type ) {
+  function _createDirectiveDdo( Type ) {
 
-    const ddoInternal = {
+    const ddoInternal: ng.IDirective = {
       restrict: 'A',
       controller: Type,
       require: _initRequire( selector ),
-      link: _postLinkFactory( true )
+      link: noop
     };
 
     if ( legacy.require ) {
@@ -53,6 +57,13 @@ export function Directive(
       ddoInternal.require = _processRequire( ddoInternal, legacy );
 
     }
+    if ( Type[ REQUIRE_METADATA_KEY ] ) {
+
+      ddoInternal.require = ddoInternal.require.concat( _buildRequireFromInjectedDirectives(Type) );
+
+    }
+
+    ddoInternal.link = _postLinkFactory( Type, true );
 
     return ddoInternal;
 
@@ -98,11 +109,11 @@ export function Component(
       throw Error( 'only template or templateUrl is allowed, nod both' );
     }
 
-    _decorateDirectiveType( Type, selector, legacy, _createDdo );
+    _decorateDirectiveType( Type, selector, legacy, _createComponentDdo );
 
   }
 
-  function _createDdo( Type ) {
+  function _createComponentDdo( Type ) {
 
     const ddoInternal: ng.IDirective = {
       restrict: 'E',
@@ -112,7 +123,7 @@ export function Component(
       bindToController: _getTypeBindings( Type ) || {},
       transclude: true,
       require: _initRequire( selector ),
-      link: _postLinkFactory( false )
+      link: noop
     };
 
     if ( attrs || inputs || outputs ) {
@@ -126,12 +137,19 @@ export function Component(
       ddoInternal.require = _processRequire( ddoInternal, legacy );
 
     }
+    if ( Type[ REQUIRE_METADATA_KEY ] ) {
+
+      ddoInternal.require = ddoInternal.require.concat( _buildRequireFromInjectedDirectives(Type) );
+
+    }
     if ( template ) {
       ddoInternal.template = template;
     }
     if ( templateUrl ) {
       ddoInternal.templateUrl = templateUrl;
     }
+
+    ddoInternal.link = _postLinkFactory( Type, false );
 
     return ddoInternal;
 
@@ -180,7 +198,7 @@ function _propertyDecoratorFactoryCreator( bindingPropertyName: string, property
     if ( existingBindings ) {
       assign( existingBindings, binding );
     } else {
-      Type[ DDO_NAME ] = { bindToController: binding };
+      Type[ DDO_METADATA_KEY ] = { bindToController: binding };
     }
 
   }
@@ -210,11 +228,20 @@ function _decorateDirectiveType( Type, selector, legacy, ddoCreator: Function ) 
   assign( Type, staticConfig );
 }
 
-function _postLinkFactory( isDirective: boolean ) {
+function _postLinkFactory( Type: any, isDirective: boolean ): ng.IDirectiveLinkFn {
+
+  const requireMetadataArr: RequireMetadata[] = Type[REQUIRE_METADATA_KEY] || [];
+  //console.log( requireMetadata );
 
   return _postLink;
 
-  function _postLink( scope, element, attrs, controller: any[] ) {
+  function _postLink(
+    scope: any,
+    element: ng.IAugmentedJQuery,
+    attrs: any,
+    controller: any[],
+    transcludeFn: ng.ITranscludeFunction
+  ) {
 
     const [ownCtrl, ...requiredCtrls] = controller;
 
@@ -223,12 +250,22 @@ function _postLinkFactory( isDirective: boolean ) {
 
     if ( requiredCtrls.length > 0 ) {
 
+      //console.log( ownCtrl );
+
       _checkLifecycle(
         afterContentInitMethod,
         ownCtrl,
         true,
         requiredCtrls
-      ) && ownCtrl[ afterContentInitMethod ]( requiredCtrls );
+      );
+
+      requireMetadataArr.forEach( ( reqMetadata, idx )=> {
+
+        ownCtrl[ reqMetadata.name ] = requiredCtrls[ idx ];
+
+      } );
+
+      ownCtrl[ afterContentInitMethod ]( requiredCtrls );
 
     } else {
 
@@ -237,7 +274,9 @@ function _postLinkFactory( isDirective: boolean ) {
         ownCtrl,
         isDirective,
         requiredCtrls
-      ) && ownCtrl[ afterContentInitMethod ]( requiredCtrls );
+      );
+
+      ownCtrl[ afterContentInitMethod ]( requiredCtrls );
 
     }
 
@@ -333,14 +372,14 @@ function _checkLifecycle( lifecycleHookMethod: string, ctrl, shouldThrow = true,
   const hasRequiredCtrls = Boolean( requiredCtrls.length );
 
   if ( shouldThrow && !hasLifecycleHookImplemented ) {
-    
-    const instanceCtorName = stringify(ctrl.constructor);    
+
+    const instanceCtorName = stringify( ctrl.constructor );
     throw Error( `@Directive/@Component ${instanceCtorName} must implement #${lifecycleHookMethod} method` );
-    
+
   }
-  
+
   if ( hasRequiredCtrls && hasLifecycleHookImplemented && method.length !== 1 ) {
-    
+
     throw Error( `
       @Directive/@Component #${lifecycleHookMethod} method is missing argument definition, which should be type of requires.
       ====
@@ -361,5 +400,36 @@ function _checkLifecycle( lifecycleHookMethod: string, ctrl, shouldThrow = true,
 // custom type guards
 export function isDirective( Type: any ): Type is DirectiveConfigStatic {
   return is( Type, 'selector' );
+}
+
+function _buildRequireFromInjectedDirectives( Type: any ): string[] {
+
+  const requireMetadataArr: RequireMetadata[] = Type[ REQUIRE_METADATA_KEY ];
+
+  return (requireMetadataArr)
+    .reduceRight( (
+      acc,
+      requireMetadata
+    )=> {
+
+      let [injectableDirectiveName] = Type.$inject.splice( requireMetadata.id, 1 ) as string[];
+      let prefix = '';
+
+      if ( requireMetadata.opt ) {
+        prefix += OPTIONAL_REQUIRE_SIGN;
+      }
+      if ( requireMetadata.parent ) {
+        prefix += PARENT_REQUIRE_SIGN;
+      }
+
+      acc.unshift( `${prefix}${injectableDirectiveName}` );
+
+      // @TODO this needs to be handled differently
+      requireMetadata.name = injectableDirectiveName;
+
+      return acc;
+
+    }, [] as string[] );
+
 }
 

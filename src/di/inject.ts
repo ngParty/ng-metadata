@@ -1,5 +1,5 @@
-import { provide } from './providers';
-import { InjectableToken } from "./injectable";
+import { provide } from '../providers';
+import { InjectableToken } from './injectable';
 
 /**
  *

@@ -1,6 +1,6 @@
 //import angular from './facade';
 import {hasInjectables, is} from './util';
-import { assign } from "./facade";
+import { assign } from "./facade/lang";
 
 //const assign = assignFactory();
 

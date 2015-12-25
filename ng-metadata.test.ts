@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import './test/host.spec';
 import './test/inject.spec';
 import './test/injectable.spec';
 import './test/util.spec';

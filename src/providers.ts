@@ -1,7 +1,7 @@
 import {makeSelector, getInjectableName} from './util';
 import {isDirective,DirectiveConfigStatic} from './directives';
 import {isPipe,PipeConfigStatic} from './pipe';
-import {isInjectable, InjectableServiceConfigStatic} from "./injectable";
+import {isInjectable, InjectableServiceConfigStatic} from "./di/injectable";
 
 export {makeDirective} from './directives';
 export {makePipe} from './pipe';

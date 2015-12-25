@@ -3,40 +3,26 @@ import {AfterContentInit} from '../src/life_cycle';
 import {Component,Directive,Output,Input,Attr,makeDirective} from '../src/directives';
 import {OnInit} from "../src/life_cycle";
 import {OnDestroy} from "../src/life_cycle";
+import {createScope,linkFnMocks} from '../src/testing/utils';
 
 describe( 'directives', function () {
 
   let scope;
   let element;
   let attrs;
+  let _invokeLink;
+  let _destroyLink;
 
   beforeEach( function () {
 
-    scope = {
-      _cb: [],
-      $on( event: string, callback: Function ){
-        this._cb.push( callback );
-      },
-      $destroy(){
-        this._cb.forEach( ( cb )=>cb() );
-      }
-    };
+    scope = createScope();
     element = {};
     attrs = {};
+    const linkMocks = linkFnMocks( scope, element, attrs );
+    _invokeLink = linkMocks.link;
+    _destroyLink = linkMocks.destroy;
 
   } );
-
-  function _destroyLink() {
-    scope.$destroy();
-  }
-
-  function _invokeLink( controllers, linkFn ) {
-
-    const instances = controllers.map( ( constructorFn )=>new constructorFn() );
-
-    linkFn( scope, element, attrs, instances );
-
-  }
 
   describe( 'makeDirective', function () {
 
