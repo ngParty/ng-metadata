@@ -11,7 +11,8 @@
     "test": "mocha ng-metadata.test.js",
     "test:live": "mocha ng-metadata.test.js -w",
     "commit": "git-cz",
-    "playground": "tsc -p playground -w & live-server --no-browser"
+    "playground": "tsc -p playground -w & live-server --no-browser",
+    "uglify": "uglifyjs test/host.spec.js --beautify --mangle --compress --output test/__uglifyTest.js"
   },
   "repository": {
     "type": "git",

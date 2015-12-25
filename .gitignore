@@ -13,6 +13,7 @@ npm-debug.log
 !src/globals.d.ts
 !playground/ng-metadata.legacy.d.ts
 typings
+test/__uglifyTest.js
 
 #################
 ## JetBrains
