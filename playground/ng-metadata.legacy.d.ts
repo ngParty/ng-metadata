@@ -34,6 +34,9 @@ declare module ngMetadata{
     pure?: boolean;
   }): ClassDecorator;
 
+  export function Optional(): ParameterDecorator;
+  export function Host(): ParameterDecorator;
+  export function Parent(): ParameterDecorator;
 
   interface InjectableServiceConfigStatic {
     _name?: string
