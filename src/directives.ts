@@ -59,7 +59,7 @@ export function Directive(
     }
     if ( Type[ REQUIRE_METADATA_KEY ] ) {
 
-      ddoInternal.require = ddoInternal.require.concat( _buildRequireFromInjectedDirectives(Type) );
+      ddoInternal.require = ddoInternal.require.concat( _buildRequireFromInjectedDirectives( Type ) );
 
     }
 
@@ -139,7 +139,7 @@ export function Component(
     }
     if ( Type[ REQUIRE_METADATA_KEY ] ) {
 
-      ddoInternal.require = ddoInternal.require.concat( _buildRequireFromInjectedDirectives(Type) );
+      ddoInternal.require = ddoInternal.require.concat( _buildRequireFromInjectedDirectives( Type ) );
 
     }
     if ( template ) {
@@ -230,7 +230,7 @@ function _decorateDirectiveType( Type, selector, legacy, ddoCreator: Function ) 
 
 function _postLinkFactory( Type: any, isDirective: boolean ): ng.IDirectiveLinkFn {
 
-  const requireMetadataArr: RequireMetadata[] = Type[REQUIRE_METADATA_KEY] || [];
+  const requireMetadataArr: RequireMetadata[] = Type[ REQUIRE_METADATA_KEY ] || [];
   //console.log( requireMetadata );
 
   return _postLink;
@@ -250,33 +250,36 @@ function _postLinkFactory( Type: any, isDirective: boolean ): ng.IDirectiveLinkF
 
     if ( requiredCtrls.length > 0 ) {
 
-      //console.log( ownCtrl );
+      if ( _checkLifecycle(
+          afterContentInitMethod,
+          ownCtrl,
+          true,
+          requiredCtrls
+        ) ) {
 
-      _checkLifecycle(
-        afterContentInitMethod,
-        ownCtrl,
-        true,
-        requiredCtrls
-      );
+        requireMetadataArr.forEach( ( reqMetadata, idx )=> {
 
-      requireMetadataArr.forEach( ( reqMetadata, idx )=> {
+          ownCtrl[ reqMetadata.name ] = requiredCtrls[ idx ];
 
-        ownCtrl[ reqMetadata.name ] = requiredCtrls[ idx ];
+        } );
 
-      } );
+        ownCtrl[ afterContentInitMethod ]( requiredCtrls );
 
-      ownCtrl[ afterContentInitMethod ]( requiredCtrls );
+      }
 
     } else {
 
-      _checkLifecycle(
-        afterContentInitMethod,
-        ownCtrl,
-        isDirective,
-        requiredCtrls
-      );
+      if ( _checkLifecycle(
+          afterContentInitMethod,
+          ownCtrl,
+          isDirective,
+          requiredCtrls
+        ) ) {
 
-      ownCtrl[ afterContentInitMethod ]( requiredCtrls );
+        ownCtrl[ afterContentInitMethod ]( requiredCtrls );
+
+      }
+
 
     }
 
