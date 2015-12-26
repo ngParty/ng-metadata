@@ -9,6 +9,9 @@ import './test/pipe.spec';
 import './test/life_cycle.spec';
 import './test/providers.spec';
 
+import './test/di/decorators.spec';
+import './test/util/decorators.spec';
+
 describe( 'ng-metadata', ()=> {
 
 } );
