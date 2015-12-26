@@ -1,24 +1,5 @@
 import {global, Type, isFunction, isString, isPresent} from '../facade/lang';
-
-
-/**
- * @internal
- * @private
- * @type {string}
- */
-export const CLASS_META_KEY = '__mAnnotations';
-/**
- * @internal
- * @private
- * @type {string}
- */
-export const PARAM_META_KEY = '__mParameters';
-/**
- * @internal
- * @private
- * @type {string}
- */
-export const PROP_META_KEY = '__mPropMetadata';
+import {reflector} from '../reflection/reflection';
 
 /**
  * An interface implemented by all Angular type decorators,
@@ -45,41 +26,6 @@ export interface TypeDecorator {
 
 }
 
-function extract( metaKey: string ) {
-
-  return function ( cls: any ): any {
-
-    if ( isFunction( cls ) && cls.hasOwnProperty( metaKey ) ) {
-      // it is a decorator, extract annotation
-      return cls[ metaKey ];
-    }
-
-  }
-
-}
-export function extractAnnotation( cls: any ): any {
-
-  return extract( CLASS_META_KEY )(cls);
-
-}
-
-export function extractParameter( cls: any ): any {
-
-  return extract( PARAM_META_KEY )(cls);
-
-}
-export function extractProperty( cls: any ): any {
-
-  return extract( PROP_META_KEY )(cls);
-
-}
-
-// This will be needed when we will used Reflect APIs
-/*const Reflect = global.Reflect;
- if (!(Reflect && Reflect.getMetadata)) {
- throw 'reflect-metadata shim is required when using class decorators';
- }*/
-
 
 export function makeDecorator(
   AnnotationCls: any,
@@ -103,21 +49,15 @@ export function makeDecorator(
 
       function TypeDecorator( cls ): TypeDecorator {
 
-        //var annotations = Reflect.getOwnMetadata('annotations', cls);
-        var annotations = cls[ CLASS_META_KEY ];
+        let annotations = reflector.annotations(cls);
 
         annotations = annotations || [];
         annotations.push( annotationInstance );
-
-        //Reflect.defineMetadata('annotations', annotations, cls);
-        cls[ CLASS_META_KEY ] = annotations;
+        reflector.registerAnnotation(annotations,cls);
 
         return cls;
 
       }
-
-      //TypeDecorator.annotations = chainAnnotation;
-      //TypeDecorator.Class = Class;
 
       if ( chainFn ) {
         chainFn( TypeDecorator );
@@ -168,8 +108,7 @@ export function makeParamDecorator( annotationCls, overrideParamDecorator: Funct
 
       }
 
-      //var parameters: any[][] = Reflect.getMetadata('parameters', cls);
-      var parameters: any[][] = cls[ PARAM_META_KEY ];
+      let parameters: any[][] = reflector.parameters(cls);
       parameters = parameters || [];
 
       // there might be gaps if some in between parameters do not have annotations.
@@ -180,11 +119,10 @@ export function makeParamDecorator( annotationCls, overrideParamDecorator: Funct
 
       parameters[ index ] = parameters[ index ] || [];
 
-      var annotationsForParam: any[] = parameters[ index ];
+      const annotationsForParam: any[] = parameters[ index ];
       annotationsForParam.push( annotationInstance );
 
-      //Reflect.defineMetadata('parameters', parameters, cls);
-      cls[ PARAM_META_KEY ] = parameters;
+      reflector.registerParameters(parameters,cls);
 
       return cls;
 
@@ -213,18 +151,14 @@ export function makePropDecorator( decoratorCls ): any {
 
       return function PropDecorator( target: any, name: string ) {
 
-
-        //var meta = Reflect.getOwnMetadata('propMetadata', target.constructor);
-        var meta = target.constructor[ PROP_META_KEY ];
+        let meta = reflector.propMetadata(target);
 
         meta = meta || {};
         meta[ name ] = meta[ name ] || [];
         meta[ name ].unshift( decoratorInstance );
 
+        reflector.registerPropMetadata(meta,target);
 
-
-        //Reflect.defineMetadata('propMetadata', meta, target.constructor);
-        target.constructor[ PROP_META_KEY ] = meta;
 
       };
 

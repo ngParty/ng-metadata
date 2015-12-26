@@ -15,10 +15,7 @@ import {
   SelfMetadata,
   SkipSelfMetadata
 } from '../../src/di/metadata';
-import {
-  CLASS_META_KEY,
-  PARAM_META_KEY
-} from '../../src/util/decorators';
+import { reflector } from '../../src/reflection/reflection';
 import {isArray,isBlank,isPresent} from '../../src/facade/lang'
 
 describe( 'di/decorators', () => {
@@ -31,7 +28,7 @@ describe( 'di/decorators', () => {
       class Test {
       }
 
-      expect( Array.isArray( Test[ CLASS_META_KEY ] ) ).to.equal( true );
+      expect( Array.isArray( reflector.annotations( Test ) ) ).to.equal( true );
 
     } );
 
@@ -55,21 +52,21 @@ describe( 'di/decorators', () => {
     } );
     it( 'should create param metadata on class', () => {
 
-      expect( Array.isArray( cls[ PARAM_META_KEY ] ) ).to.equal( true );
+      expect( Array.isArray( reflector.parameters(cls) ) ).to.equal( true );
 
     } );
     it( 'should create 2 dimensional param metadata', () => {
 
-      const [paramOne,paramTwo] = cls[ PARAM_META_KEY ];
+      const [paramOne,paramTwo] = reflector.parameters(cls);
 
-      expect( cls[ PARAM_META_KEY ].length ).to.equal( 2 );
+      expect( reflector.parameters(cls).length ).to.equal( 2 );
       expect( paramOne.length ).to.equal( 1 );
       expect( paramTwo.length ).to.equal( 2 );
 
     } );
     it( 'should put to proper indexes proper paramDecorator instance', () => {
 
-      const [paramOne,paramTwo] = cls[ PARAM_META_KEY ];
+      const [paramOne,paramTwo] = reflector.parameters(cls);
 
       expect( paramOne[ 0 ] instanceof InjectMetadata ).to.equal( true );
       expect( paramTwo[ 0 ] instanceof InjectMetadata ).to.equal( true );
@@ -104,7 +101,7 @@ describe( 'di/decorators', () => {
 
     it( 'should not add instance to PARAM_META_KEY if used on non constructor', () => {
 
-      expect( isBlank( cls[ PARAM_META_KEY ] ) ).to.equal( true );
+      expect( isBlank( reflector.parameters(cls) ) ).to.equal( true );
 
     } );
 
@@ -143,8 +140,8 @@ describe( 'di/decorators', () => {
 
       const cls = TestBothInjectProvider;
 
-      expect( isBlank( cls[ PARAM_META_KEY ] ) ).to.equal( false );
-      expect( cls[ PARAM_META_KEY ][0][0] instanceof InjectMetadata ).to.equal( true );
+      expect( isBlank( reflector.parameters(cls) ) ).to.equal( false );
+      expect( reflector.parameters(cls)[0][0] instanceof InjectMetadata ).to.equal( true );
       expect( isBlank( cls.$inject ) ).to.equal( true );
 
       expect( isArray( cls.prototype.$get.$inject ) ).to.equal( true );

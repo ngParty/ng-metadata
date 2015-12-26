@@ -11,6 +11,7 @@ import './test/providers.spec';
 
 import './test/di/decorators.spec';
 import './test/util/decorators.spec';
+import './test/reflection/reflection.spec';
 
 describe( 'ng-metadata', ()=> {
 
