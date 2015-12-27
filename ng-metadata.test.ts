@@ -10,6 +10,7 @@ import './test/life_cycle.spec';
 import './test/providers.spec';
 
 import './test/di/decorators.spec';
+import './test/di/povider.spec';
 import './test/util/decorators.spec';
 import './test/reflection/reflection.spec';
 

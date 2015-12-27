@@ -41,7 +41,7 @@ export function isBlank( obj: any ): boolean {
   return obj === undefined || obj === null;
 }
 
-export function isString( obj: any ): boolean {
+export function isString( obj: any ): obj is String {
   return typeof obj === "string";
 }
 
@@ -106,3 +106,63 @@ export function assign( destination: any, ...sources: any[] ): any {
   return envAssign( destination, ...sources );
 
 }
+
+const ATTRS_BOUNDARIES = /\[|\]/g;
+const COMPONENT_SELECTOR = /^\[?[\w|-]*\]?$/;
+const SKEWER_CASE = /-(\w)/g;
+
+export function resolveDirectiveNameFromSelector( selector: string ): string {
+
+  if ( !selector.match( COMPONENT_SELECTOR ) ) {
+    throw new Error(
+      `Only selectors matching element names or base attributes are supported, got: ${selector}`
+    );
+  }
+
+  return selector
+    .trim()
+    .replace(
+      ATTRS_BOUNDARIES,
+      ''
+    )
+    .replace(
+      SKEWER_CASE,
+      ( all, letter ) => letter.toUpperCase()
+    )
+}
+
+export function getTypeName(type): string{
+
+  const typeName = _getFuncName(type);
+  return firstToLowerCase( typeName );
+
+}
+
+/**
+ *
+ * @param {Function}  func
+ * @returns {string}
+ * @private
+ */
+function _getFuncName( func: Function ): string {
+
+  const parsedFnStatement = /function\s*([^\s(]+)/.exec(stringify(func));
+  const [,name=''] = parsedFnStatement || [];
+
+  return name || stringify(func);
+
+}
+
+export function controllerKey( name: string ): string {
+  return '$' + name + 'Controller';
+}
+export function hasCtorInjectables( Type ): boolean {
+  return (Array.isArray( Type.$inject ) && Type.$inject.length !== 0);
+}
+export function firstToLowerCase( value: string ): string {
+  return value.charAt( 0 ).toLocaleLowerCase() + value.substring( 1 );
+}
+export function firstToUpperCase( value: string ): string {
+  return value.charAt( 0 ).toUpperCase() + value.substring( 1 );
+}
+
