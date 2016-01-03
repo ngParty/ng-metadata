@@ -1,4 +1,4 @@
-import { assign } from 'facade/lang';
+import { assign } from './facade/lang';
 import {REQUIRE_METADATA_KEY,RequireMetadata} from './host';
 
 
