@@ -47,4 +47,16 @@ export function linkFnMocks( scope, element, attrs ) {
 
 }
 
+/**
+ * @internal
+ * @returns {any}
+ */
+export function getNg1InjectorMock(): ng.auto.IInjectorService {
+  return {
+    instantiate( classFactory ){
+      return new classFactory();
+    }
+  } as ng.auto.IInjectorService;
+}
+
 
