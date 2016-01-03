@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Inject } from '../src/di/inject';
+import { Inject } from '../src/inject';
 import { Pipe } from '../src/pipe';
 
 

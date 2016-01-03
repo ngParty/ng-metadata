@@ -1,9 +1,9 @@
 import { expect } from 'chai';
 import {DDO_METADATA_KEY} from '../src/directives';
-import { Optional } from '../src/di/optional';
-import { Host,REQUIRE_METADATA_KEY } from '../src/di/host';
-import { Parent } from '../src/di/parent';
-import { Inject } from '../src/di/inject';
+import { Optional } from '../src/optional';
+import { Host,REQUIRE_METADATA_KEY } from '../src/host';
+import { Parent } from '../src/parent';
+import { Inject } from '../src/inject';
 import { Component, Directive } from '../src/directives';
 import {linkFnMocks,createScope} from "../src/testing/utils";
 import {AfterContentInit} from "../src/life_cycle";

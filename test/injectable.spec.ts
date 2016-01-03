@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { Injectable, INJECTABLE_NAME_TOKEN } from '../src/di/injectable';
+import { Injectable, INJECTABLE_NAME_TOKEN } from '../src/injectable';
 
 describe( '@Injectable', ()=> {
 

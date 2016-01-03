@@ -1,4 +1,4 @@
-import { getInjectableName, is } from '../util';
+import { getInjectableName, is } from 'util';
 
 /**
  * @internal

@@ -1,6 +1,6 @@
 import { assign,noop } from './facade/lang';
 import {hasInjectables,makeSelector,firstLowerCase,is,stringify} from './util';
-import {REQUIRE_METADATA_KEY,RequireMetadata,OPTIONAL_REQUIRE_SIGN,PARENT_REQUIRE_SIGN} from './di/host';
+import {REQUIRE_METADATA_KEY,RequireMetadata,OPTIONAL_REQUIRE_SIGN,PARENT_REQUIRE_SIGN} from './host';
 import {getLifecycleMethod,LifecycleHooks} from './life_cycle';
 
 type Binding = {[key:string]:string};

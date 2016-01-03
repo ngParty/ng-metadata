@@ -1,4 +1,4 @@
-import { provide } from '../providers';
+import { provide } from 'providers';
 import { InjectableToken } from './injectable';
 
 /**

@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {Inject} from '../src/di/inject';
+import {Inject} from '../src/inject';
 import {Pipe,makePipe,isPipe} from '../src/pipe';
 
 describe( '@Pipe', function () {
