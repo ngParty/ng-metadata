@@ -18,6 +18,7 @@ import './test/facade/lang.spec';
 import './test/facade/collections.spec';
 import './test/linker/pipe_resolver.spec';
 import './test/pipes/pipe_provider.spec';
+import './test/linker/directive_lifecycles_reflector.spec';
 
 describe( 'ng-metadata', ()=> {
 } );
