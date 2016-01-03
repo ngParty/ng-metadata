@@ -149,10 +149,17 @@ function _getFuncName( func: Function ): string {
   const parsedFnStatement = /function\s*([^\s(]+)/.exec(stringify(func));
   const [,name=''] = parsedFnStatement || [];
 
+  // if Function.name doesn't exist exec will find match otherwise return name property
   return name || stringify(func);
 
 }
 
+/**
+ * controller instance of directive is exposed on jqLiteElement.data()
+ * under the name: `$` + Ctor + `Controller`
+ * @param name
+ * @returns {string}
+ */
 export function controllerKey( name: string ): string {
   return '$' + name + 'Controller';
 }
@@ -160,9 +167,60 @@ export function hasCtorInjectables( Type ): boolean {
   return (Array.isArray( Type.$inject ) && Type.$inject.length !== 0);
 }
 export function firstToLowerCase( value: string ): string {
-  return value.charAt( 0 ).toLocaleLowerCase() + value.substring( 1 );
+  return _firstTo(value,String.prototype.toLowerCase);
 }
 export function firstToUpperCase( value: string ): string {
-  return value.charAt( 0 ).toUpperCase() + value.substring( 1 );
+  return _firstTo(value,String.prototype.toUpperCase);
+}
+function _firstTo( value: string, cb: Function ): string {
+  return cb.call( value.charAt( 0 ) ) + value.substring( 1 );
 }
 
+
+export function find(arr, predicate, ctx?) {
+  if ( isFunction( Array.prototype[ 'find' ] ) ) {
+    return arr.find( predicate, ctx );
+  }
+
+  ctx = ctx || this;
+  var length = arr.length;
+  var i;
+
+  if (!isFunction(predicate)) {
+    throw new TypeError(`${predicate} is not a function`);
+  }
+
+  for (i = 0; i < length; i++) {
+    if (predicate.call(ctx, arr[i], i, arr)) {
+      return arr[i];
+    }
+  }
+
+  return undefined;
+
+}
+
+export function findIndex(arr, predicate, ctx?) {
+  if (isFunction(Array.prototype['findIndex'])) {
+    return arr.findIndex(predicate, ctx);
+  }
+
+  if (!isFunction(predicate)) {
+    throw new TypeError('predicate must be a function');
+  }
+
+  var list = Object(arr);
+  var len = list.length;
+
+  if (len === 0) {
+    return -1;
+  }
+
+  for (var i = 0; i < len; i++) {
+    if (predicate.call(ctx, list[i], i, list)) {
+      return i;
+    }
+  }
+
+  return -1;
+}

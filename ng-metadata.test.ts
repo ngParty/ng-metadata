@@ -13,6 +13,7 @@ import './test/di/decorators.spec';
 import './test/di/povider.spec';
 import './test/util/decorators.spec';
 import './test/reflection/reflection.spec';
+import './test/facade/lang.spec';
 
 describe( 'ng-metadata', ()=> {
 
