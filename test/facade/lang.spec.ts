@@ -5,12 +5,10 @@ import {
   stringify,
   hasCtorInjectables,
   firstToLowerCase,
-  firstToUpperCase,
-  find,
-  findIndex
+  firstToUpperCase
 } from '../../src/facade/lang';
 
-describe.only( `facade`, ()=> {
+describe( `facade/lang`, ()=> {
 
   describe( 'makeSelector', ()=> {
 
@@ -135,30 +133,6 @@ describe.only( `facade`, ()=> {
     it( 'should return string with first char uppercase',  ()=> {
 
       expect( firstToUpperCase( 'jediMaster' ) ).to.equal( 'JediMaster' );
-
-    } );
-
-  } );
-
-  describe( `ES6 Array ponyfills`, ()=> {
-
-    it( `should find array item or undefined if not found`, ()=> {
-
-      let arr:any[] = [ 1, 2, 3, 4, 5 ];
-      let found = find( arr, ( el )=> el === 2 );
-      expect( found ).equal( 2 );
-
-      arr = [{name: 'adam'}, {name: 'eve'}, {name: 'john'}];
-      found = find(arr, (el)=>el.name === 'eve');
-      expect(found).to.deep.equal({name: 'eve'});
-
-    } );
-    it( `should find array item position or -1 if not found`, ()=> {
-
-      const arr = [10, 20, 30, 40];
-
-      expect( findIndex( arr, ( x )=>x === 30 ) ).to.equal( 2 );
-      expect( findIndex( arr, ( x )=>x === 'noop' ) ).to.equal( -1 );
 
     } );
 

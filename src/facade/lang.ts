@@ -13,7 +13,7 @@ var _global: BrowserNodeGlobal = globalScope;
 
 export {_global as global};
 
-export var Type = Function;
+export const Type = Function;
 
 /**
  * Runtime representation a type that a Component or other object is instances of.
@@ -174,53 +174,4 @@ export function firstToUpperCase( value: string ): string {
 }
 function _firstTo( value: string, cb: Function ): string {
   return cb.call( value.charAt( 0 ) ) + value.substring( 1 );
-}
-
-
-export function find(arr, predicate, ctx?) {
-  if ( isFunction( Array.prototype[ 'find' ] ) ) {
-    return arr.find( predicate, ctx );
-  }
-
-  ctx = ctx || this;
-  var length = arr.length;
-  var i;
-
-  if (!isFunction(predicate)) {
-    throw new TypeError(`${predicate} is not a function`);
-  }
-
-  for (i = 0; i < length; i++) {
-    if (predicate.call(ctx, arr[i], i, arr)) {
-      return arr[i];
-    }
-  }
-
-  return undefined;
-
-}
-
-export function findIndex(arr, predicate, ctx?) {
-  if (isFunction(Array.prototype['findIndex'])) {
-    return arr.findIndex(predicate, ctx);
-  }
-
-  if (!isFunction(predicate)) {
-    throw new TypeError('predicate must be a function');
-  }
-
-  var list = Object(arr);
-  var len = list.length;
-
-  if (len === 0) {
-    return -1;
-  }
-
-  for (var i = 0; i < len; i++) {
-    if (predicate.call(ctx, list[i], i, list)) {
-      return i;
-    }
-  }
-
-  return -1;
 }
