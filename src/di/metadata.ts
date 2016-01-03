@@ -121,8 +121,7 @@ export class OptionalMetadata {
  * ```
  */
 @CONST()
-export class InjectableMetadata {
-}
+export class InjectableMetadata {}
 
 /**
  * Specifies that an {@link Injector} should retrieve a dependency only from itself.

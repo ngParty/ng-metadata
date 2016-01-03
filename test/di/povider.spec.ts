@@ -2,13 +2,14 @@ import {expect} from 'chai';
 import {provide,provideResolver, _getInjectStringTokens} from "../../src/di/provider";
 import {Inject,Injectable} from "../../src/di/decorators";
 import {InjectMetadata,OptionalMetadata,HostMetadata} from "../../src/di/metadata";
-import {Component,Directive,Pipe} from "../../src/directives/decorators";
+import {Component,Directive} from "../../src/directives/decorators";
+import {Pipe} from '../../src/pipes/decorators'
 
 describe( `di/provider`, ()=> {
 
   describe( `public #provide`, ()=> {
 
-    it( `should return string name for Angular registry and add $inject prop if needed (string)`, ()=> {
+    it( `should return string name and Ctor for Angular registry and add $inject prop if needed (string)`, ()=> {
 
       class Foo{
         constructor(@Inject('$http') private $http){
@@ -16,13 +17,13 @@ describe( `di/provider`, ()=> {
         }
       }
       const actual = provide('fooToken',{useClass:Foo});
-      const expected = 'fooToken';
+      const expected = [ 'fooToken', Foo ];
 
-      expect(actual).to.equal(expected);
+      expect(actual).to.deep.equal(expected);
       expect(Foo.$inject).to.deep.equal(['$http']);
 
     } );
-    it( `should return string name for Angular registry and add $inject prop if needed (Class)`, ()=> {
+    it( `should return string name and Ctor for Angular registry and add $inject prop if needed (Class)`, ()=> {
 
       class MyService{}
 
@@ -30,13 +31,13 @@ describe( `di/provider`, ()=> {
         constructor(@Inject(MyService) private mySvc){}
       }
       const actual = provide(Foo);
-      const expected = 'foo';
+      const expected = ['foo', Foo];
 
       expect(actual).to.equal(expected);
       expect(Foo.$inject).to.deep.equal(['myService']);
 
     } );
-    it( `should return string name for Angular registry and add $inject prop if needed (Pipe)`, ()=> {
+    it( `should return string name and filter factory for Angular registry and add $inject prop if needed (Pipe)`, ()=> {
 
       class MyService{}
 
@@ -47,13 +48,13 @@ describe( `di/provider`, ()=> {
         constructor(@Inject(MyService) private mySvc){}
       }
       const actual = provide(FooPipe);
-      const expected = 'fooYo';
+      const expected = ['fooYo',function pipeFactory(){ return function pipe(){}}];
 
       expect(actual).to.equal(expected);
       expect(FooPipe.$inject).to.deep.equal(['myService']);
 
     } );
-    it( `should return string name for Angular registry and add $inject prop if needed (Directive)`, ()=> {
+    it( `should return string name and directiveFactory for Angular registry and add $inject prop if needed (Directive)`, ()=> {
 
       class MyService{}
 
@@ -64,13 +65,13 @@ describe( `di/provider`, ()=> {
         constructor(@Inject(MyService) private mySvc){}
       }
       const actual = provide(FooDirective);
-      const expected = 'myFoo';
+      const expected = ['myFoo',function directiveFactory(){return {}}];
 
       expect(actual).to.equal(expected);
       expect(FooDirective.$inject).to.deep.equal(['myService']);
 
     } );
-    it( `should return string name for Angular registry and add $inject prop if needed (Component)`, ()=> {
+    it( `should return string name and directiveFactory for Angular registry and add $inject prop if needed (Component)`, ()=> {
 
       class MyService{}
 
@@ -82,7 +83,7 @@ describe( `di/provider`, ()=> {
         constructor(@Inject(MyService) private mySvc,@Inject('$element') private $element){}
       }
       const actual = provide(FooComponent);
-      const expected = 'myFoo';
+      const expected = ['myFoo',function directiveFactory(){return {}}];
 
       expect(actual).to.equal(expected);
       expect(FooComponent.$inject).to.deep.equal(['myService','$element']);

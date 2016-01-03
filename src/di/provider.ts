@@ -5,7 +5,7 @@ import {isString} from "../facade/lang";
 import {isArray} from "../facade/lang";
 import {isType} from "../facade/lang";
 import {getTypeName} from "../facade/lang";
-import {PipeMetadata} from "../directives/metadata_directives";
+import {PipeMetadata} from "../pipes/metadata";
 import {DirectiveMetadata} from "../directives/metadata_directives";
 import {InjectableMetadata} from "./metadata";
 import {resolveDirectiveNameFromSelector} from "../facade/lang";
@@ -39,6 +39,13 @@ export function provide( type: Type | string, {useClass}:{useClass?:Type} = {} )
 
 }
 
+/**
+ * creates $inject array for @Inject only annotations
+ * @param parameters
+ * @returns {string[]}
+ * @private
+ * @internal
+ */
 export function _getInjectStringTokens( parameters: any[][] = [] ): string[] {
 
   return parameters
