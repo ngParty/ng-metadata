@@ -7,7 +7,7 @@ import {Pipe} from '../../src/pipes/decorators'
 
 describe( `di/provider`, ()=> {
 
-  describe( `public #provide`, ()=> {
+  describe.skip( `public #provide`, ()=> {
 
     it( `should return string name and Ctor for Angular registry and add $inject prop if needed (string)`, ()=> {
 

@@ -5,7 +5,7 @@ import {Pipe} from "../../src/pipes/decorators";
 import {pipeProvider} from "../../src/pipes/pipe_provider";
 import {PipeTransform} from "../../src/pipes/pipe_interfaces";
 
-  describe.only( `pipes/pipeProvider`, ()=> {
+  describe( `pipes/pipeProvider`, ()=> {
 
     const $injector = getNg1InjectorMock();
 

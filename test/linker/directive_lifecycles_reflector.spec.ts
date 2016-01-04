@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {hasLifecycleHook} from "../../src/linker/directive_lifecycles_reflector";
 import {LifecycleHooks} from "../../src/linker/directive_lifecycle_interfaces";
 
-describe.only( `linker/lifecycles_reflector`, ()=> {
+describe( `linker/lifecycles_reflector`, ()=> {
 
   it( `should properly check if class implements one of life cycle hooks`, ()=> {
 
