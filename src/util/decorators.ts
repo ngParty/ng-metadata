@@ -151,13 +151,13 @@ export function makePropDecorator( decoratorCls ): any {
 
       return function PropDecorator( target: any, name: string ) {
 
-        let meta = reflector.propMetadata(target);
+        let meta = reflector.propMetadata(target.constructor);
 
         meta = meta || {};
         meta[ name ] = meta[ name ] || [];
         meta[ name ].unshift( decoratorInstance );
 
-        reflector.registerPropMetadata(meta,target);
+        reflector.registerPropMetadata(meta,target.constructor);
 
 
       };

@@ -58,8 +58,8 @@ export class Reflector {
   }
 
   registerPropMetadata( propMetadata, type: Type ): void {
-    //Reflect.defineMetadata('propMetadata', meta, target.constructor);
-    type.constructor[ PROP_META_KEY ] = propMetadata;
+    //Reflect.defineMetadata('propMetadata', meta, target);
+    type[ PROP_META_KEY ] = propMetadata;
   }
 
 }
