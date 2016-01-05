@@ -1,11 +1,11 @@
-import {Injectable} from '../di/decorators';
-import {Type, isPresent, isBlank, stringify} from '../facade/lang';
+import {Type, isPresent, isBlank, stringify, assign} from '../facade/lang';
 import {StringMapWrapper, ListWrapper} from "../facade/collections";
-
+import {reflector} from '../reflection/reflection';
 import {
   DirectiveMetadata,
   ComponentMetadata,
   InputMetadata,
+  AttrMetadata,
   OutputMetadata,
   HostBindingMetadata,
   HostListenerMetadata
@@ -16,15 +16,62 @@ import {
   ContentChildMetadata,
   ViewChildMetadata
 } from '../directives/metadata_di';
-import {reflector} from '../reflection/reflection';
-import {assign} from "../facade/lang";
-import {AttrMetadata} from "../directives/metadata_directives";
-
+import {InjectMetadata,HostMetadata,SelfMetadata,SkipSelfMetadata,OptionalMetadata} from "../di/metadata";
 
 type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
+type ParamMetaInst = HostMetadata | InjectMetadata | SelfMetadata | SkipSelfMetadata;
+type StringMap = {[key:string]:string};
 
-function _isDirectiveMetadata(type: any): boolean {
+function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;
+}
+
+function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[] ): StringMap {
+
+  if ( paramsMeta.length < 2 ) {
+    return;
+  }
+
+  const injectInst = ListWrapper.find( paramsMeta, param=>param instanceof InjectMetadata ) as InjectMetadata;
+  const isHost = ListWrapper.find( paramsMeta, param=>param instanceof HostMetadata ) !== -1;
+
+  if ( !(isHost || injectInst) ) {
+    return;
+  }
+
+  if ( !injectInst.token ) {
+    throw new Error( 'no Directive instance name provided within @Inject()' );
+  }
+
+  const isOptional = ListWrapper.findIndex( paramsMeta, param=>param instanceof OptionalMetadata ) !== -1;
+  const isSelf = ListWrapper.findIndex( paramsMeta, param=>param instanceof SelfMetadata ) !== -1;
+  const isSkipSelf = ListWrapper.findIndex( paramsMeta, param=>param instanceof SkipSelfMetadata ) !== -1;
+
+  if ( isSelf && isSkipSelf ) {
+    throw new Error( `you cannot provide both @Self() and @SkipSelf() for @Inject(${injectInst.token})` );
+  }
+
+  let locateType = '';
+  let optionalType = isOptional
+    ? '?'
+    : '';
+  if ( isHost ) {
+    locateType = '^';
+  }
+  if ( isSelf ) {
+    locateType = '';
+  }
+  if ( isSkipSelf ) {
+    locateType = '^^';
+  }
+
+  const requireExpressionPrefix = `${optionalType}${locateType}`;
+  const directiveName = injectInst.token;
+
+  return {
+    [directiveName]: `${ requireExpressionPrefix }${ directiveName }`
+  };
+
 }
 
 /**
@@ -34,25 +81,78 @@ export class DirectiveResolver {
   /**
    * Return {@link DirectiveMetadata} for a given `Type`.
    */
-  resolve(type: Type): DirectiveMetadata {
+  resolve( type: Type ): DirectiveMetadata {
 
-    const typeMetadata = reflector.annotations(type);
+    const metadata: DirectiveMetadata = this._getDirectiveMeta( type );
 
-    if (isPresent(typeMetadata)) {
+    const propertyMetadata: {[key: string]: PropMetaInst[]} = reflector.propMetadata( type );
 
-      const metadata: DirectiveMetadata = ListWrapper.find(typeMetadata, _isDirectiveMetadata);
+    return this._mergeWithPropertyMetadata( metadata, propertyMetadata );
 
-      if (isPresent(metadata)) {
+  }
 
-        const propertyMetadata: {[key: string]: PropMetaInst[]} = reflector.propMetadata(type);
+  /**
+   * transform parameter annotations to required directives map so we can use it
+   * for DDO creation
+   *
+   * map consist of :
+   *  - key == name of directive
+   *  - value == Angular 1 require expression
+   *
+   * @param {Type} type
+   * @returns {StringMap}
+   */
+  getRequiredDirectivesMap( type: Type ): StringMap {
 
-        return this._mergeWithPropertyMetadata(metadata, propertyMetadata);
+    const metadata: DirectiveMetadata = this._getDirectiveMeta( type );
+
+    const paramMetadata = reflector.parameters( type );
+
+    if ( isPresent( paramMetadata ) ) {
+
+      return paramMetadata
+        .reduce( ( acc, paramMetaArr )=> {
+
+          const requireExp = _transformInjectedDirectivesMeta( paramMetaArr );
+          if ( isPresent( requireExp ) ) {
+            assign( acc, requireExp );
+          }
+
+          return acc;
+
+        }, {} as StringMap );
+
+    }
+
+    return {} as StringMap;
+
+  }
+
+  /**
+   *
+   * @param type
+   * @returns {DirectiveMetadata}
+   * @throws Error
+   * @private
+   */
+  private _getDirectiveMeta( type: Type ): DirectiveMetadata {
+
+    const typeMetadata = reflector.annotations( type );
+
+    if ( isPresent( typeMetadata ) ) {
+
+      const metadata: DirectiveMetadata = ListWrapper.find( typeMetadata, _isDirectiveMetadata );
+
+      if ( isPresent( metadata ) ) {
+
+        return metadata;
 
       }
 
     }
 
-    throw new Error(`No Directive annotation found on ${stringify(type)}`);
+    throw new Error( `No Directive annotation found on ${stringify( type )}` );
+
   }
 
   private _mergeWithPropertyMetadata(
@@ -70,76 +170,76 @@ export class DirectiveResolver {
 
       metadata.forEach( propMetaInst => {
 
-        if (propMetaInst instanceof InputMetadata) {
+        if ( propMetaInst instanceof InputMetadata ) {
 
-          if (isPresent(propMetaInst.bindingPropertyName)) {
-            inputs.push(`${propName}: ${propMetaInst.bindingPropertyName}`);
+          if ( isPresent( propMetaInst.bindingPropertyName ) ) {
+            inputs.push( `${propName}: ${propMetaInst.bindingPropertyName}` );
           } else {
-            inputs.push(propName);
+            inputs.push( propName );
           }
 
         }
 
-        if (propMetaInst instanceof AttrMetadata) {
+        if ( propMetaInst instanceof AttrMetadata ) {
 
-          if (isPresent(propMetaInst.bindingPropertyName)) {
-            attrs.push(`${propName}: ${propMetaInst.bindingPropertyName}`);
+          if ( isPresent( propMetaInst.bindingPropertyName ) ) {
+            attrs.push( `${propName}: ${propMetaInst.bindingPropertyName}` );
           } else {
-            attrs.push(propName);
+            attrs.push( propName );
           }
 
         }
 
-        if (propMetaInst instanceof OutputMetadata) {
+        if ( propMetaInst instanceof OutputMetadata ) {
 
-          if (isPresent(propMetaInst.bindingPropertyName)) {
-            outputs.push(`${propName}: ${propMetaInst.bindingPropertyName}`);
+          if ( isPresent( propMetaInst.bindingPropertyName ) ) {
+            outputs.push( `${propName}: ${propMetaInst.bindingPropertyName}` );
           } else {
-            outputs.push(propName);
+            outputs.push( propName );
           }
 
         }
 
-        if (propMetaInst instanceof HostBindingMetadata) {
+        if ( propMetaInst instanceof HostBindingMetadata ) {
 
-          if (isPresent(propMetaInst.hostPropertyName)) {
-            host[`[${propMetaInst.hostPropertyName}]`] = propName;
+          if ( isPresent( propMetaInst.hostPropertyName ) ) {
+            host[ `[${propMetaInst.hostPropertyName}]` ] = propName;
           } else {
-            host[`[${propName}]`] = propName;
+            host[ `[${propName}]` ] = propName;
           }
 
         }
 
-        if (propMetaInst instanceof HostListenerMetadata) {
+        if ( propMetaInst instanceof HostListenerMetadata ) {
 
           const args = isPresent( propMetaInst.args )
             ? propMetaInst.args.join( ', ' )
             : '';
-          host[`(${propMetaInst.eventName})`] = `${propName}(${args})`;
+          host[ `(${propMetaInst.eventName})` ] = `${propName}(${args})`;
 
         }
 
-        if (propMetaInst instanceof ContentChildrenMetadata) {
-          queries[propName] = propMetaInst;
+        if ( propMetaInst instanceof ContentChildrenMetadata ) {
+          queries[ propName ] = propMetaInst;
         }
 
-        if (propMetaInst instanceof ViewChildrenMetadata) {
-          queries[propName] = propMetaInst;
+        if ( propMetaInst instanceof ViewChildrenMetadata ) {
+          queries[ propName ] = propMetaInst;
         }
 
-        if (propMetaInst instanceof ContentChildMetadata) {
-          queries[propName] = propMetaInst;
+        if ( propMetaInst instanceof ContentChildMetadata ) {
+          queries[ propName ] = propMetaInst;
         }
 
-        if (propMetaInst instanceof ViewChildMetadata) {
-          queries[propName] = propMetaInst;
+        if ( propMetaInst instanceof ViewChildMetadata ) {
+          queries[ propName ] = propMetaInst;
         }
 
-      });
+      } );
 
-    });
+    } );
 
-    return this._merge(directiveMetadata, inputs, attrs, outputs, host, queries);
+    return this._merge( directiveMetadata, inputs, attrs, outputs, host, queries );
 
   }
 
@@ -178,7 +278,7 @@ export class DirectiveResolver {
       legacy: dm.legacy
     };
 
-    if (dm instanceof ComponentMetadata) {
+    if ( dm instanceof ComponentMetadata ) {
 
       const componentSettings = assign(
         {},
@@ -188,11 +288,11 @@ export class DirectiveResolver {
           templateUrl: dm.templateUrl
         } );
 
-      return new ComponentMetadata(componentSettings);
+      return new ComponentMetadata( componentSettings );
 
     } else {
 
-      return new DirectiveMetadata(directiveSettings);
+      return new DirectiveMetadata( directiveSettings );
 
     }
 
