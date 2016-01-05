@@ -41,6 +41,17 @@ export class StringMapWrapper {
     }
   }
 
+  static values<K, V>( map: {[key: string]: V} ): V[] {
+
+    const values = [];
+    StringMapWrapper.forEach( map, ( value )=> {
+      values.push( value );
+    } );
+
+    return values;
+
+  }
+
   static merge<V>( m1: {[key: string]: V}, m2: {[key: string]: V} ): {[key: string]: V} {
     var m: {[key: string]: V} = {};
 
