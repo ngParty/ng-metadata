@@ -1,4 +1,5 @@
-import {isPresent,isBlank,isFunction} from "./lang";
+import {isPresent,isBlank,isFunction,toObject,toPath} from "./lang";
+
 /**
  * Wraps Javascript Objects
  */
@@ -12,6 +13,66 @@ export class StringMapWrapper {
 
   static contains( map: {[key: string]: any}, key: string ): boolean {
     return map.hasOwnProperty( key );
+  }
+
+  /**
+   * The base implementation of `getValueFromPath` without support for string paths
+   * and default values.
+   *
+   * @private
+   * @param {Object} object The object to query.
+   * @param {Array} path The path of the property to get.
+   * @param {string} [pathKey] The key representation of path.
+   * @returns {*} Returns the resolved value.
+   */
+  static baseGet( object: Object, path: string[], pathKey?: string ) {
+    if ( object == null ) {
+      return;
+    }
+    object = toObject( object );
+    if ( pathKey !== undefined && pathKey in object ) {
+      path = [ pathKey ];
+    }
+    var index = 0,
+      length = path.length;
+
+    while ( object != null && index < length ) {
+      object = toObject( object )[ path[ index++ ] ];
+    }
+    return (index && index == length)
+      ? object
+      : undefined;
+  }
+
+  /**
+   * Gets the property value at `path` of `object`. If the resolved value is
+   * `undefined` the `defaultValue` is used in its place.
+   *
+   * @static
+   * @param {Object} object The object to query.
+   * @param {Array|string} path The path of the property to get.
+   * @param {*} [defaultValue] The value returned if the resolved value is `undefined`.
+   * @returns {*} Returns the resolved value.
+   * @example
+   *
+   * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+   *
+   * _.get(object, 'a[0].b.c');
+   * // => 3
+   *
+   * _.get(object, ['a', '0', 'b', 'c']);
+   * // => 3
+   *
+   * _.get(object, 'a.b.c', 'default');
+   * // => 'default'
+   */
+  static getValueFromPath( object: Object, path: string|any[], defaultValue? ) {
+    var result = object == null
+      ? undefined
+      : StringMapWrapper.baseGet( object, toPath( path ), (path + '') );
+    return result === undefined
+      ? defaultValue
+      : result;
   }
 
   static get<V>( map: {[key: string]: V}, key: string ): V {

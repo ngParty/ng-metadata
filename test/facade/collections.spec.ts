@@ -13,7 +13,76 @@ describe( `facade/collections`, ()=> {
 
       expect( actual ).to.deep.equal( expected );
 
-    } )
+    } );
+
+    describe( `#baseGet`, ()=> {
+
+      it( `should get value from object array path`, ()=> {
+
+        const obj = { one: { two: {three: 3}}};
+        const path = ['one','two','three'];
+        const actual = StringMapWrapper.baseGet(obj,path);
+        const expected = 3;
+
+        expect(actual).to.equal(expected);
+
+      } );
+
+      it( `should get undefined from object array path if not found`, ()=> {
+
+        const obj = { one: { two: {three: 3}}};
+        const path = ['one','two','four'];
+        const actual = StringMapWrapper.baseGet(obj,path);
+        const expected = undefined;
+
+        expect(actual).to.equal(expected);
+
+      } );
+
+    } );
+
+    describe( `#getValueFromPath`, ()=> {
+
+      it( `should get value from object string path`, ()=> {
+
+        const obj = { one: { two: {three: 3}}};
+        const path = 'one.two.three';
+        const actual = StringMapWrapper.getValueFromPath(obj,path);
+        const expected = 3;
+
+        expect(actual).to.equal(expected);
+
+      } );
+
+      it( `should get default value if set or undefined if path didn't found a value`, ()=> {
+
+        const obj = { one: { two: {three: 3}}};
+        const path = 'one.two.three.four';
+        let actual = StringMapWrapper.getValueFromPath(obj,path);
+        let expected = undefined;
+
+        expect(actual).to.equal(expected);
+
+        actual = StringMapWrapper.getValueFromPath(obj,path,111);
+        expected = 111;
+        expect(actual).to.equal(expected);
+
+      } );
+
+      it( `should find path also if array indexes are used`, ()=> {
+
+        const obj = { one: { two: [ { three: 3 } ] } };
+        const path = 'one.two[0].three';
+        const actual = StringMapWrapper.getValueFromPath(obj,path);
+        const expected = 3;
+
+        console.log( actual );
+
+        expect(actual).to.equal(expected);
+
+      } );
+
+    } );
 
   } );
 
