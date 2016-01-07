@@ -110,6 +110,45 @@ describe( `facade/collections`, ()=> {
 
     } );
 
+    describe( `#assign`, ()=> {
+
+      it( `should combine objects by extend`, ()=> {
+
+        const mutatedObj = {one:1};
+        const sourceOne = {two:2};
+        let actual = StringMapWrapper.assign( mutatedObj, sourceOne, { one: '111' } as any );
+        let expected = { one: '111', two: 2 };
+
+        expect(actual).to.deep.equal(expected);
+        expect( mutatedObj ).to.deep.equal( expected );
+        expect( sourceOne ).to.deep.equal( sourceOne );
+
+        const actual2 = StringMapWrapper.assign( {}, { foo: 'fooo', bar: 'baz' }, { twoo: 'phar' } as any );
+        const expected2 = { foo: 'fooo', bar: 'baz', twoo: 'phar' };
+        expect( actual2 ).to.deep.equal( expected2 );
+
+      } );
+
+      it( `should work as expected if Object.assign is not available`, ()=> {
+
+        const envAssign = (Object as any).assign;
+        (Object as any).assign = undefined;
+
+        const mutatedObj = {one:1};
+        const sourceOne = {two:2};
+        let actual = StringMapWrapper.assign( mutatedObj, sourceOne, { one: '111' } as any );
+        let expected = { one: '111', two: 2 };
+
+        expect(actual).to.deep.equal(expected);
+        expect( mutatedObj ).to.deep.equal( expected );
+        expect( sourceOne ).to.deep.equal( sourceOne );
+
+        (Object as any).assign = envAssign;
+
+      } );
+
+    } );
+
   } );
 
   describe( `ListWrapper`, ()=> {

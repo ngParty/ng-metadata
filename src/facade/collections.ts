@@ -208,6 +208,37 @@ export class StringMapWrapper {
     return true;
   }
 
+  static assign<T,S>( target: T, ...sources: S[] ): T&S {
+
+    if ( !isPresent( target ) ) {
+      throw new TypeError( 'Object.assign cannot be called with null or undefined' );
+    }
+
+    const hasOwnProperty = Object.prototype.hasOwnProperty;
+
+    if ( (Object as any).assign ) {
+      return (Object as any).assign( target, ...sources );
+    }
+
+    let from;
+    const to = Object( target );
+
+    for ( var s = 0; s < sources.length; s++ ) {
+
+      from = Object( sources[ s ] );
+
+      for ( var key in from ) {
+        if ( hasOwnProperty.call( from, key ) ) {
+          to[ key ] = from[ key ];
+        }
+      }
+
+    }
+
+    return to;
+
+  }
+
 }
 
 
