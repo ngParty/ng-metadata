@@ -5,7 +5,8 @@ import {
   stringify,
   hasCtorInjectables,
   firstToLowerCase,
-  firstToUpperCase
+  firstToUpperCase,
+  toPath
 } from '../../src/facade/lang';
 
 describe( `facade/lang`, ()=> {
@@ -133,6 +134,37 @@ describe( `facade/lang`, ()=> {
     it( 'should return string with first char uppercase',  ()=> {
 
       expect( firstToUpperCase( 'jediMaster' ) ).to.equal( 'JediMaster' );
+
+    } );
+
+  } );
+
+  describe( `#toPath`, ()=> {
+
+    it( `should create path array from basic string object path`, ()=> {
+
+      const path = 'foo.moo.boo.hello';
+      const actual = toPath( path );
+      const expected = [ 'foo', 'moo', 'boo', 'hello' ];
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
+    it( `should create path array from string/array object path`, ()=> {
+
+      const path = 'foo.moo[0].boo[1].hello';
+      const actual = toPath( path );
+      const expected = [ 'foo', 'moo', '0', 'boo', '1', 'hello' ];
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
+    it( `should return the same if path is already an array`, ()=> {
+
+      const path = ['moo','boo'];
+      const actual = toPath( path );
+      const expected = ['moo','boo'];
+      expect( actual ).to.deep.equal( expected );
 
     } );
 

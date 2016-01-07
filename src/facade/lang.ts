@@ -7,6 +7,14 @@ if ( typeof window === 'undefined' ) {
 }
 
 
+/** Used to match property names within property paths. */
+const rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\n\\]|\\.)*?)\2)\]/g;
+
+/** Used to match backslashes in property paths. */
+const reEscapeChar = /\\(\\)?/g;
+
+
+
 // Need to declare a new variable for global here since TypeScript
 // exports the original value of the symbol.
 var _global: BrowserNodeGlobal = globalScope;
@@ -99,6 +107,40 @@ export function stringify( token ): string {
     : res.substring( 0, newLineIndex );
 }
 
+/**
+ * Converts `value` to a string if it's not one. An empty string is returned
+ * for `null` or `undefined` values.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {string} Returns the string.
+ */
+export function baseToString(value:any): string {
+  return value == null ? '' : (value + '');
+}
+/**
+ * Converts `value` to property path array if it's not one.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {Array} Returns the property path array.
+ */
+export function toPath(value:any): any[] {
+  if (isArray(value)) {
+    return value;
+  }
+  //return value.split('.');
+  const result = [];
+  baseToString( value ).replace( rePropName, ( match, number, quote, string )=> {
+    const resultValue = quote
+      ? string.replace( reEscapeChar, '$1' )
+      : (number || match);
+    result.push( resultValue );
+    return resultValue;
+  } );
+  return result;
+}
+
 export function assign( destination: any, ...sources: any[] ): any {
 
   const envAssign = _global.Object['assign'] || _global.angular.extend;
@@ -174,4 +216,17 @@ export function firstToUpperCase( value: string ): string {
 }
 function _firstTo( value: string, cb: Function ): string {
   return cb.call( value.charAt( 0 ) ) + value.substring( 1 );
+}
+
+/**
+ * Converts `value` to an object if it's not one.
+ *
+ * @private
+ * @param {*} value The value to process.
+ * @returns {Object} Returns the object.
+ */
+export function toObject( value ): Object|Function {
+  return isJsObject( value )
+    ? value
+    : Object( value );
 }
