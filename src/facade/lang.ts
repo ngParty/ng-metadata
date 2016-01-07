@@ -8,10 +8,21 @@ if ( typeof window === 'undefined' ) {
 
 
 /** Used to match property names within property paths. */
+const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\n\\]|\\.)*?\1)\]/;
+const reIsPlainProp = /^\w*$/;
 const rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\n\\]|\\.)*?)\2)\]/g;
 
 /** Used to match backslashes in property paths. */
 const reEscapeChar = /\\(\\)?/g;
+
+/** Used to detect unsigned integer values. */
+const reIsUint = /^\d+$/;
+
+/**
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
+ * of an array-like value.
+ */
+const MAX_SAFE_INTEGER = 9007199254740991;
 
 
 
@@ -229,4 +240,41 @@ export function toObject( value ): Object|Function {
   return isJsObject( value )
     ? value
     : Object( value );
+}
+
+
+/**
+ * Checks if `value` is a valid array-like index.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {number} [length=MAX_SAFE_INTEGER] The upper bounds of a valid index.
+ * @returns {boolean} Returns `true` if `value` is a valid index, else `false`.
+ */
+export function isIndex( value: any, length: number = MAX_SAFE_INTEGER ): boolean {
+  value = (isNumber( value ) || reIsUint.test( value ))
+    ? +value
+    : -1;
+  return value > -1 && value % 1 == 0 && value < length;
+}
+
+/**
+ * Checks if `value` is a property name and not a property path.
+ *
+ * @private
+ * @param {*} value The value to check.
+ * @param {Object} [object] The object to query keys on.
+ * @returns {boolean} Returns `true` if `value` is a property name, else `false`.
+ */
+export function isKey( value: any, object: Object ): boolean {
+
+  if ( (isString( value ) && reIsPlainProp.test( value )) || isNumber( value ) ) {
+    return true;
+  }
+  if ( isArray( value ) ) {
+    return false;
+  }
+  var result = !reIsDeepProp.test( value );
+  return result || (object != null && value in toObject( object ));
+
 }

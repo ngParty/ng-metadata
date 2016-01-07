@@ -1,4 +1,13 @@
-import {isPresent,isBlank,isFunction,toObject,toPath} from "./lang";
+import {
+  isPresent,
+  isBlank,
+  isFunction,
+  toObject,
+  toPath,
+  isJsObject,
+  isIndex,
+  isKey
+} from "./lang";
 
 /**
  * Wraps Javascript Objects
@@ -73,6 +82,58 @@ export class StringMapWrapper {
     return result === undefined
       ? defaultValue
       : result;
+  }
+
+  /**
+   * Sets the property value of `path` on `object`. If a portion of `path`
+   * does not exist it's created.
+   *
+   * @static
+   * @param {Object} object The object to augment.
+   * @param {Array|string} path The path of the property to set.
+   * @param {*} value The value to set.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * var object = { 'a': [{ 'b': { 'c': 3 } }] };
+   *
+   * _.set(object, 'a[0].b.c', 4);
+   * console.log(object.a[0].b.c);
+   * // => 4
+   *
+   * _.set(object, 'x[0].y.z', 5);
+   * console.log(object.x[0].y.z);
+   * // => 5
+   */
+  static setValueInPath<O,M>( object: any, path: string|any[], value: any ): M {
+
+    if ( object == null ) {
+      return object;
+    }
+    var pathKey = (path + '');
+    path = (object[ pathKey ] != null || isKey( path, object ))
+      ? [ pathKey ]
+      : toPath( path );
+
+    var index = -1,
+      length = path.length,
+      lastIndex = length - 1,
+      nested = object;
+
+    while ( nested != null && ++index < length ) {
+      var key = path[ index ];
+      if ( isJsObject( nested ) ) {
+        if ( index == lastIndex ) {
+          nested[ key ] = value;
+        } else if ( nested[ key ] == null ) {
+          nested[ key ] = isIndex( path[ index + 1 ] )
+            ? []
+            : {};
+        }
+      }
+      nested = nested[ key ];
+    }
+    return object;
   }
 
   static get<V>( map: {[key: string]: V}, key: string ): V {

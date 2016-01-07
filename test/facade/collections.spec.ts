@@ -84,6 +84,32 @@ describe( `facade/collections`, ()=> {
 
     } );
 
+    describe( `#setValueInPath`, ()=> {
+
+      it( `should set value on object by path`, ()=> {
+
+        let obj = { style: { font: { fontsize: '' } } };
+        let path = 'style.font.fontsize';
+        let actual = StringMapWrapper.setValueInPath(obj,path,'12px');
+        let expected = { style: { font: { fontsize: '12px' } } };
+
+        expect( actual ).to.deep.equal( expected );
+
+      } );
+
+      it( `should create property with value if path value not found`, ()=> {
+
+        let obj = { style: { font: { fontsize: '' } } };
+        let path = 'style.font.size';
+        let actual = StringMapWrapper.setValueInPath(obj,path,'12px');
+        let expected = { style: { font: { fontsize: '', size: '12px' } } };
+
+        expect( actual ).to.deep.equal( expected );
+
+      } );
+
+    } );
+
   } );
 
   describe( `ListWrapper`, ()=> {
