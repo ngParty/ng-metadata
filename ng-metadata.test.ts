@@ -15,11 +15,13 @@ import './test/di/povider.spec';
 import './test/util/decorators.spec';
 import './test/reflection/reflection.spec';
 import './test/facade/lang.spec';
+import './test/facade/primitives.spec';
 import './test/facade/collections.spec';
 import './test/linker/pipe_resolver.spec';
 import './test/pipes/pipe_provider.spec';
 import './test/linker/directive_lifecycles_reflector.spec';
 import './test/linker/directive_resolver.spec';
+import './test/directives/directive_provider.spec';
 
 describe( 'ng-metadata', ()=> {
 } );
