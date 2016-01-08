@@ -34,7 +34,7 @@ describe( `directives/directive_provider`, ()=> {
       @Output()
       execMe: Function;
 
-      @HostBinding( 'class.isDisabled' )
+      @HostBinding( 'class.is-disabled' )
       isDisabled: boolean;
 
       @HostListener( 'click', [ '$event' ] )
@@ -55,6 +55,9 @@ describe( `directives/directive_provider`, ()=> {
 
     const [directiveName,directiveFactory] = directiveProvider.createFromType( MyClicker );
     const ddo: ng.IDirective = directiveFactory();
+
+    //console.log( ddo.link.pre.toString() );
+    //console.log( ddo.link.post.toString() );
 
     expect( directiveName ).to.equal( 'myClicker' );
     expect( isFunction( directiveFactory ) ).to.equal( true );
@@ -163,7 +166,7 @@ describe( `directives/directive_provider`, ()=> {
       @Output()
       onLightsaberAttack: Function;
 
-      @HostBinding( 'class.isDisabled' )
+      @HostBinding( 'class.is-disabled' )
       isDisabled: boolean;
 
       @HostListener( 'click', [ '$event' ] )

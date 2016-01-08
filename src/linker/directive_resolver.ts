@@ -20,7 +20,6 @@ import {InjectMetadata,HostMetadata,SelfMetadata,SkipSelfMetadata,OptionalMetada
 
 type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
 type ParamMetaInst = HostMetadata | InjectMetadata | SelfMetadata | SkipSelfMetadata;
-type StringMap = {[key:string]:string};
 
 function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;

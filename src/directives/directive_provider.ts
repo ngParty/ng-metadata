@@ -6,15 +6,14 @@ import {hasLifecycleHook} from "../linker/directive_lifecycles_reflector";
 import {LifecycleHooks} from "../linker/directive_lifecycle_interfaces";
 import {DirectiveMetadata,ComponentMetadata,LegacyDirectiveDefinition} from "./metadata_directives";
 
-type StringMap = {[key:string]:string};
-type HostBindingsProcessed = {
+export type HostBindingsProcessed = {
   classes: StringMap,
   attributes: StringMap,
   properties: StringMap
 }
-type HostListenersProcessed = {[key:string]:string[]};
-type HostProcessed = {
-  hostStatic:StringMap,
+export type HostListenersProcessed = {[key:string]:string[]};
+export type HostProcessed = {
+  hostStatic: StringMap,
   hostBindings: HostBindingsProcessed,
   hostListeners: HostListenersProcessed
 }

@@ -20,3 +20,5 @@ interface BrowserNodeGlobal {
   setInterval: Function,
   clearInterval: Function
 }
+
+declare type StringMap = {[key:string]:string};
