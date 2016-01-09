@@ -59,4 +59,61 @@ export function getNg1InjectorMock(): ng.auto.IInjectorService {
   } as ng.auto.IInjectorService;
 }
 
+/**
+ * @internal
+ */
+export class $Scope {
+  $$watchers = [];
+
+  $watch( watchExp: Function|string, watchListener: Function ) {
+    this.$$watchers.push( [ watchExp, watchListener ] );
+    return function disposable() {}
+  }
+
+  $eval( expression ) {
+    const toEval = expression;
+    const done = 'evaluated';
+    return eval( 'toEval + " " + done' );
+  }
+}
+
+/**
+ * @internal
+ */
+export class $Attrs {
+  $$observers = [];
+
+  $observe( attrName, observeListener ) {
+    this.$$observers.push( [ attrName, observeListener ] );
+    return function disposable() {}
+  }
+}
+
+/**
+ *
+ * @internal
+ * @constructor
+ */
+export function ElementFactory() {
+  return {
+    _eventListeners:[],
+    '0': {},
+    classList: {},
+    attributes: {},
+    toggleClass( className, toggle? ){
+      if ( toggle ) {
+        this.classList[ className ] = true;
+      } else {
+        delete this.classList[ className ];
+      }
+    },
+    attr( attrName, value ){
+      this.attributes[ attrName ] = value;
+    },
+    on(eventName:string,cb:Function){
+      this._eventListeners.push({ eventName, cb } )
+    }
+  }
+}
+
 
