@@ -309,35 +309,6 @@ export class DirectiveProvider {
         const _disposables = _createDirectiveBindings( scope, attributes, ctrl, metadata );
         _watchers.push( ..._disposables.watchers );
         _observers.push( ..._disposables.observers );
-        /*
-         const {inputs,outputs,attrs} = metadata;
-
-         // setup @Inputs
-         StringMapWrapper.forEach( _extractBindings( inputs ), ( alias: string, propName: string )=> {
-         _watchers.push(
-         scope.$watch(
-         alias || propName,
-         ( newValue )=> {
-         ctrl[ propName ] = newValue
-         }
-         )
-         )
-         } );
-         // setup @Outputs
-         StringMapWrapper.forEach( _extractBindings( outputs ), ( alias: string, propName: string )=> {
-         ctrl[ propName ] = ()=> scope.$eval( alias || propName );
-         } );
-         // setup @Attrs
-         StringMapWrapper.forEach( _extractBindings( attrs ), ( alias: string, propName: string )=> {
-         _observers.push(
-         attributes.$observe(
-         alias || propName,
-         ( newValue )=> {
-         ctrl[ propName ] = newValue
-         }
-         )
-         )
-         } );*/
 
 
         _setHostStaticAttributes( element, hostProcessed.hostStatic );
@@ -512,9 +483,10 @@ export function _setHostBindings(
  * @param element
  * @param ctrl
  * @param hostListeners
+ * @internal
  * @private
  */
-function _setHostListeners( element: ng.IAugmentedJQuery, ctrl: any, hostListeners: HostListenersProcessed ): void {
+export function _setHostListeners( element: ng.IAugmentedJQuery, ctrl: any, hostListeners: HostListenersProcessed ): void {
 
   StringMapWrapper.forEach(
     hostListeners,
@@ -547,22 +519,24 @@ function _setHostListeners( element: ng.IAugmentedJQuery, ctrl: any, hostListene
  * @returns {Array}
  * @private
  */
-function _getHostListenerCbParams( event: any, eventParams: string[] ): any[] {
+export function _getHostListenerCbParams( event: any, eventParams: string[] ): any[] {
+
+  const ALLOWED_EVENT_NAME = '$event';
 
   return eventParams.reduce(
     ( acc, eventPath: string )=> {
 
-      if ( !StringWrapper.startsWith( eventPath, '$event' ) ) {
+      if ( !StringWrapper.startsWith( eventPath, ALLOWED_EVENT_NAME ) ) {
         throw new Error( `
               only $event.* is supported. Please provide correct listener parameter @example: $event,$event.target
               ` );
       }
 
-      if ( eventPath === '$event' ) {
+      if ( eventPath === ALLOWED_EVENT_NAME ) {
         return [ ...acc, event ];
       }
 
-      return [ ...acc, StringMapWrapper.getValueFromPath( event, eventPath ) ];
+      return [ ...acc, StringMapWrapper.getValueFromPath( event, eventPath.replace( ALLOWED_EVENT_NAME, '' ) ) ];
 
     },
     []
@@ -576,16 +550,17 @@ function _getHostListenerCbParams( event: any, eventParams: string[] ): any[] {
  * @param ctrl
  * @param metadata
  * @returns {{watchers: Array, observers: Array}}
+ * @internal
  * @private
  */
-function _createDirectiveBindings(
+export function _createDirectiveBindings(
   scope: ng.IScope,
   attributes: ng.IAttributes,
   ctrl: any,
   metadata: DirectiveMetadata
 ): {watchers:Function[], observers:Function[]} {
 
-  const {inputs,outputs,attrs} = metadata;
+  const {inputs=[],outputs=[],attrs=[]} = metadata;
   const _internalWatchers = [];
   const _internalObservers = [];
 

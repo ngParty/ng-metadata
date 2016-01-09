@@ -1,14 +1,22 @@
+import * as sinon from 'sinon';
 import {expect} from 'chai';
 
-import {isFunction} from "../../src/facade/lang";
-import {Component,Directive} from "../../src/directives/decorators";
+import {noop,isFunction} from "../../src/facade/lang";
 import {AfterContentInit,OnDestroy,OnInit} from "../../src/linker/directive_lifecycle_interfaces";
-import {Input,Attr,Output,HostListener,HostBinding} from "../../src/directives/decorators";
+import {Component,Directive,Input,Attr,Output,HostListener,HostBinding} from "../../src/directives/decorators";
 import {Inject} from "../../src/di/decorators";
-import {directiveProvider,DirectiveProvider} from "../../src/directives/directive_provider";
-import {noop} from "../../src/facade/lang";
-import {_assignRequiredCtrlInstancesToHostCtrl} from "../../src/directives/directive_provider";
-import {_setHostBindings} from "../../src/directives/directive_provider";
+import {DirectiveMetadata} from "../../src/directives/metadata_directives";
+import {$Scope,$Attrs,ElementFactory} from "../../src/testing/utils";
+
+import {
+  directiveProvider,
+  DirectiveProvider,
+  _setHostBindings,
+  _assignRequiredCtrlInstancesToHostCtrl,
+  _getHostListenerCbParams,
+  _setHostListeners,
+  _createDirectiveBindings
+} from "../../src/directives/directive_provider";
 
 describe( `directives/directive_provider`, ()=> {
 
@@ -320,8 +328,8 @@ describe( `directives/directive_provider`, ()=> {
           'role': 'button',
           '[class.disabled]': 'isDisabled',
           '[class.enabled]': 'isEnabled',
-          '[attr.aria-label]':'ariaLabel',
-          '[readonly]':'isReadonly',
+          '[attr.aria-label]': 'ariaLabel',
+          '[readonly]': 'isReadonly',
           '(mousemove)': 'onMove($event.target)',
           '(mouseout)': 'onMoveOut()'
         } as any;
@@ -344,8 +352,8 @@ describe( `directives/directive_provider`, ()=> {
             }
           },
           hostListeners: {
-            'mousemove': ['onMove','$event.target'],
-            'mouseout': ['onMoveOut']
+            'mousemove': [ 'onMove', '$event.target' ],
+            'mouseout': [ 'onMoveOut' ]
           }
         };
 
@@ -359,55 +367,55 @@ describe( `directives/directive_provider`, ()=> {
 
       it( `should create DDO from shell and provided ddo`, ()=> {
 
-        const actual = directiveProvider._createDDO({
-          scope:{},
-          bindToController:{item:'='},
-          require:['foo'],
-          controller: class Foo{},
+        const actual = directiveProvider._createDDO( {
+          scope: {},
+          bindToController: { item: '=' },
+          require: [ 'foo' ],
+          controller: class Foo {},
           controllerAs: 'ctrl',
-          template:'hello'
-        },{});
+          template: 'hello'
+        }, {} );
         const expected = {
-          scope:{},
-          bindToController:{item:'='},
-          require:['foo'],
+          scope: {},
+          bindToController: { item: '=' },
+          require: [ 'foo' ],
           controller: actual.controller,
           controllerAs: 'ctrl',
-          template:'hello',
-          link:actual.link
+          template: 'hello',
+          link: actual.link
         };
 
-        expect(actual).to.deep.equal(expected);
+        expect( actual ).to.deep.equal( expected );
 
       } );
 
       it( `should overwrite any property with legacy DDO`, ()=> {
 
-        const actual = directiveProvider._createDDO({
-          scope:{},
-          bindToController:{item:'='},
-          require:['foo'],
-          controller: class Foo{},
+        const actual = directiveProvider._createDDO( {
+          scope: {},
+          bindToController: { item: '=' },
+          require: [ 'foo' ],
+          controller: class Foo {},
           controllerAs: 'ctrl',
-          template:'hello'
-        },{
+          template: 'hello'
+        }, {
           scope: true,
-          controllerAs:'foo',
+          controllerAs: 'foo',
           transclude: false
-        });
+        } );
 
         const expected = {
-          scope:true,
-          bindToController:{item:'='},
-          require:['foo'],
+          scope: true,
+          bindToController: { item: '=' },
+          require: [ 'foo' ],
           controller: actual.controller,
           controllerAs: 'foo',
-          template:'hello',
-          link:actual.link,
+          template: 'hello',
+          link: actual.link,
           transclude: false
         };
 
-        expect(actual).to.deep.equal(expected);
+        expect( actual ).to.deep.equal( expected );
 
       } );
 
@@ -419,7 +427,7 @@ describe( `directives/directive_provider`, ()=> {
 
         it( `should extend ctrl instances with requiredCtrl names with proper require ctrl instances`, ()=> {
 
-          const ngModel = { $modelValue: undefined, $viewValue:'123', $setViewValue: noop};
+          const ngModel = { $modelValue: undefined, $viewValue: '123', $setViewValue: noop };
           const emSomeDirective = { callMe: noop };
           const requiredCtrlVarNames = [ 'ngModelCtrl', 'someDirective' ];
           const requiredCtrls = [ ngModel, emSomeDirective ];
@@ -431,7 +439,7 @@ describe( `directives/directive_provider`, ()=> {
             someDirective: emSomeDirective
           };
 
-          expect(ctrl).to.deep.equal(expected);
+          expect( ctrl ).to.deep.equal( expected );
 
         } );
 
@@ -439,39 +447,12 @@ describe( `directives/directive_provider`, ()=> {
 
       describe( `#_setHostBindings`, ()=> {
 
-        class $Scope{
-          $$watchers = [];
-          $watch(watchExp: Function|string,watchListener:Function){
-            this.$$watchers.push([watchExp,watchListener]);
-            return function disposable(){}
-          }
-        }
-
-        function ElementFactory() {
-          return {
-            '0': {},
-            classList: {},
-            attributes: {},
-            toggleClass( className, toggle? ){
-              if ( toggle ) {
-                this.classList[ className ] = true;
-              } else {
-                delete this.classList[ className ];
-              }
-              //this.classList[ className ] = toggle;
-            },
-            attr( attrName, value ){
-              this.attributes[ attrName ] = value;
-            }
-          }
-        }
-
         let $scope;
         let $element;
         let hostBindings = {
-          classes: {'is-foo':'isFoo'} as StringMap,
-          attributes: {'aria-label':'aria'} as StringMap,
-          properties: {'style.fontSize':'fontSize'} as StringMap
+          classes: { 'is-foo': 'isFoo' } as StringMap,
+          attributes: { 'aria-label': 'aria' } as StringMap,
+          properties: { 'style.fontSize': 'fontSize' } as StringMap
         };
         let ctrl = { isFoo: true, aria: 'hello', fontSize: 12 };
 
@@ -485,7 +466,7 @@ describe( `directives/directive_provider`, ()=> {
           const actual = _setHostBindings( $scope, $element, ctrl, hostBindings );
 
           expect( actual.length ).to.deep.equal( 3 );
-          expect( actual.every(isFunction) ).to.deep.equal( true );
+          expect( actual.every( isFunction ) ).to.deep.equal( true );
           expect( $scope.$$watchers.length ).to.equal( 3 );
 
         } );
@@ -494,15 +475,15 @@ describe( `directives/directive_provider`, ()=> {
 
           const actual = _setHostBindings( $scope, $element, ctrl, hostBindings );
 
-          const classWatcher = $scope.$$watchers[0];
+          const classWatcher = $scope.$$watchers[ 0 ];
           const [watchExp,watchListener] = classWatcher;
 
-          expect(watchExp()).to.equal(true);
+          expect( watchExp() ).to.equal( true );
 
-          watchListener(true);
+          watchListener( true );
           expect( $element.classList[ 'is-foo' ] ).to.equal( true );
 
-          watchListener(false);
+          watchListener( false );
           expect( $element.classList[ 'is-foo' ] ).to.equal( undefined );
 
         } );
@@ -511,15 +492,15 @@ describe( `directives/directive_provider`, ()=> {
 
           const actual = _setHostBindings( $scope, $element, ctrl, hostBindings );
 
-          const attrWatcher = $scope.$$watchers[1];
+          const attrWatcher = $scope.$$watchers[ 1 ];
           const [watchExp,watchListener] = attrWatcher;
 
-          expect(watchExp()).to.equal('hello');
+          expect( watchExp() ).to.equal( 'hello' );
 
-          watchListener('nope');
+          watchListener( 'nope' );
           expect( $element.attributes[ 'aria-label' ] ).to.equal( 'nope' );
 
-          watchListener('yay');
+          watchListener( 'yay' );
           expect( $element.attributes[ 'aria-label' ] ).to.equal( 'yay' );
 
         } );
@@ -528,16 +509,250 @@ describe( `directives/directive_provider`, ()=> {
 
           const actual = _setHostBindings( $scope, $element, ctrl, hostBindings );
 
-          const propWatcher = $scope.$$watchers[2];
+          const propWatcher = $scope.$$watchers[ 2 ];
           const [watchExp,watchListener] = propWatcher;
 
           expect( watchExp() ).to.equal( 12 );
 
-          watchListener('12px');
-          expect( $element[0][ 'style' ][ 'fontSize' ] ).to.equal( '12px' );
+          watchListener( '12px' );
+          expect( $element[ 0 ][ 'style' ][ 'fontSize' ] ).to.equal( '12px' );
 
           watchListener( '2rem' );
-          expect( $element[0][ 'style' ][ 'fontSize' ] ).to.equal( '2rem' );
+          expect( $element[ 0 ][ 'style' ][ 'fontSize' ] ).to.equal( '2rem' );
+
+        } );
+
+      } );
+
+      describe( `#_setHostListeners`, ()=> {
+
+        const sandbox = sinon.sandbox.create();
+        let $element;
+        let hostListeners = {
+          'click': [ 'onClick', '$event' ],
+          'mousemove': [ 'onMove', '$event.target.x', '$event.target.x' ],
+          'mouseout': [ 'onOut' ]
+        } as {[key:string]:string[]};
+        let ctrl = {
+          onClick: sandbox.spy( ( evt )=> {} ),
+          onMove: sandbox.spy( ( x, y )=> {} ),
+          onOut: sandbox.spy( ()=>true )
+        };
+        let event = {
+          target: {
+            position: 123,
+            x: 111,
+            y: 3333
+          },
+          preventDefault: sandbox.spy()
+        };
+
+        beforeEach( ()=> {
+          $element = ElementFactory();
+          _setHostListeners( $element, ctrl, hostListeners );
+        } );
+
+        afterEach( ()=> {
+
+          event.preventDefault.reset();
+          sandbox.restore();
+
+        } );
+
+        it( `should register proper host listeners`, ()=> {
+
+          const allAreFunctions = $element._eventListeners.every( evListener=> {
+            return isFunction( evListener.cb );
+          } );
+
+          expect( $element._eventListeners.length ).to.equal( 3 );
+          expect( allAreFunctions ).to.equal( true );
+
+        } );
+
+        it( `should call proper controller method on element event trigger`, ()=> {
+
+          const [{cb:clickCb},{cb:moveCb},{cb:outCb}] = $element._eventListeners;
+
+          expect( ctrl.onClick.called ).to.equal( false );
+          clickCb( event );
+          expect( ctrl.onClick.called ).to.equal( true );
+
+          expect( ctrl.onMove.called ).to.equal( false );
+          moveCb( event );
+          expect( ctrl.onMove.called ).to.equal( true );
+
+          expect( ctrl.onOut.called ).to.equal( false );
+          outCb( event );
+          expect( ctrl.onOut.called ).to.equal( true );
+
+        } );
+
+        it( `should call event.preventDefault if ctrl method call returns falsy value`, ()=> {
+
+          const [{cb:clickCb}] = $element._eventListeners;
+
+          expect( event.preventDefault.called ).to.equal( false );
+
+          clickCb( event );
+
+          expect( event.preventDefault.called ).to.equal( true );
+
+        } );
+
+        it( `should not call event.preventDefault if ctrl method call returns truthy value`, ()=> {
+
+          const [,,{cb:outCb}] = $element._eventListeners;
+
+          expect( event.preventDefault.called ).to.equal( false );
+
+          outCb( event );
+
+          expect( event.preventDefault.called ).to.equal( false );
+
+        } );
+
+      } );
+
+      describe( `#_getHostListenerCbParams`, ()=> {
+
+        it( `should throw if event name doesn't have $event prefix`, ()=> {
+
+          const event = {};
+          const eventParams = [ 'target' ];
+
+          expect( ()=>_getHostListenerCbParams( event, eventParams ) ).to.throw();
+
+        } );
+
+        it( `should return all event values from eventParams path if they exist on $event`, ()=> {
+
+          const event = {
+            target: {
+              position: 123,
+              x: 111,
+              y: 3333
+            }
+          };
+          const eventParams = [
+            '$event', '$event.target', '$event.target.position', '$event.position'
+          ];
+          const actual = _getHostListenerCbParams( event, eventParams );
+          const expected = [
+            event,
+            { position: 123, x: 111, y: 3333 },
+            123,
+            undefined
+          ];
+
+          expect( actual ).to.deep.equal( expected );
+
+        } );
+
+      } );
+
+      describe( `#_createDirectiveBindings`, ()=> {
+
+        const sandbox = sinon.sandbox.create();
+        let $element;
+        let $scope;
+        let $attrs;
+        let ctrl;
+        let event = {
+          target: {
+            position: 123,
+            x: 111,
+            y: 3333
+          },
+          preventDefault: sandbox.spy()
+        };
+
+        beforeEach( ()=> {
+          $element = ElementFactory();
+          $scope = new $Scope();
+          $attrs = new $Attrs();
+          ctrl = {};
+        } );
+
+        afterEach( ()=> {
+
+          event.preventDefault.reset();
+          sandbox.restore();
+
+        } );
+
+        it( `should create array of scope.$watch disposable callbacks for @Input`, ()=> {
+
+          const metadata = {
+            inputs: [
+              'foo',
+              'one: oneAlias'
+            ]
+          } as DirectiveMetadata;
+          const bindingDisposables = _createDirectiveBindings( $scope, $attrs, ctrl, metadata );
+          const {watchers,observers} = bindingDisposables;
+
+          expect( watchers.length ).to.equal( 2 );
+          expect( observers.length ).to.equal( 0 );
+
+          const [[firstExp,firstList],[secondExp,secondList]] = $scope.$$watchers;
+
+          expect(firstExp).to.equal(undefined);
+          expect( ctrl.foo ).to.equal( undefined );
+          firstList( 'hello' );
+          expect( ctrl.foo ).to.equal( 'hello' );
+
+          expect(secondExp).to.equal(undefined);
+          expect( ctrl.one ).to.equal( undefined );
+          secondList( 'hello one' );
+          expect( ctrl.one ).to.equal( 'hello one' );
+
+        } );
+
+        it( `should create array of attrs.$observe disposable callbacks for @Attr`, ()=> {
+
+          const metadata = {
+            attrs: [
+              'foo',
+              'one: oneAlias'
+            ]
+          } as DirectiveMetadata;
+          const bindingDisposables = _createDirectiveBindings( $scope, $attrs, ctrl, metadata );
+          const {watchers,observers} = bindingDisposables;
+
+          expect( watchers.length ).to.equal( 0 );
+          expect( observers.length ).to.equal( 2 );
+
+          const [[firstExp,firstList],[secondExp,secondList]] = $attrs.$$observers;
+
+          expect(firstExp).to.equal('foo');
+          expect( ctrl.foo ).to.equal( undefined );
+          firstList( 'hello' );
+          expect( ctrl.foo ).to.equal( 'hello' );
+
+          expect(secondExp).to.equal('oneAlias');
+          expect( ctrl.one ).to.equal( undefined );
+          secondList( 'hello one' );
+          expect( ctrl.one ).to.equal( 'hello one' );
+
+        } );
+
+        it( `should set to property function which evaluates experssion for @Output`, ()=> {
+
+          const metadata = {
+            outputs: [
+              'onFoo',
+              'onOne: onOneAlias'
+            ]
+          } as DirectiveMetadata;
+          const bindingDisposables = _createDirectiveBindings( $scope, $attrs, ctrl, metadata );
+          const {watchers,observers} = bindingDisposables;
+
+          expect( watchers.length ).to.equal( 0 );
+          expect( observers.length ).to.equal( 0 );
+          expect( Object.keys( ctrl ) ).to.deep.equal( [ 'onFoo', 'onOne' ] );
+          expect( ctrl.onFoo() ).to.equal( 'onFoo evaluated' );
+          expect( ctrl.onOne() ).to.equal( 'onOneAlias evaluated' );
 
         } );
 
