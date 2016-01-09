@@ -75,7 +75,7 @@ export class DirectiveProvider {
       };
     }
 
-    const ddo = this._createDdo( _ddo, metadata.legacy );
+    const ddo = this._createDDO( _ddo, metadata.legacy );
 
     return [
       directiveName,
@@ -84,7 +84,7 @@ export class DirectiveProvider {
 
   }
 
-  private _createDdo( ddo: ng.IDirective, legacyDDO: LegacyDirectiveDefinition ): ng.IDirective {
+  _createDDO( ddo: ng.IDirective, legacyDDO: LegacyDirectiveDefinition ): ng.IDirective {
     return assign(
       {},
       DirectiveProvider._ddoShell,
@@ -419,11 +419,12 @@ function _setupDestroyHandler(
  * @param requiredCtrlVarNames
  * @param requiredCtrls
  * @param ctrl
+ * @internal
  * @private
  */
-function _assignRequiredCtrlInstancesToHostCtrl(
+export function _assignRequiredCtrlInstancesToHostCtrl(
   requiredCtrlVarNames: string[],
-  requiredCtrls: any[],
+  requiredCtrls: Object[],
   ctrl: any
 ): void {
   requiredCtrlVarNames.forEach( ( varName, idx )=>ctrl[ varName ] = requiredCtrls[ idx ] );
@@ -446,9 +447,10 @@ function _setHostStaticAttributes( element: ng.IAugmentedJQuery, staticAttribute
  * @param ctrl
  * @param hostBindings
  * @returns {Array}
+ * @internal
  * @private
  */
-function _setHostBindings(
+export function _setHostBindings(
   scope: ng.IScope,
   element: ng.IAugmentedJQuery,
   ctrl: any,
@@ -462,48 +464,14 @@ function _setHostBindings(
     ..._createWatcherByType( 'properties', hostBindings )
   ];
 
-  /*const _internalWatchers = [];
-
-   // classes
-   StringMapWrapper.forEach(
-   hostBindings.classes,
-   ( watchPropName: string, className: string )=> {
-   _internalWatchers.push(
-   scope.$watch(
-   ()=>ctrl[ watchPropName ],
-   ( addOrRemove )=>element.toggleClass( className, addOrRemove )
-   )
-   )
-   }
-   );
-
-   // attributes
-   StringMapWrapper.forEach(
-   hostBindings.attributes,
-   ( watchPropName: string, attrName: string )=> {
-   _internalWatchers.push(
-   scope.$watch(
-   ()=>ctrl[ watchPropName ],
-   ( attrValue )=>element.attr( attrName, attrValue )
-   )
-   )
-   }
-   );
-   // properties
-   StringMapWrapper.forEach(
-   hostBindings.properties,
-   ( watchPropName: string, domPropNamePath: string )=> {
-   _internalWatchers.push(
-   scope.$watch(
-   ()=>ctrl[ watchPropName ],
-   ( domPropValue )=>StringMapWrapper.setValueInPath( element[ 0 ], domPropNamePath, domPropValue )
-   )
-   )
-   }
-   );
-
-   return _internalWatchers;*/
-
+  /**
+   * registers $scope.$watch for appropriate hostBinding
+   * the watcher watches property on controller instance
+   * @param type
+   * @param hostBinding
+   * @returns {Array}
+   * @private
+   */
   function _createWatcherByType( type: string, hostBinding: HostBindingsProcessed ): Function[] {
 
     const _watchersByType = [];
@@ -517,7 +485,7 @@ function _setHostBindings(
             ()=>ctrl[ watchPropName ],
             ( newValue )=> {
 
-              if ( type === 'class' ) {
+              if ( type === 'classes' ) {
                 element.toggleClass( keyToSet, newValue )
               }
               if ( type === 'attributes' ) {

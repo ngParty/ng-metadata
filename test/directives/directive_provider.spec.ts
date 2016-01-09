@@ -7,6 +7,8 @@ import {Input,Attr,Output,HostListener,HostBinding} from "../../src/directives/d
 import {Inject} from "../../src/di/decorators";
 import {directiveProvider,DirectiveProvider} from "../../src/directives/directive_provider";
 import {noop} from "../../src/facade/lang";
+import {_assignRequiredCtrlInstancesToHostCtrl} from "../../src/directives/directive_provider";
+import {_setHostBindings} from "../../src/directives/directive_provider";
 
 describe( `directives/directive_provider`, ()=> {
 
@@ -348,6 +350,196 @@ describe( `directives/directive_provider`, ()=> {
         };
 
         expect( actual ).to.deep.equal( expected );
+
+      } );
+
+    } );
+
+    describe( `#_createDDO`, ()=> {
+
+      it( `should create DDO from shell and provided ddo`, ()=> {
+
+        const actual = directiveProvider._createDDO({
+          scope:{},
+          bindToController:{item:'='},
+          require:['foo'],
+          controller: class Foo{},
+          controllerAs: 'ctrl',
+          template:'hello'
+        },{});
+        const expected = {
+          scope:{},
+          bindToController:{item:'='},
+          require:['foo'],
+          controller: actual.controller,
+          controllerAs: 'ctrl',
+          template:'hello',
+          link:actual.link
+        };
+
+        expect(actual).to.deep.equal(expected);
+
+      } );
+
+      it( `should overwrite any property with legacy DDO`, ()=> {
+
+        const actual = directiveProvider._createDDO({
+          scope:{},
+          bindToController:{item:'='},
+          require:['foo'],
+          controller: class Foo{},
+          controllerAs: 'ctrl',
+          template:'hello'
+        },{
+          scope: true,
+          controllerAs:'foo',
+          transclude: false
+        });
+
+        const expected = {
+          scope:true,
+          bindToController:{item:'='},
+          require:['foo'],
+          controller: actual.controller,
+          controllerAs: 'foo',
+          template:'hello',
+          link:actual.link,
+          transclude: false
+        };
+
+        expect(actual).to.deep.equal(expected);
+
+      } );
+
+    } );
+
+    describe( `link fn creators helpers`, ()=> {
+
+      describe( `#_assignRequiredCtrlInstancesToHostCtrl`, ()=> {
+
+        it( `should extend ctrl instances with requiredCtrl names with proper require ctrl instances`, ()=> {
+
+          const ngModel = { $modelValue: undefined, $viewValue:'123', $setViewValue: noop};
+          const emSomeDirective = { callMe: noop };
+          const requiredCtrlVarNames = [ 'ngModelCtrl', 'someDirective' ];
+          const requiredCtrls = [ ngModel, emSomeDirective ];
+          const ctrl = {};
+
+          _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
+          const expected = {
+            ngModelCtrl: ngModel,
+            someDirective: emSomeDirective
+          };
+
+          expect(ctrl).to.deep.equal(expected);
+
+        } );
+
+      } );
+
+      describe( `#_setHostBindings`, ()=> {
+
+        class $Scope{
+          $$watchers = [];
+          $watch(watchExp: Function|string,watchListener:Function){
+            this.$$watchers.push([watchExp,watchListener]);
+            return function disposable(){}
+          }
+        }
+
+        function ElementFactory() {
+          return {
+            '0': {},
+            classList: {},
+            attributes: {},
+            toggleClass( className, toggle? ){
+              if ( toggle ) {
+                this.classList[ className ] = true;
+              } else {
+                delete this.classList[ className ];
+              }
+              //this.classList[ className ] = toggle;
+            },
+            attr( attrName, value ){
+              this.attributes[ attrName ] = value;
+            }
+          }
+        }
+
+        let $scope;
+        let $element;
+        let hostBindings = {
+          classes: {'is-foo':'isFoo'} as StringMap,
+          attributes: {'aria-label':'aria'} as StringMap,
+          properties: {'style.fontSize':'fontSize'} as StringMap
+        };
+        let ctrl = { isFoo: true, aria: 'hello', fontSize: 12 };
+
+        beforeEach( ()=> {
+          $scope = new $Scope();
+          $element = ElementFactory();
+        } );
+
+        it( `should create array of scope.$watch disposable callbacks`, ()=> {
+
+          const actual = _setHostBindings( $scope, $element, ctrl, hostBindings );
+
+          expect( actual.length ).to.deep.equal( 3 );
+          expect( actual.every(isFunction) ).to.deep.equal( true );
+          expect( $scope.$$watchers.length ).to.equal( 3 );
+
+        } );
+
+        it( `should toggle host bindings appropriately for class bindings`, ()=> {
+
+          const actual = _setHostBindings( $scope, $element, ctrl, hostBindings );
+
+          const classWatcher = $scope.$$watchers[0];
+          const [watchExp,watchListener] = classWatcher;
+
+          expect(watchExp()).to.equal(true);
+
+          watchListener(true);
+          expect( $element.classList[ 'is-foo' ] ).to.equal( true );
+
+          watchListener(false);
+          expect( $element.classList[ 'is-foo' ] ).to.equal( undefined );
+
+        } );
+
+        it( `should toggle host bindings appropriately for attr bindings`, ()=> {
+
+          const actual = _setHostBindings( $scope, $element, ctrl, hostBindings );
+
+          const attrWatcher = $scope.$$watchers[1];
+          const [watchExp,watchListener] = attrWatcher;
+
+          expect(watchExp()).to.equal('hello');
+
+          watchListener('nope');
+          expect( $element.attributes[ 'aria-label' ] ).to.equal( 'nope' );
+
+          watchListener('yay');
+          expect( $element.attributes[ 'aria-label' ] ).to.equal( 'yay' );
+
+        } );
+
+        it( `should toggle host bindings appropriately for prop bindings`, ()=> {
+
+          const actual = _setHostBindings( $scope, $element, ctrl, hostBindings );
+
+          const propWatcher = $scope.$$watchers[2];
+          const [watchExp,watchListener] = propWatcher;
+
+          expect( watchExp() ).to.equal( 12 );
+
+          watchListener('12px');
+          expect( $element[0][ 'style' ][ 'fontSize' ] ).to.equal( '12px' );
+
+          watchListener( '2rem' );
+          expect( $element[0][ 'style' ][ 'fontSize' ] ).to.equal( '2rem' );
+
+        } );
 
       } );
 
