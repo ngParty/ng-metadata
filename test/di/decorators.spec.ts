@@ -101,7 +101,7 @@ describe( 'di/decorators', () => {
 
     it( 'should not add instance to PARAM_META_KEY if used on non constructor', () => {
 
-      expect( isBlank( reflector.parameters(cls) ) ).to.equal( true );
+      expect( reflector.parameters( cls ) ).to.deep.equal( [] );
 
     } );
 

@@ -34,7 +34,7 @@ export class Reflector {
 
   parameters( typeOrFunc: Type ): any[][] {
     //return Reflect.getMetadata('parameters', cls);
-    return extractParameter( typeOrFunc );
+    return extractParameter( typeOrFunc ) || [];
   }
 
   registerParameters( parameters, type: Type ): void {
@@ -44,7 +44,7 @@ export class Reflector {
 
   annotations( typeOrFunc: Type ): any[] {
     //return Reflect.getOwnMetadata('annotations', cls);
-    return extractAnnotation( typeOrFunc );
+    return extractAnnotation( typeOrFunc ) || [];
   }
 
   registerAnnotation( annotations, type: Type ): void {
@@ -54,7 +54,7 @@ export class Reflector {
 
   propMetadata( typeOrFunc: Type ): {[key: string]: any[]} {
     //return Reflect.getOwnMetadata('propMetadata', target.constructor);
-    return extractProperty( typeOrFunc );
+    return extractProperty( typeOrFunc ) || {};
   }
 
   registerPropMetadata( propMetadata, type: Type ): void {
