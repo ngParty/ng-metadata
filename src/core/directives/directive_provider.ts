@@ -288,10 +288,12 @@ export class DirectiveProvider {
         _setHostListeners( element, ctrl, hostProcessed.hostListeners );
 
         // AfterContent Hooks
-        ctrl.ngAfterContentInit();
+        if ( lfHooks.ngAfterContentInit ) {
+          ctrl.ngAfterContentInit();
+        }
 
         // destroy
-        _setupDestroyHandler( scope, element, ctrl, _watchers );
+        _setupDestroyHandler( scope, element, ctrl, lfHooks.ngOnDestroy, _watchers );
 
       }
 
@@ -328,10 +330,12 @@ export class DirectiveProvider {
         _setHostListeners( element, ctrl, hostProcessed.hostListeners );
 
         // AfterContent Hooks
-        ctrl.ngAfterContentInit();
+        if ( lfHooks.ngAfterContentInit ) {
+          ctrl.ngAfterContentInit();
+        }
 
         // destroy
-        _setupDestroyHandler( scope, element, ctrl, _watchers, _observers );
+        _setupDestroyHandler( scope, element, ctrl, lfHooks.ngOnDestroy, _watchers, _observers );
 
       }
 
@@ -375,13 +379,18 @@ function _setupDestroyHandler(
   scope: ng.IScope,
   element: ng.IAugmentedJQuery,
   ctrl: any,
+  implementsNgOnDestroy: boolean,
   watchersToDispose: Function[],
   observersToDispose?: Function[]
 ): void {
 
   scope.$on( '$destroy', ()=> {
 
-    ctrl.ngOnDestroy();
+    if ( implementsNgOnDestroy ) {
+
+      ctrl.ngOnDestroy();
+
+    }
 
     watchersToDispose.forEach( _watcherDispose=>_watcherDispose() );
     observersToDispose.forEach( _observerDispose=>_observerDispose() );

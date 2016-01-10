@@ -273,6 +273,146 @@ describe( `directives/directive_provider`, ()=> {
 
   } );
 
+  describe( `life cycles`, ()=> {
+
+    let $element;
+    let $scope;
+    let $attrs;
+    let $transclude;
+    beforeEach( ()=> {
+
+      $element = ElementFactory();
+      $scope = new $Scope();
+      $attrs = new $Attrs();
+      $transclude = noop();
+
+    } );
+    it( `should call ngOnInit only if it's implemented from preLink`, ()=> {
+
+      @Directive({selector:'[myDir]'})
+      class MyDirective{
+        ngOnInit(){}
+      }
+
+      const ctrl = [ new MyDirective() ];
+      const spy = sinon.spy( ctrl[0],'ngOnInit' );
+
+      const directiveProviderArr = directiveProvider.createFromType( MyDirective );
+      const ddo = directiveProviderArr[ 1 ]();
+      const link: ng.IDirectivePrePost = ddo.link;
+
+      expect( isFunction( link.pre ) ).to.equal( true );
+      expect( isFunction( link.post ) ).to.equal( true );
+      expect( spy.called ).to.equal( false );
+
+      link.pre( $scope, $element, $attrs, ctrl, $transclude );
+      expect( spy.called ).to.equal( true );
+
+      spy.restore();
+
+    } );
+    it( `should call ngOnDestroy only if it's implemented from postLink`, ()=> {
+
+      @Directive({selector:'[myDir]'})
+      class MyDirective{
+        ngOnDestroy(){}
+      }
+
+      const ctrl = [ new MyDirective() ];
+      const spy = sinon.spy( ctrl[0],'ngOnDestroy' );
+
+      const directiveProviderArr = directiveProvider.createFromType( MyDirective );
+      const ddo = directiveProviderArr[ 1 ]();
+      const link = ddo.link as ng.IDirectiveLinkFn;
+
+      expect( isFunction( link ) ).to.equal( true );
+      expect( spy.called ).to.equal( false );
+
+      link( $scope, $element, $attrs, ctrl, $transclude );
+      expect( spy.called ).to.equal( false );
+
+      $scope.$emit( '$destroy' );
+      expect( spy.called ).to.equal( true );
+
+
+      spy.restore();
+
+    } );
+
+    it( `should call ngAfterContentInit only if it's implemented from postLink`, ()=> {
+
+      @Directive({selector:'[myDir]'})
+      class MyDirective implements AfterContentInit{
+        ngAfterContentInit(){}
+      }
+
+      const ctrl = [ new MyDirective() ];
+      const spy = sinon.spy( ctrl[0],'ngAfterContentInit' );
+
+      const directiveProviderArr = directiveProvider.createFromType( MyDirective );
+      const ddo = directiveProviderArr[ 1 ]();
+      const link = ddo.link as ng.IDirectiveLinkFn;
+
+      expect( isFunction( link ) ).to.equal( true );
+      expect( spy.called ).to.equal( false );
+
+      link( $scope, $element, $attrs, ctrl, $transclude );
+      expect( spy.called ).to.equal( true );
+
+      spy.restore();
+
+    } );
+
+    it( `should call all hooks if they are implemented`, ()=> {
+
+      @Directive({selector:'[myDir]'})
+      class MyDirective{
+        ngOnInit(){}
+        ngAfterContentInit(){}
+        ngOnDestroy(){}
+      }
+
+      const ctrl = [ new MyDirective() ];
+      const spyInit = sinon.spy( ctrl[0],'ngOnInit' );
+      const spyAfterContentInit = sinon.spy( ctrl[0],'ngAfterContentInit' );
+      const spyDestroy = sinon.spy( ctrl[0],'ngOnDestroy' );
+
+      const directiveProviderArr = directiveProvider.createFromType( MyDirective );
+      const ddo = directiveProviderArr[ 1 ]();
+      const link: ng.IDirectivePrePost = ddo.link;
+
+      expect( isFunction( link.pre ) ).to.equal( true );
+      expect( isFunction( link.post ) ).to.equal( true );
+
+      expect( spyInit.called ).to.equal( false );
+      expect( spyAfterContentInit.called ).to.equal( false );
+      expect( spyDestroy.called ).to.equal( false );
+
+      link.pre( $scope, $element, $attrs, ctrl, $transclude );
+      expect( spyInit.called ).to.equal( true );
+      expect( spyAfterContentInit.called ).to.equal( false );
+      expect( spyDestroy.called ).to.equal( false );
+
+      link.post( $scope, $element, $attrs, ctrl, $transclude );
+
+      expect( spyInit.called ).to.equal( true );
+      expect( spyAfterContentInit.called ).to.equal( true );
+      expect( spyDestroy.called ).to.equal( false );
+
+      $scope.$emit( '$destroy' );
+
+      expect( spyInit.called ).to.equal( true );
+      expect( spyAfterContentInit.called ).to.equal( true );
+      expect( spyDestroy.called ).to.equal( true );
+
+      spyInit.restore();
+      spyAfterContentInit.restore();
+      spyDestroy.restore();
+
+    } );
+
+  } );
+
   describe( `private API`, ()=> {
 
     describe( `#_createComponentBindings`, ()=> {

@@ -64,6 +64,7 @@ export function getNg1InjectorMock(): ng.auto.IInjectorService {
  */
 export class $Scope {
   $$watchers = [];
+  $$events = [];
 
   $watch( watchExp: Function|string, watchListener: Function ) {
     this.$$watchers.push( [ watchExp, watchListener ] );
@@ -75,6 +76,25 @@ export class $Scope {
     const done = 'evaluated';
     return eval( 'toEval + " " + done' );
   }
+
+  $on( eventName, cb ){
+    this.$$events.push({eventName,cb})
+  }
+
+  $emit(eventName){
+
+    this.$$events.forEach( eventObj=> {
+
+      if ( eventObj.eventName === eventName ) {
+        eventObj.cb();
+        return;
+      }
+
+    } )
+
+  }
+
+
 }
 
 /**
@@ -112,6 +132,9 @@ export function ElementFactory() {
     },
     on(eventName:string,cb:Function){
       this._eventListeners.push({ eventName, cb } )
+    },
+    off(eventName?){
+
     }
   }
 }
