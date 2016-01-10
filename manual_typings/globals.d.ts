@@ -1,4 +1,8 @@
-declare var global: any;
+// TODO: ideally the node.d.ts reference should be scoped only for files that need and not to all
+//       the code including client code
+/// <reference path="../typings/browser/ambient/node/node.d.ts" />
+
+// @TODO add angular1 module overrides for proper ...provide handling
 
 interface BrowserNodeGlobal {
   Object: typeof Object,
