@@ -25,5 +25,6 @@ import {CONST} from '../facade/lang';
 export class OpaqueToken {
   constructor(private _desc: string) {}
 
+  get desc(): string { return this._desc }
   toString(): string { return `Token ${this._desc}`; }
 }
