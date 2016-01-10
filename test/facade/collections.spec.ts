@@ -76,8 +76,6 @@ describe( `facade/collections`, ()=> {
         const actual = StringMapWrapper.getValueFromPath(obj,path);
         const expected = 3;
 
-        console.log( actual );
-
         expect(actual).to.equal(expected);
 
       } );
