@@ -1,4 +1,12 @@
 import {
+  makeDecorator,
+  makePropDecorator,
+  TypeDecorator
+} from '../util/decorators';
+
+import {Type} from '../facade/lang';
+
+import {
   ContentChildrenMetadata,
   ContentChildMetadata,
   ViewChildrenMetadata,
@@ -10,19 +18,11 @@ import {
   ComponentMetadata,
   DirectiveMetadata,
   InputMetadata,
+  AttrMetadata,
   OutputMetadata,
   HostBindingMetadata,
   HostListenerMetadata
 } from './metadata_directives';
-
-import {
-  makeDecorator,
-  makePropDecorator,
-  TypeDecorator
-} from '../util/decorators';
-
-import {Type} from '../facade/lang';
-import {AttrMetadata} from "./metadata_directives";
 import {LegacyDirectiveDefinition} from "./metadata_directives";
 
 
