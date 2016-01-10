@@ -2,14 +2,12 @@
   "name": "ng-metadata",
   "version": "1.0.0-beta.5",
   "description": "Angular 2 style decorators and utils for Angular 1.x",
-  "main": "ng-metadata.js",
-  "typings": "./ng-metadata.d.ts",
   "scripts": {
     "typings": "typings install",
     "prepublish": "npm run typings && tsc",
     "start": "tsc -w",
-    "test": "mocha ng-metadata.test.js",
-    "test:live": "mocha ng-metadata.test.js -w",
+    "test": "mocha ./test/index.js",
+    "test:live": "mocha ./test/index.js -w",
     "commit": "git-cz",
     "playground": "tsc -p playground -w & live-server --no-browser",
     "uglify": "uglifyjs test/host.spec.js --beautify --mangle --compress --output test/__uglifyTest.js"
