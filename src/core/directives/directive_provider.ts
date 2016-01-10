@@ -45,34 +45,40 @@ export class DirectiveProvider {
     const {inputs,attrs,outputs,host,queries,legacy} = metadata;
 
     let _ddo = {} as ng.IDirective;
+    const _basicDDO = {
+      controller: type,
+      require: this._createRequires( requireMap, directiveName ),
+    } as ng.IDirective;
+
     if ( metadata instanceof ComponentMetadata ) {
 
-      _ddo = {
+      const componentSpecificDDO = {
         scope: {},
         bindToController: this._createComponentBindings( inputs, attrs, outputs ),
-        controller: Type,
         controllerAs: 'ctrl',
-        require: this._createRequires( requireMap, directiveName ),
         link: this._createLink( type, metadata, lfHooks, requireMap )
-      };
+      } as ng.IDirective;
 
       if ( metadata.template && metadata.templateUrl ) {
         throw new Error( 'cannot have both template and templateUrl' );
       }
       if ( metadata.template ) {
-        _ddo.template = metadata.template;
+        componentSpecificDDO.template = metadata.template;
       }
       if ( metadata.templateUrl ) {
-        _ddo.templateUrl = metadata.templateUrl;
+        componentSpecificDDO.templateUrl = metadata.templateUrl;
       }
 
-    }
-    else {
-      _ddo = {
-        controller: Type,
-        require: this._createRequires( requireMap, directiveName ),
+      StringMapWrapper.assign( _ddo, _basicDDO, componentSpecificDDO );
+
+    } else {
+
+      const directiveSpecificDDO = {
         link: this._createLink( type, metadata, lfHooks, requireMap )
-      };
+      } as ng.IDirective;
+
+      StringMapWrapper.assign( _ddo, _basicDDO, directiveSpecificDDO );
+
     }
 
     const ddo = this._createDDO( _ddo, metadata.legacy );

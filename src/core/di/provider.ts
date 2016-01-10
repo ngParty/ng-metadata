@@ -84,11 +84,11 @@ class ProviderBuilder{
     }
 
     if ( annotation instanceof PipeMetadata ) {
-      return pipeProvider.createFromType(injectableType);
+      return pipeProvider.createFromType( injectableType );
     }
 
     if ( annotation instanceof DirectiveMetadata ) {
-      return directiveProvider.createFromType(injectableType);
+      return directiveProvider.createFromType( injectableType );
     }
 
     if ( annotation instanceof InjectableMetadata ) {

@@ -86,6 +86,7 @@ describe( `di/provider`, ()=> {
       expect( FooPipe.$inject ).to.deep.equal( [ 'myService' ] );
 
     } );
+
     it( `should return string name and directiveFactory for Angular registry and add $inject prop if needed (Directive)`, ()=> {
 
       class MyService{}
@@ -102,9 +103,12 @@ describe( `di/provider`, ()=> {
 
       expect( ngContainerName ).to.deep.equal( 'myFoo' );
       expect( isFunction( filterFactory ) ).to.deep.equal( true );
+
       expect(FooDirective.$inject).to.deep.equal(['myService']);
+      //expect( filterFactory().controller ).to.equal( FooDirective );
 
     } );
+
     it( `should return string name and directiveFactory for Angular registry and add $inject prop if needed (Component)`, ()=> {
 
       class MyService{}
@@ -124,6 +128,7 @@ describe( `di/provider`, ()=> {
       expect( isFunction( filterFactory ) ).to.deep.equal( true );
 
       expect(FooComponent.$inject).to.deep.equal(['myService','$element']);
+      expect( filterFactory().controller ).to.equal( FooComponent );
 
     } );
 

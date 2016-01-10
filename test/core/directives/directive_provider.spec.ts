@@ -73,7 +73,7 @@ describe( `directives/directive_provider`, ()=> {
     expect( isFunction( directiveFactory ) ).to.equal( true );
     expect( directiveFactory() ).to.deep.equal( {
       require: [ 'myClicker' ],
-      controller: MyClicker.constructor,
+      controller: MyClicker,
       link: {
         pre: (ddo.link as ng.IDirectivePrePost).pre,
         post: (ddo.link as ng.IDirectivePrePost).post
@@ -209,7 +209,7 @@ describe( `directives/directive_provider`, ()=> {
         onLightsaberAttack: '&'
       },
       require: [ 'jediMaster' ],
-      controller: JediMasterCmp.constructor,
+      controller: JediMasterCmp,
       controllerAs: 'ctrl',
       link: {
         pre: (ddo.link as ng.IDirectivePrePost).pre,
