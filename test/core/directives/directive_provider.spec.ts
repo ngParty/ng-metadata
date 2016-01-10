@@ -1,12 +1,12 @@
 import * as sinon from 'sinon';
 import {expect} from 'chai';
 
-import {noop,isFunction} from "../../src/facade/lang";
-import {AfterContentInit,OnDestroy,OnInit} from "../../src/linker/directive_lifecycle_interfaces";
-import {Component,Directive,Input,Attr,Output,HostListener,HostBinding} from "../../src/directives/decorators";
-import {Inject} from "../../src/di/decorators";
-import {DirectiveMetadata} from "../../src/directives/metadata_directives";
-import {$Scope,$Attrs,ElementFactory} from "../../src/testing/utils";
+import {noop,isFunction} from '../../../src/facade/lang';
+import {AfterContentInit,OnDestroy,OnInit} from '../../../src/core/linker/directive_lifecycle_interfaces';
+import {Component,Directive,Input,Attr,Output,HostListener,HostBinding} from '../../../src/core/directives/decorators';
+import {Inject} from '../../../src/core/di/decorators';
+import {DirectiveMetadata} from '../../../src/core/directives/metadata_directives';
+import {$Scope,$Attrs,ElementFactory} from '../../../src/testing/utils';
 
 import {
   directiveProvider,
@@ -16,7 +16,7 @@ import {
   _getHostListenerCbParams,
   _setHostListeners,
   _createDirectiveBindings
-} from "../../src/directives/directive_provider";
+} from '../../../src/core/directives/directive_provider';
 
 describe( `directives/directive_provider`, ()=> {
 

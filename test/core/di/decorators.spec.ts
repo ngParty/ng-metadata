@@ -6,7 +6,7 @@ import {
   Optional,
   Self,
   SkipSelf
-} from '../../src/di/decorators';
+} from '../../../src/core/di/decorators';
 import {
   InjectMetadata,
   HostMetadata,
@@ -14,9 +14,9 @@ import {
   OptionalMetadata,
   SelfMetadata,
   SkipSelfMetadata
-} from '../../src/di/metadata';
-import { reflector } from '../../src/reflection/reflection';
-import {isArray,isBlank,isPresent} from '../../src/facade/lang'
+} from '../../../src/core/di/metadata';
+import { reflector } from '../../../src/core/reflection/reflection';
+import {isArray,isBlank,isPresent} from '../../../src/facade/lang'
 
 describe( 'di/decorators', () => {
 

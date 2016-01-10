@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import {stringify} from "../../src/facade/lang";
-import {DirectiveMetadata,ComponentMetadata} from "../../src/directives/metadata_directives";
+import {stringify} from '../../../src/facade/lang';
+import {DirectiveMetadata,ComponentMetadata} from '../../../src/core/directives/metadata_directives';
 import {
   Directive,
   Component,
@@ -9,17 +9,17 @@ import {
   HostBinding,
   HostListener,
   Attr
-} from "../../src/directives/decorators";
-import {DirectiveResolver} from "../../src/linker/directive_resolver";
-import {Inject} from "../../src/di/decorators";
-import {Host} from "../../src/di/decorators";
-import {Self} from "../../src/di/decorators";
-import {Optional} from "../../src/di/decorators";
-import {InjectMetadata} from "../../src/di/metadata";
-import {HostMetadata} from "../../src/di/metadata";
-import {SelfMetadata} from "../../src/di/metadata";
-import {OptionalMetadata} from "../../src/di/metadata";
-import {SkipSelf} from "../../src/di/decorators";
+} from '../../../src/core/directives/decorators';
+import {DirectiveResolver} from '../../../src/core/linker/directive_resolver';
+import {Inject} from '../../../src/core/di/decorators';
+import {Host} from '../../../src/core/di/decorators';
+import {Self} from '../../../src/core/di/decorators';
+import {Optional} from '../../../src/core/di/decorators';
+import {InjectMetadata} from '../../../src/core/di/metadata';
+import {HostMetadata} from '../../../src/core/di/metadata';
+import {SelfMetadata} from '../../../src/core/di/metadata';
+import {OptionalMetadata} from '../../../src/core/di/metadata';
+import {SkipSelf} from '../../../src/core/di/decorators';
 
 
 describe( `linker/directive_resolver`, ()=> {

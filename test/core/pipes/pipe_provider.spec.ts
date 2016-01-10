@@ -1,9 +1,9 @@
 import {expect} from 'chai';
-import {getNg1InjectorMock} from "../../src/testing/utils";
-import {isString,isFunction} from "../../src/facade/lang";
-import {Pipe} from "../../src/pipes/decorators";
-import {pipeProvider} from "../../src/pipes/pipe_provider";
-import {PipeTransform} from "../../src/pipes/pipe_interfaces";
+import {getNg1InjectorMock} from '../../../src/testing/utils';
+import {isString,isFunction} from '../../../src/facade/lang';
+import {Pipe} from '../../../src/core/pipes/decorators';
+import {pipeProvider} from '../../../src/core/pipes/pipe_provider';
+import {PipeTransform} from '../../../src/core/pipes/pipe_interfaces';
 
   describe( `pipes/pipeProvider`, ()=> {
 

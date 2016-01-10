@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import {makeDecorator,makeParamDecorator,makePropDecorator} from '../../src/util/decorators';
-import {isFunction} from "../../src/facade/lang";
+import {makeDecorator,makeParamDecorator,makePropDecorator} from '../../../src/core/util/decorators';
+import {isFunction} from '../../../src/facade/lang';
 
 describe( `util/decorators`, ()=> {
 

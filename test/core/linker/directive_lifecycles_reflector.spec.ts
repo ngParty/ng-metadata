@@ -1,6 +1,6 @@
 import {expect} from 'chai';
-import {hasLifecycleHook} from "../../src/linker/directive_lifecycles_reflector";
-import {LifecycleHooks} from "../../src/linker/directive_lifecycle_interfaces";
+import {hasLifecycleHook} from '../../../src/core/linker/directive_lifecycles_reflector';
+import {LifecycleHooks} from '../../../src/core/linker/directive_lifecycle_interfaces';
 
 describe( `linker/lifecycles_reflector`, ()=> {
 

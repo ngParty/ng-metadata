@@ -1,7 +1,7 @@
 import {expect} from 'chai';
-import {Pipe} from "../../src/pipes/decorators";
-import {PipeResolver} from "../../src/linker/pipe_resolver";
-import {PipeMetadata} from "../../src/pipes/metadata";
+import {Pipe} from '../../../src/core/pipes/decorators';
+import {PipeResolver} from '../../../src/core/linker/pipe_resolver';
+import {PipeMetadata} from '../../../src/core/pipes/metadata';
 
 describe( `linker/pipe_resolver`, ()=> {
 

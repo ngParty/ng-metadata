@@ -1,13 +1,13 @@
 import {expect} from 'chai';
-import {makePropDecorator} from '../../src/util/decorators';
-import {Injectable} from "../../src/di/decorators";
-import {Inject} from "../../src/di/decorators";
-import {InjectableMetadata} from "../../src/di/metadata";
-import {Host} from "../../src/di/decorators";
-import {HostMetadata} from "../../src/di/metadata";
-import {assign} from "../../src/facade/lang";
-import {InjectMetadata} from "../../src/di/metadata";
-import {reflector} from "../../src/reflection/reflection";
+import {makePropDecorator} from '../../../src/core/util/decorators';
+import {Injectable} from '../../../src/core/di/decorators';
+import {Inject} from '../../../src/core/di/decorators';
+import {InjectableMetadata} from '../../../src/core/di/metadata';
+import {Host} from '../../../src/core/di/decorators';
+import {HostMetadata} from '../../../src/core/di/metadata';
+import {assign} from '../../../src/facade/lang';
+import {InjectMetadata} from '../../../src/core/di/metadata';
+import {reflector} from '../../../src/core/reflection/reflection';
 
 
 describe( `reflection/reflector`, ()=> {
