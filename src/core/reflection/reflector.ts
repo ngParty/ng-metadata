@@ -1,4 +1,4 @@
-import {Type,isPresent,isFunction} from "../facade/lang";
+import {Type,isPresent,isFunction} from "../../facade/lang";
 
 // This will be needed when we will used Reflect APIs
 /*const Reflect = global.Reflect;

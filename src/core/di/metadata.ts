@@ -1,4 +1,4 @@
-import {CONST, stringify, isBlank, isPresent, isString} from "../facade/lang";
+import {CONST, stringify, isBlank, isPresent, isString} from "../../facade/lang";
 import {InjectFactory} from "./decorators";
 
 /**

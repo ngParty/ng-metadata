@@ -1,4 +1,4 @@
-import {CONST, Type, stringify, isPresent, isString} from '../facade/lang';
+import {CONST, Type, stringify, isPresent, isString} from '../../facade/lang';
 
 @CONST()
 export class QueryMetadata {

@@ -2,8 +2,8 @@ import {
   Type,
   isPresent,
   stringify
-} from '../facade/lang';
-import {ListWrapper} from '../facade/collections';
+} from '../../facade/lang';
+import {ListWrapper} from '../../facade/collections';
 import {PipeMetadata} from '../pipes/metadata';
 import {reflector} from '../reflection/reflection';
 

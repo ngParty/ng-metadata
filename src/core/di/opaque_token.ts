@@ -1,4 +1,4 @@
-import {CONST} from '../facade/lang';
+import {CONST} from '../../facade/lang';
 
 /**
  * Creates a token that can be used in a DI Provider.

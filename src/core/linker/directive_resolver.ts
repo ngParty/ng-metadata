@@ -1,5 +1,5 @@
-import {Type, isPresent, isBlank, stringify, assign} from '../facade/lang';
-import {StringMapWrapper, ListWrapper} from "../facade/collections";
+import {Type, isPresent, isBlank, stringify, assign} from '../../facade/lang';
+import {StringMapWrapper, ListWrapper} from "../../facade/collections";
 import {reflector} from '../reflection/reflection';
 import {
   DirectiveMetadata,

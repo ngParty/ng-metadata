@@ -1,4 +1,4 @@
-import {global, Type, isFunction, isString, isPresent} from '../facade/lang';
+import {global, Type, isFunction, isString, isPresent} from '../../facade/lang';
 import {reflector} from '../reflection/reflection';
 
 /**

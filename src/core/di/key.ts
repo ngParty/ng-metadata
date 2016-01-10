@@ -1,6 +1,6 @@
-import {isBlank,stringify} from '../facade/lang';
+import {isBlank,stringify} from '../../facade/lang';
 import {resolveForwardRef} from './forward_ref';
-import {StringMapWrapper} from '../facade/collections';
+import {StringMapWrapper} from '../../facade/collections';
 
 /**
  * @TODO

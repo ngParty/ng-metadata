@@ -7,7 +7,7 @@ import {
   resolveDirectiveNameFromSelector,
   isPresent,
   stringify
-} from '../facade/lang';
+} from '../../facade/lang';
 import {reflector} from "../reflection/reflection";
 import {OpaqueToken} from "./opaque_token";
 import {PipeMetadata} from "../pipes/metadata";

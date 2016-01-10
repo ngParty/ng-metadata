@@ -2,7 +2,7 @@ import {
   makeDecorator,
   TypeDecorator
 } from '../util/decorators';
-import {Type} from '../facade/lang';
+import {Type} from '../../facade/lang';
 import {PipeMetadata} from './metadata';
 
 /**

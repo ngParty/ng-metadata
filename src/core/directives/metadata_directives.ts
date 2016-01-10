@@ -1,4 +1,4 @@
-import {isPresent, CONST, Type} from '../facade/lang';
+import {isPresent, CONST, Type} from '../../facade/lang';
 import {InjectableMetadata} from '../di/metadata';
 
 export type LegacyDirectiveDefinition = {
