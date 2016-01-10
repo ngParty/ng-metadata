@@ -1,74 +1,208 @@
-import {Type,stringify} from '../facade/lang';
-import {isFunction} from "../facade/lang";
+import {
+  Type,
+  isString,
+  isBlank,
+  isType,
+  getTypeName,
+  resolveDirectiveNameFromSelector,
+  isPresent,
+  stringify
+} from '../facade/lang';
 import {reflector} from "../reflection/reflection";
-import {isString} from "../facade/lang";
-import {isArray} from "../facade/lang";
-import {isType} from "../facade/lang";
-import {getTypeName} from "../facade/lang";
+import {OpaqueToken} from "./opaque_token";
 import {PipeMetadata} from "../pipes/metadata";
-import {DirectiveMetadata} from "../directives/metadata_directives";
-import {InjectableMetadata} from "./metadata";
-import {resolveDirectiveNameFromSelector} from "../facade/lang";
-import {InjectMetadata} from "./metadata";
+import {
+  DirectiveMetadata,
+  OutputMetadata,
+  HostBindingMetadata,
+  HostListenerMetadata,
+  InputMetadata
+} from "../directives/metadata_directives";
+import {
+  InjectMetadata,
+  InjectableMetadata,
+  SkipSelfMetadata,
+  SelfMetadata,
+  HostMetadata
+} from './metadata';
+import {pipeProvider} from "../pipes/pipe_provider";
+import {directiveProvider} from "../directives/directive_provider";
 
+
+export type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
+export type ParamMetaInst = HostMetadata | InjectMetadata | SelfMetadata | SkipSelfMetadata;
+export type ProviderType = Type | string | OpaqueToken;
+
+class ProviderBuilder{
+
+  static createFromType(type: ProviderType, {useClass,useValue}:{useClass?:Type,useValue?:any} = {}): [string,Type]{
+
+    // ...provide(opaqueTokenInst,{useValue: {foo:12312} })
+    if ( type instanceof OpaqueToken ) {
+
+      if(isBlank(useValue)){
+        throw new Error(`you must provide useValue when registering constant/value via OpaqueToken`);
+      }
+      return [
+        type.desc,
+        useValue
+      ];
+
+    }
+
+    // ...provide('myValue',{useValue: {foo:12312} })
+    if ( isString( type ) && isPresent( useValue ) ) {
+      return [
+        type,
+        useValue
+      ];
+    }
+
+    const injectableType = isString( type )
+      ? useClass
+      : type as Type;
+
+    const overrideName = isString( type )
+      ? type
+      : '';
+
+    if ( !isType( injectableType ) ) {
+      throw new Error( `token ${stringify( injectableType )} must be type of Type, You cannot provide non class` );
+    }
+
+    injectableType.$inject = _dependenciesFor( injectableType );
+
+    const [annotation] = reflector.annotations( injectableType );
+
+    if ( isBlank( annotation ) ) {
+
+      throw new Error( `
+      cannot create appropriate construct from provided Type.
+       -> Type must be on of (@Pipe(),@Component(),@Directive(),@Injectable())
+      ` );
+
+    }
+
+    if ( annotation instanceof PipeMetadata ) {
+      return pipeProvider.createFromType(injectableType);
+    }
+
+    if ( annotation instanceof DirectiveMetadata ) {
+      return directiveProvider.createFromType(injectableType);
+    }
+
+    if ( annotation instanceof InjectableMetadata ) {
+      return [
+        overrideName || getTypeName( injectableType ),
+        injectableType
+      ];
+    }
+
+  }
+}
 /**
  * should extract the string token from provided Type and add $inject angular 1 annotation to constructor if @Inject
  * was used
  * @param type
  * @returns {string}
  */
-export function provide( type: Type | string, {useClass}:{useClass?:Type} = {} ): string {
+export function provide( type: ProviderType, {useClass,useValue}:{useClass?:Type,useValue?:any} = {} ): [string,Type] {
 
-  // create $inject annotation if needed
-  const parameters = isString( type )
-    ? reflector.parameters( useClass )
-    : reflector.parameters( type );
-  const injectTo = isString( type )
-    ? useClass
-    : type;
-
-  const $inject = _getInjectStringTokens( parameters );
-
-  if ( isArray( $inject ) ) {
-
-    (injectTo).$inject = $inject;
-
-  }
-
-  return provideResolver( type );
+  return ProviderBuilder.createFromType( type, { useClass, useValue } );
 
 }
 
 /**
- * creates $inject array for @Inject only annotations
- * @param parameters
- * @returns {string[]}
+ * creates $inject array Angular 1 DI annotation strings for provided Type
+ * @param typeOrFunc
+ * @returns {any}
  * @private
  * @internal
  */
-export function _getInjectStringTokens( parameters: any[][] = [] ): string[] {
+export function _dependenciesFor(typeOrFunc: Type): string[] {
 
-  return parameters
-    .filter( ( paramMeta )=>paramMeta.length === 1 && paramMeta[ 0 ] instanceof InjectMetadata )
-    .map( ( [injectMeta] )=>provideResolver( injectMeta.token ) );
+  const params = reflector.parameters(typeOrFunc);
+
+  if ( isBlank( params ) ) return [];
+
+  if ( params.some( isBlank ) ) {
+
+    throw new Error( `
+      ${ stringify( typeOrFunc ) } :
+      -------------------------------------------------
+      you cannot have holes in constructor DI injection
+      ` );
+
+  }
+
+  if ( !_areAllDirectiveInjectionsAtTail( params ) ) {
+    throw new Error( `
+      ${ stringify( typeOrFunc ) } :
+      -------------------------------------------------
+      you cannot mix Directive @Inject() in constructor.
+      @Host/@Self/@SkipSelf/@Optional+@Inject needs to be at last positions in constructor
+    ` );
+  }
+
+  return params
+    .filter( paramMeta=>paramMeta.length === 1 )
+    .map( ( p: any[] ) => _extractToken( p ) );
 
 }
 
-export function provideResolver( type: Type | string ): string {
+/**
+ * should extract service/values/directives/pipes token from constructor @Inject() paramMetadata
+ * @param metadata
+ * @private
+ * @internal
+ */
+export function _extractToken( metadata: ParamMetaInst[] ): string {
 
-  if ( isString( type ) ) {
-    return type;
+  const [injectMetadata] = metadata
+    .filter( paramMetadata=>paramMetadata instanceof InjectMetadata ) as InjectMetadata[];
+
+  if(isBlank(injectMetadata)){
+    return;
   }
-  if ( isType( type ) ) {
+
+  const {token} = injectMetadata;
+
+  return _getTokenStringFromInjectable(token);
+
+}
+
+/**
+ *
+ * @param injectable
+ * @returns {any}
+ * @private
+ * @internal
+ */
+export function _getTokenStringFromInjectable(injectable: ProviderType): string{
+
+  // @Inject('foo') foo
+  if ( isString( injectable ) ) {
+
+    return injectable;
+
+  }
+
+  // const fooToken = new OpaqueToken('foo')
+  // @Inject(fooToken) foo
+  if ( injectable instanceof OpaqueToken ) {
+
+    return injectable.desc;
+
+  }
+
+  // @Injectable()
+  // class SomeService(){}
+  //
+  // @Inject(SomeService) someSvc
+  if ( isType( injectable ) ) {
 
     // only the first class annotations is injectable
-    const [annotation=null] = reflector.annotations( type as Type ) || [];
-
-    if ( !annotation ) {
-
-      return getTypeName( type );
-
-    }
+    const [annotation] = reflector.annotations( injectable );
 
     if ( annotation instanceof PipeMetadata ) {
       return annotation.name;
@@ -78,10 +212,47 @@ export function provideResolver( type: Type | string ): string {
       return resolveDirectiveNameFromSelector( annotation.selector );
     }
 
-    if ( annotation instanceof InjectableMetadata ) {
-      return getTypeName( type );
+    if ( annotation instanceof InjectableMetadata || isBlank( annotation ) ) {
+      return getTypeName( injectable );
     }
 
   }
+
+}
+
+/**
+ *
+ * @param metadata
+ * @returns {boolean}
+ * @private
+ * @internal
+ */
+export function _areAllDirectiveInjectionsAtTail( metadata: ParamMetaInst[][] ): boolean {
+
+  return metadata.every( ( paramMetadata, idx, arr )=> {
+
+    const isCurrentDirectiveInjection = paramMetadata.length > 1;
+
+    const hasPrev = idx > 0;
+    const hasNext = idx < arr.length - 1;
+
+    if ( hasPrev ) {
+      const prevInjection = arr[ idx - 1 ];
+      const isPrevDirectiveInjection = prevInjection.length > 1;
+      if ( isPrevDirectiveInjection && !isCurrentDirectiveInjection ) {
+        return false;
+      }
+    }
+    if ( hasNext ) {
+      const nextInjection = arr[ idx + 1 ];
+      const isNextDirectiveInjection = nextInjection.length > 1;
+      if ( !isNextDirectiveInjection && isNextDirectiveInjection ) {
+        return false;
+      }
+    }
+
+    return true;
+
+  } );
 
 }

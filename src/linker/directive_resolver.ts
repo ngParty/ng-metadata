@@ -17,9 +17,7 @@ import {
   ViewChildMetadata
 } from '../directives/metadata_di';
 import {InjectMetadata,HostMetadata,SelfMetadata,SkipSelfMetadata,OptionalMetadata} from "../di/metadata";
-
-type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
-type ParamMetaInst = HostMetadata | InjectMetadata | SelfMetadata | SkipSelfMetadata;
+import {ParamMetaInst,PropMetaInst} from '../di/provider';
 
 function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;
