@@ -146,6 +146,8 @@ export class StringMapWrapper {
 
   static keys( map: {[key: string]: any} ): string[] { return Object.keys( map ); }
 
+  static size( map: {[key: string]: any} ): number { return StringMapWrapper.keys( map ).length; }
+
   static isEmpty( map: {[key: string]: any} ): boolean {
     for ( var prop in map ) {
       return false;

@@ -80,7 +80,7 @@ export function isDate( obj ): boolean {
   return obj instanceof Date && !isNaN( obj.valueOf() );
 }
 
-export function isType( obj: any ): boolean {
+export function isType( obj: any ): obj is Type {
   return isFunction( obj );
 }
 
@@ -227,6 +227,42 @@ export function firstToUpperCase( value: string ): string {
 }
 function _firstTo( value: string, cb: Function ): string {
   return cb.call( value.charAt( 0 ) ) + value.substring( 1 );
+}
+
+export function normalizeBlank(obj: Object): any {
+  return isBlank(obj) ? null : obj;
+}
+
+export function normalizeBool(obj: boolean): boolean {
+  return isBlank(obj) ? false : obj;
+}
+
+export function print(obj: Error | Object) {
+  console.log(obj);
+}
+
+/**
+ * Angular 2 setValueOnPath
+ * supports only `.` path separator
+ * @param global
+ * @param path
+ * @param value
+ */
+export function setValueOnPath(global: any, path: string, value: any) {
+  var parts = path.split('.');
+  var obj: any = global;
+  while (parts.length > 1) {
+    var name = parts.shift();
+    if (obj.hasOwnProperty(name) && isPresent(obj[name])) {
+      obj = obj[name];
+    } else {
+      obj = obj[name] = {};
+    }
+  }
+  if (obj === undefined || obj === null) {
+    obj = {};
+  }
+  obj[parts.shift()] = value;
 }
 
 /**
