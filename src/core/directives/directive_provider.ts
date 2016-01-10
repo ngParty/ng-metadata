@@ -56,7 +56,8 @@ export class DirectiveProvider {
         scope: {},
         bindToController: this._createComponentBindings( inputs, attrs, outputs ),
         controllerAs: 'ctrl',
-        link: this._createLink( type, metadata, lfHooks, requireMap )
+        link: this._createLink( type, metadata, lfHooks, requireMap ),
+        transclude: true
       } as ng.IDirective;
 
       if ( metadata.template && metadata.templateUrl ) {
@@ -371,6 +372,7 @@ function _preLinkFnFactory() {
  * @param scope
  * @param element
  * @param ctrl
+ * @param implementsNgOnDestroy
  * @param watchersToDispose
  * @param observersToDispose
  * @private

@@ -215,7 +215,8 @@ describe( `directives/directive_provider`, ()=> {
         pre: (ddo.link as ng.IDirectivePrePost).pre,
         post: (ddo.link as ng.IDirectivePrePost).post
       },
-      template: `<div>Click me to attack!</div>`
+      template: `<div>Click me to attack!</div>`,
+      transclude: true
     } );
 
     const howShoulsLinkLookLike = {
