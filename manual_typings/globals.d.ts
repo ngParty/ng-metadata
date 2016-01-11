@@ -26,3 +26,15 @@ interface BrowserNodeGlobal {
 }
 
 declare type StringMap = {[key:string]:string};
+declare type Type = Function;
+declare type ProvideSpreadType = string|Type;
+
+declare module angular {
+  interface IModule {
+    // constant(object: Object): IModule;
+    // value(object: Object): IModule;
+    directive(...args: ProvideSpreadType[]): IModule;
+    filter(...args: ProvideSpreadType[]): IModule;
+    service(...args: ProvideSpreadType[]): IModule;
+  }
+}
