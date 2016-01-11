@@ -382,8 +382,8 @@ function _setupDestroyHandler(
   element: ng.IAugmentedJQuery,
   ctrl: any,
   implementsNgOnDestroy: boolean,
-  watchersToDispose: Function[],
-  observersToDispose?: Function[]
+  watchersToDispose: Function[] = [],
+  observersToDispose: Function[] = []
 ): void {
 
   scope.$on( '$destroy', ()=> {
