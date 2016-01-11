@@ -5,8 +5,7 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "experimentalDecorators": true,
-    "declaration": true,
-    "stripInternal": true
+    "declaration": true
   },
   "exclude": [
     "typings/main",

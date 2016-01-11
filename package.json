@@ -4,7 +4,7 @@
   "description": "Angular 2 style decorators and utils for Angular 1.x",
   "scripts": {
     "typings": "typings install",
-    "prepublish": "npm run typings && tsc",
+    "prepublish": "npm run typings && tsc && ./scripts/create_core.sh",
     "start": "tsc -w",
     "test": "mocha ./test/index.js",
     "test:live": "mocha ./test/index.js -w",

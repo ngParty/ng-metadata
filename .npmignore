@@ -8,16 +8,25 @@ build.xml
 node_modules/*
 npm-debug.log
 
+# ignore all typescript
 *.ts
 # allow only ambient type definitions
 !*.d.ts
+.travis.yml
+.editorconfig
+.npmignore
+.npmrc
 
-# ignore test files
+# ignore folders
 test
-
-typings
+scripts
 assets
 playground
+
+#################
+## VSCode
+#################
+.vscode
 
 #################
 ## JetBrains
