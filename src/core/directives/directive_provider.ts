@@ -286,7 +286,7 @@ export class DirectiveProvider {
         );
 
         // setup @HostListeners
-        _setHostListeners( element, ctrl, hostProcessed.hostListeners );
+        _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
 
         // AfterContent Hooks
         if ( lfHooks.ngAfterContentInit ) {
@@ -328,7 +328,7 @@ export class DirectiveProvider {
         );
 
         // setup @HostListeners
-        _setHostListeners( element, ctrl, hostProcessed.hostListeners );
+        _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
 
         // AfterContent Hooks
         if ( lfHooks.ngAfterContentInit ) {
@@ -497,13 +497,14 @@ export function _setHostBindings(
 
 /**
  *
+ * @param scope
  * @param element
  * @param ctrl
  * @param hostListeners
  * @internal
  * @private
  */
-export function _setHostListeners( element: ng.IAugmentedJQuery, ctrl: any, hostListeners: HostListenersProcessed ): void {
+export function _setHostListeners( scope: ng.IScope, element: ng.IAugmentedJQuery, ctrl: any, hostListeners: HostListenersProcessed ): void {
 
   StringMapWrapper.forEach(
     hostListeners,
@@ -514,13 +515,18 @@ export function _setHostListeners( element: ng.IAugmentedJQuery, ctrl: any, host
       element.on( eventName, ( evt )=> {
 
         const cbParams: any[] = _getHostListenerCbParams( evt, methodParams );
-        const noPreventDefault = ctrl[ methodName ]( ...cbParams );
 
-        // HostListener preventDefault if method name returns false,
-        // which is default if you dont explicitly return truthy value
-        if ( !noPreventDefault ) {
-          evt.preventDefault();
-        }
+        scope.$applyAsync( ()=> {
+
+          const noPreventDefault = ctrl[ methodName ]( ...cbParams );
+
+          // HostListener preventDefault if method name returns false,
+          // which is default if you don't explicitly return truthy value
+          if ( !noPreventDefault ) {
+            evt.preventDefault();
+          }
+
+        } );
 
       } );
 

@@ -1,3 +1,4 @@
+import {isFunction} from '../facade/lang';
 /**
  *
  * @internal
@@ -75,6 +76,23 @@ export class $Scope {
     const toEval = expression;
     const done = 'evaluated';
     return eval( 'toEval + " " + done' );
+  }
+  $evalAsync(expression){
+    if(isFunction(expression)){
+      expression()
+    }
+  }
+
+  $apply( expression? ) {
+    if ( isFunction( expression ) ) {
+      expression()
+    }
+  }
+
+  $applyAsync(expression?){
+    if(isFunction(expression)){
+      expression()
+    }
   }
 
   $on( eventName, cb ){

@@ -669,6 +669,7 @@ describe( `directives/directive_provider`, ()=> {
 
         const sandbox = sinon.sandbox.create();
         let $element;
+        let $scope;
         let hostListeners = {
           'click': [ 'onClick', '$event' ],
           'mousemove': [ 'onMove', '$event.target.x', '$event.target.x' ],
@@ -690,7 +691,8 @@ describe( `directives/directive_provider`, ()=> {
 
         beforeEach( ()=> {
           $element = ElementFactory();
-          _setHostListeners( $element, ctrl, hostListeners );
+          $scope = new $Scope();
+          _setHostListeners( $scope, $element, ctrl, hostListeners );
         } );
 
         afterEach( ()=> {
