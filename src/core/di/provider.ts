@@ -1,5 +1,6 @@
 import {
   Type,
+  isFunction,
   isString,
   isBlank,
   isType,
@@ -41,7 +42,11 @@ class ProviderBuilder{
     if ( type instanceof OpaqueToken ) {
 
       if(isBlank(useValue)){
-        throw new Error(`you must provide useValue when registering constant/value via OpaqueToken`);
+        throw new Error(`
+        Provider registration: "${ type.desc }":
+        =======================================================
+        you must provide useValue when registering constant/value via OpaqueToken
+        `);
       }
       return [
         type.desc,
@@ -67,18 +72,47 @@ class ProviderBuilder{
       : '';
 
     if ( !isType( injectableType ) ) {
-      throw new Error( `token ${stringify( injectableType )} must be type of Type, You cannot provide non class` );
+
+      throw new Error( `
+      Provider registration: "${stringify( injectableType )}":
+      =======================================================
+      token ${ stringify( injectableType ) } must be type of Type, You cannot provide non class
+      ` );
+
     }
 
     injectableType.$inject = _dependenciesFor( injectableType );
 
     const [annotation] = reflector.annotations( injectableType );
+    const [paramMetadata] = reflector.parameters( injectableType );
+
+    if ( isBlank( annotation ) && isPresent( paramMetadata ) ) {
+
+      throw new Error( `
+      Provider registration: "${ stringify(injectableType) }":
+      =======================================================
+      cannot create appropriate construct from provided Type.
+       -> you are injecting to ${ stringify(injectableType) } service, but you're missing @Injectable() decorator
+      ` );
+
+    }
+
+    // @NOTE:
+    // this can get confusing if user forgets to provide Annotation @Directive/@Component/@Pipe and has no @Inject
+    // it will register Service
+    //
+    // register service if it doesn't have any @Inject ables
+    if ( isBlank( annotation ) && isFunction( injectableType ) ) {
+      return ProviderBuilder._provideService(injectableType,overrideName);
+    }
 
     if ( isBlank( annotation ) ) {
 
       throw new Error( `
+      Provider registration: "${ stringify(injectableType) }":
+      =======================================================
       cannot create appropriate construct from provided Type.
-       -> Type must be on of (@Pipe(),@Component(),@Directive(),@Injectable())
+       -> Type "${ stringify(injectableType) }" must be on of [ @Pipe(), @Component(), @Directive() ]
       ` );
 
     }
@@ -92,12 +126,16 @@ class ProviderBuilder{
     }
 
     if ( annotation instanceof InjectableMetadata ) {
-      return [
-        overrideName || getTypeName( injectableType ),
-        injectableType
-      ];
+      return ProviderBuilder._provideService(injectableType,overrideName);
     }
 
+  }
+
+  private static _provideService( injectableType: Type, overriddenName?: string ): [string,Type] {
+    return [
+      overriddenName || getTypeName( injectableType ),
+      injectableType
+    ]
   }
 }
 /**

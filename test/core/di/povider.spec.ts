@@ -134,6 +134,38 @@ describe( `di/provider`, ()=> {
 
   } );
 
+  describe( `provide:errors`, ()=> {
+
+    it( `should throw if registering ng.constant/value via Opaque token and useValue is blank`, ()=> {
+
+      const MY_CONST = new OpaqueToken('myConst');
+
+      expect( ()=>provide( MY_CONST ) ).to.throw();
+      expect( ()=>provide( MY_CONST, { useValue: undefined } ) ).to.throw();
+
+    } );
+
+    it( `should throw if registering type as service which is not a CLass`, ()=> {
+
+      expect( ()=>provide( 'foo' ) ).to.throw();
+      expect( ()=>(provide as any)( 1231 ) ).to.throw();
+      expect( ()=>(provide as any)( { hello: 'wat' } ) ).to.throw();
+
+    } );
+    it( `should throw if registering service which has @Inject and doesn't uses @Injectable`, ()=> {
+
+
+      class MyService{
+        constructor(@Inject('$log') private $log){}
+      }
+
+      expect( ()=>provide( MyService ) ).to.throw();
+
+
+    } );
+
+  } );
+
   describe( `private API`, ()=> {
 
     describe( `#_getTokenStringFromInjectable`, ()=> {
