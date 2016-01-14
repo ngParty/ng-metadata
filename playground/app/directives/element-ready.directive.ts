@@ -1,4 +1,4 @@
-import { Inject, Directive, AfterContentInit } from 'ng-metadata/ng-metadata';
+import { Inject, Directive, AfterContentInit } from 'ng-metadata/core';
 
 type MDLcomponentHandler = {
   upgradeAllRegistered()

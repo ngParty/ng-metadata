@@ -1,4 +1,4 @@
-import { Pipe } from 'ng-metadata/ng-metadata';
+import { Pipe } from 'ng-metadata/core';
 import { TodoModel } from '../stores/todoStore.service';
 
 @Pipe( {

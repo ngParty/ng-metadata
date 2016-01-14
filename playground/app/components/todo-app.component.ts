@@ -1,4 +1,4 @@
-import { Component, Inject } from 'ng-metadata/ng-metadata';
+import { Component, Inject } from 'ng-metadata/core';
 import { TodoModel, TodoStore } from '../stores/todoStore.service';
 
 @Component( {
