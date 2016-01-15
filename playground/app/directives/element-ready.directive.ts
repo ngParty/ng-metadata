@@ -1,4 +1,4 @@
-import { Inject, Directive, AfterContentInit } from 'ng-metadata/core';
+import { Inject, Directive, OnInit } from 'ng-metadata/core';
 
 type MDLcomponentHandler = {
   upgradeAllRegistered()
@@ -9,14 +9,14 @@ const componentHandler: MDLcomponentHandler = window[ 'componentHandler' ];
 @Directive( {
   selector: '[element-ready]'
 } )
-export class ElementReadyDirective implements AfterContentInit {
+export class ElementReadyDirective implements OnInit {
 
   constructor(
     @Inject( '$element' ) private $element: ng.IAugmentedJQuery,
     @Inject( '$scope' ) private $scope: ng.IScope
   ) {}
 
-  ngAfterContentInit() {
+  ngOnInit() {
 
     this.$element.ready( ()=> {
 
@@ -31,6 +31,6 @@ export class ElementReadyDirective implements AfterContentInit {
     //this.$scope.$watch( componentHandler.upgradeAllRegistered )
 
   }
-
+  }
 
 }
