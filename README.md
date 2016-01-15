@@ -18,7 +18,7 @@ It leads you, to to write **clean and component driven** style code.
 
 Behind the scenes it uses ES7 decorators extended by Typescript( which add to the proposal parameter decorators etc...)
 
-![ng-metadata logo](assets/logo/ng-metadata_logo.png)
+![ng-metadata logo](assets/logo/ngMetadata.png)
 
 ## Installation
 
