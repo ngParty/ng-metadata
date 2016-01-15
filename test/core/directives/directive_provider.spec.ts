@@ -17,6 +17,7 @@ import {
   _setHostListeners,
   _createDirectiveBindings
 } from '../../../src/core/directives/directive_provider';
+import {AfterViewInit} from '../../../src/core/linker/directive_lifecycle_interfaces';
 
 describe( `directives/directive_provider`, ()=> {
 
@@ -364,6 +365,30 @@ describe( `directives/directive_provider`, ()=> {
 
     } );
 
+    it( `should call ngAfterViewInit from @Component only if it's implemented from postLink`, ()=> {
+
+      @Component({selector:'my-cmp'})
+      class MyComponent implements AfterViewInit{
+        ngAfterViewInit() {}
+      }
+
+      const ctrl = [ new MyComponent() ];
+      const spy = sinon.spy( ctrl[0],'ngAfterViewInit' );
+
+      const directiveProviderArr = directiveProvider.createFromType( MyComponent );
+      const ddo = directiveProviderArr[ 1 ]();
+      const link = ddo.link as ng.IDirectiveLinkFn;
+
+      expect( isFunction( link ) ).to.equal( true );
+      expect( spy.called ).to.equal( false );
+
+      link( $scope, $element, $attrs, ctrl, $transclude );
+      expect( spy.called ).to.equal( true );
+
+      spy.restore();
+
+    } );
+
     it( `should call all hooks if they are implemented`, ()=> {
 
       @Directive({selector:'[myDir]'})
@@ -443,6 +468,33 @@ describe( `directives/directive_provider`, ()=> {
       link.post( $scope, $element, $attrs, ctrl, $transclude );
 
       expect( ownCtrl[ 'ngModel' ] instanceof NgModel ).to.equal( true );
+
+    } );
+
+    describe( `error handling`, ()=> {
+
+      it( `should throw if @Component implements both AfterViewInit and AfterContentInit`, ()=> {
+
+        @Component({selector:'my-cmp'})
+        class MyComponent implements AfterViewInit,AfterContentInit{
+          ngAfterContentInit() {}
+          ngAfterViewInit() {}
+        }
+
+        expect( ()=>directiveProvider.createFromType( MyComponent ) ).to.throw();
+
+      } );
+
+      it( `should throw if @Directive implements AfterViewInit because it doesn't have any View`, ()=> {
+
+        @Directive( { selector: '[myDir]' } )
+        class MyDirective implements AfterViewInit {
+          ngAfterViewInit() {}
+        }
+
+        expect( ()=>directiveProvider.createFromType( MyDirective ) ).to.throw();
+
+      } );
 
     } );
 

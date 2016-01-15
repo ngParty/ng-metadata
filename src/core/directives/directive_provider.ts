@@ -5,6 +5,7 @@ import {StringMapWrapper} from "../../facade/collections";
 import {hasLifecycleHook} from "../linker/directive_lifecycles_reflector";
 import {LifecycleHooks} from "../linker/directive_lifecycle_interfaces";
 import {DirectiveMetadata,ComponentMetadata,LegacyDirectiveDefinition} from "./metadata_directives";
+import {stringify} from '../../facade/lang';
 
 export type HostBindingsProcessed = {
   classes: StringMap,
@@ -283,6 +284,17 @@ export class DirectiveProvider {
     // postLink
     if ( metadata instanceof ComponentMetadata ) {
 
+      if ( lfHooks.ngAfterContentInit && lfHooks.ngAfterViewInit ) {
+
+        throw new Error( `
+        Hooks Impl for ${ stringify( type ) }:
+        ===================================
+        You cannot implement both AfterContentInit and AfterViewInit, because they're doing the same in
+        component context. For Components please prefer AfterViewInit
+        ` )
+
+      }
+
       postLink = function (
         scope: ng.IScope,
         element: ng.IAugmentedJQuery,
@@ -309,9 +321,10 @@ export class DirectiveProvider {
         // setup @HostListeners
         _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
 
-        // AfterContent Hooks
-        if ( lfHooks.ngAfterContentInit ) {
-          ctrl.ngAfterContentInit();
+        // AfterContentInit/AfterViewInit Hooks
+        // call one of those methods if implemented
+        if ( lfHooks.ngAfterViewInit || lfHooks.ngAfterContentInit ) {
+          (ctrl[ 'ngAfterContentInit'] || ctrl['ngAfterViewInit' ])();
         }
 
         // destroy
@@ -321,7 +334,20 @@ export class DirectiveProvider {
 
 
     } else {
+
       // Directive postLink
+      if ( lfHooks.ngAfterViewInit ) {
+
+        throw new Error( `
+        Hooks Impl for ${ stringify( type ) }:
+        ===================================
+        You cannot implement AfterViewInit for @Directive,
+        because directive doesn't have View so you probably doing something wrong.
+        @Directive support only AfterContentInit hook which is triggered from postLink
+        ` )
+
+      }
+
       postLink = function (
         scope: ng.IScope,
         element: ng.IAugmentedJQuery,
