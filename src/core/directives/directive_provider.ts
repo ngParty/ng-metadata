@@ -39,6 +39,7 @@ export class DirectiveProvider {
     const lfHooks = {
       ngOnInit: hasLifecycleHook( LifecycleHooks.OnInit, type ),
       ngAfterContentInit: hasLifecycleHook( LifecycleHooks.AfterContentInit, type ),
+      ngAfterViewInit: hasLifecycleHook( LifecycleHooks.AfterViewInit, type ),
       ngOnDestroy: hasLifecycleHook( LifecycleHooks.OnDestroy, type )
     };
 
@@ -243,10 +244,27 @@ export class DirectiveProvider {
 
   }
 
+  /**
+   * Directive lifeCycles:
+   * - ngOnInit from preLink (all children compiled and DOM ready)
+   * - ngAfterContentInit from postLink ( DOM in children ready )
+   * - ngOnDestroy from postLink
+   *
+   * Component lifeCycles:
+   * - ngOnInit from preLink (controller require ready)
+   * - ngAfterViewInit from postLink ( all children in view+content compiled and DOM ready )
+   * - ngOnDestroy from postLink
+   * @param type
+   * @param metadata
+   * @param lfHooks
+   * @param requireMap
+   * @private
+   * @internal
+   */
   _createLink(
     type: Type,
     metadata: DirectiveMetadata | ComponentMetadata,
-    lfHooks: {ngOnInit:boolean,ngAfterContentInit: boolean, ngOnDestroy: boolean},
+    lfHooks: {ngOnInit:boolean,ngAfterContentInit: boolean, ngAfterViewInit: boolean, ngOnDestroy: boolean},
     requireMap: StringMap
   ): ng.IDirectiveLinkFn | ng.IDirectivePrePost {
 
@@ -259,7 +277,7 @@ export class DirectiveProvider {
 
     // preLink
     if ( lfHooks.ngOnInit ) {
-      preLink = _preLinkFnFactory();
+      preLink = _preLinkFnFactory(requiredCtrlVarNames);
     }
 
     // postLink
@@ -276,7 +294,10 @@ export class DirectiveProvider {
         const _watchers = [];
         const [ctrl,...requiredCtrls] = controller;
 
-        _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
+        // if OnInit implemented don't create controller properties again
+        if ( !lfHooks.ngOnInit ) {
+          _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
+        }
 
         _setHostStaticAttributes( element, hostProcessed.hostStatic );
 
@@ -313,7 +334,10 @@ export class DirectiveProvider {
         const _observers = [];
         const [ctrl,...requiredCtrls] = controller;
 
-        _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
+        // if OnInit implemented don't create controller properties again
+        if ( !lfHooks.ngOnInit ) {
+          _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
+        }
 
         const _disposables = _createDirectiveBindings( scope, attributes, ctrl, metadata );
         _watchers.push( ..._disposables.watchers );
@@ -354,15 +378,22 @@ export class DirectiveProvider {
 // private helpers
 
 /**
- *
- * @returns {function(any, any, any, any): undefined}
+ * creates preLink Function
+ * assigns required controller instances to current directive instance
+ * Note: it is not safe to do following in preLink:
+ *  - attaching event listeners
+ *  - doing DOM manipulation
  * @private
  */
-function _preLinkFnFactory() {
+function _preLinkFnFactory(requiredCtrlVarNames: string[]) {
 
   return function preLink( scope, element, attrs, controller, transclude ) {
-    const [ctrl] = controller;
+
+    const [ctrl,...requiredCtrls] = controller;
+    _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
+
     ctrl.ngOnInit();
+
   }
 
 }

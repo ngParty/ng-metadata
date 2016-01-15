@@ -1,10 +1,10 @@
 import * as sinon from 'sinon';
 import {expect} from 'chai';
 
-import {noop,isFunction} from '../../../src/facade/lang';
+import {noop,isFunction,isBlank} from '../../../src/facade/lang';
 import {AfterContentInit,OnDestroy,OnInit} from '../../../src/core/linker/directive_lifecycle_interfaces';
 import {Component,Directive,Input,Attr,Output,HostListener,HostBinding} from '../../../src/core/directives/decorators';
-import {Inject} from '../../../src/core/di/decorators';
+import {Inject,Host} from '../../../src/core/di/decorators';
 import {DirectiveMetadata} from '../../../src/core/directives/metadata_directives';
 import {$Scope,$Attrs,ElementFactory} from '../../../src/testing/utils';
 
@@ -409,6 +409,40 @@ describe( `directives/directive_provider`, ()=> {
       spyInit.restore();
       spyAfterContentInit.restore();
       spyDestroy.restore();
+
+    } );
+
+    it( `should attach required directives instances to current instance from preLink if ngOnInit impl`, ()=> {
+
+      class OverrideMe{}
+      class NgModel{}
+
+      @Directive({selector:'[myDir]'})
+      class MyDirective implements OnInit{
+        constructor(@Inject('ngModel') @Host() private ngModel ){}
+        ngOnInit(){}
+      }
+
+      const ctrl = [ new MyDirective( null ), new NgModel() ];
+
+      const directiveProviderArr = directiveProvider.createFromType( MyDirective );
+      const ddo = directiveProviderArr[ 1 ]();
+      const link: ng.IDirectivePrePost = ddo.link;
+
+      const [ownCtrl] = ctrl;
+
+      expect( isBlank( ownCtrl[ 'ngModel' ] ) ).to.equal( true );
+
+      link.pre( $scope, $element, $attrs, ctrl, $transclude );
+
+      expect( ownCtrl[ 'ngModel' ] instanceof NgModel ).to.equal( true );
+
+      // override ngModel to check that it wont be set again in postLink
+      ctrl[ 1 ] = new OverrideMe();
+
+      link.post( $scope, $element, $attrs, ctrl, $transclude );
+
+      expect( ownCtrl[ 'ngModel' ] instanceof NgModel ).to.equal( true );
 
     } );
 
