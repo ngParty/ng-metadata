@@ -86,25 +86,6 @@ class ProviderBuilder{
     const [annotation] = reflector.annotations( injectableType );
     const [paramMetadata] = reflector.parameters( injectableType );
 
-    if ( isBlank( annotation ) && isPresent( paramMetadata ) ) {
-
-      throw new Error( `
-      Provider registration: "${ stringify(injectableType) }":
-      =======================================================
-      cannot create appropriate construct from provided Type.
-       -> you are injecting to ${ stringify(injectableType) } service, but you're missing @Injectable() decorator
-      ` );
-
-    }
-
-    // @NOTE:
-    // this can get confusing if user forgets to provide Annotation @Directive/@Component/@Pipe and has no @Inject
-    // it will register Service
-    //
-    // register service if it doesn't have any @Inject ables
-    if ( isBlank( annotation ) && isFunction( injectableType ) ) {
-      return ProviderBuilder._provideService(injectableType,overrideName);
-    }
 
     if ( isBlank( annotation ) ) {
 
@@ -112,7 +93,7 @@ class ProviderBuilder{
       Provider registration: "${ stringify(injectableType) }":
       =======================================================
       cannot create appropriate construct from provided Type.
-       -> Type "${ stringify(injectableType) }" must be on of [ @Pipe(), @Component(), @Directive() ]
+       -> Type "${ stringify(injectableType) }" must be on of [ @Pipe(), @Component(), @Directive(), @Injectable() ]
       ` );
 
     }

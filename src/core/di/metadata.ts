@@ -92,8 +92,6 @@ export class OptionalMetadata {
 /**
  * A marker metadata that marks a class as available to {@link Injector} for creation.
  *
- * ### Example ([live demo](http://plnkr.co/edit/Wk4DMQ?p=preview))
- *
  * ```typescript
  * @Injectable()
  * class UsefulService {}

@@ -11,7 +11,7 @@
 //import './test/providers.spec';
 
 import './core/di/decorators.spec';
-import './core/di/povider.spec';
+import './core/di/provider.spec';
 import './core/util/decorators.spec';
 import './core/reflection/reflection.spec';
 import './core/linker/pipe_resolver.spec';

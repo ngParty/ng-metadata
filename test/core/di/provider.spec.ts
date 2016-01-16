@@ -145,14 +145,14 @@ describe( `di/provider`, ()=> {
 
     } );
 
-    it( `should throw if registering type as service which is not a CLass`, ()=> {
+    it( `should throw if registering type as service which is not a Class`, ()=> {
 
       expect( ()=>provide( 'foo' ) ).to.throw();
       expect( ()=>(provide as any)( 1231 ) ).to.throw();
       expect( ()=>(provide as any)( { hello: 'wat' } ) ).to.throw();
 
     } );
-    it( `should throw if registering service which has @Inject and doesn't uses @Injectable`, ()=> {
+    it( `should throw if registering class which is missing annotation`, ()=> {
 
 
       class MyService{
