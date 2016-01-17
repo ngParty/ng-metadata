@@ -28,6 +28,7 @@ import {
 } from './metadata';
 import {pipeProvider} from "../pipes/pipe_provider";
 import {directiveProvider} from "../directives/directive_provider";
+import {getFuncName} from '../../facade/lang';
 
 
 export type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
@@ -81,11 +82,7 @@ class ProviderBuilder{
 
     }
 
-    injectableType.$inject = _dependenciesFor( injectableType );
-
     const [annotation] = reflector.annotations( injectableType );
-    const [paramMetadata] = reflector.parameters( injectableType );
-
 
     if ( isBlank( annotation ) ) {
 
@@ -98,6 +95,8 @@ class ProviderBuilder{
 
     }
 
+    injectableType.$inject = _dependenciesFor( injectableType );
+
     if ( annotation instanceof PipeMetadata ) {
       return pipeProvider.createFromType( injectableType );
     }
@@ -107,18 +106,16 @@ class ProviderBuilder{
     }
 
     if ( annotation instanceof InjectableMetadata ) {
-      return ProviderBuilder._provideService(injectableType,overrideName);
+      return [
+        overrideName || annotation.id,
+        injectableType
+      ];
     }
 
   }
 
-  private static _provideService( injectableType: Type, overriddenName?: string ): [string,Type] {
-    return [
-      overriddenName || getTypeName( injectableType ),
-      injectableType
-    ]
-  }
 }
+
 /**
  * should extract the string token from provided Type and add $inject angular 1 annotation to constructor if @Inject
  * was used
@@ -186,18 +183,32 @@ export function _extractToken( metadata: ParamMetaInst[] ): string {
 
   const {token} = injectMetadata;
 
-  return _getTokenStringFromInjectable(token);
+  return getInjectableName(token);
 
 }
 
 /**
+ *  A utility function that can be used to get the angular 1 injectable's name. Needed for some cases, since
+ *  injectable names are auto-created.
  *
- * @param injectable
- * @returns {any}
- * @private
- * @internal
+ *  Works for string/OpaqueToken/Type
+ *  Note: Type must be decorated otherwise it throws
+ *
+ *  @example
+ *  ```typescript
+ *  import { Injectable, getInjectableName } from 'ng-metadata/core';
+ *  // this is given some random name like 'myService48' when it's created with `module.service`
+ *
+ *  @Injectable
+ *  class MyService {}
+ *
+ *  console.log(getInjectableName(MyService)); // 'myService48'
+ *  ```
+ *
+ * @param {ProviderType}  injectable
+ * @returns {string}
  */
-export function _getTokenStringFromInjectable(injectable: ProviderType): string{
+export function getInjectableName(injectable: ProviderType): string{
 
   // @Inject('foo') foo
   if ( isString( injectable ) ) {
@@ -223,6 +234,13 @@ export function _getTokenStringFromInjectable(injectable: ProviderType): string{
     // only the first class annotations is injectable
     const [annotation] = reflector.annotations( injectable );
 
+    if ( isBlank( annotation ) ) {
+      throw new Error( `
+        cannot get injectable name token from non decorated class ${ getFuncName( injectable ) }
+        Only @Injectable/@Directive/@Component/@Pipe decorated classes can be injected by reference
+      ` );
+    }
+
     if ( annotation instanceof PipeMetadata ) {
       return annotation.name;
     }
@@ -231,8 +249,8 @@ export function _getTokenStringFromInjectable(injectable: ProviderType): string{
       return resolveDirectiveNameFromSelector( annotation.selector );
     }
 
-    if ( annotation instanceof InjectableMetadata || isBlank( annotation ) ) {
-      return getTypeName( injectable );
+    if ( annotation instanceof InjectableMetadata ) {
+      return annotation.id;
     }
 
   }

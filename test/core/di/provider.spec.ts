@@ -6,17 +6,24 @@ import {Component,Directive} from '../../../src/core/directives/decorators';
 import {Pipe} from '../../../src/core/pipes/decorators'
 import {noop} from '../../../src/facade/lang';
 import {_areAllDirectiveInjectionsAtTail} from '../../../src/core/di/provider';
-import {_getTokenStringFromInjectable} from '../../../src/core/di/provider';
+import {getInjectableName} from '../../../src/core/di/provider';
 import {OpaqueToken} from '../../../src/core/di/opaque_token';
 import {_extractToken} from '../../../src/core/di/provider';
 import {_dependenciesFor} from '../../../src/core/di/provider';
 import {Host} from '../../../src/core/di/decorators';
 import {isFunction} from '../../../src/facade/lang';
 import {ParamMetaInst} from '../../../src/core/di/provider';
+import {globalKeyRegistry} from '../../../src/core/di/key';
 
 describe( `di/provider`, ()=> {
 
-  describe( `provide`, ()=> {
+  beforeEach( ()=> {
+
+    globalKeyRegistry._reset();
+
+  } );
+
+  describe( `#provide`, ()=> {
 
     it( `should allow registration of ng.constant and ng.value via string and useValue`, ()=> {
 
@@ -55,6 +62,7 @@ describe( `di/provider`, ()=> {
     } );
     it( `should return string name and Ctor for Angular registry and add $inject prop if needed (Class)`, ()=> {
 
+      @Injectable()
       class MyService {}
 
       @Injectable()
@@ -62,14 +70,15 @@ describe( `di/provider`, ()=> {
         constructor( @Inject( MyService ) private mySvc ) {}
       }
       const actual = provide( Foo );
-      const expected = [ 'foo', Foo ];
+      const expected = [ 'foo#2', Foo ];
 
       expect(actual).to.deep.equal(expected);
-      expect( Foo.$inject ).to.deep.equal( [ 'myService' ] );
+      expect( Foo.$inject ).to.deep.equal( [ 'myService#1' ] );
 
     } );
     it( `should return string name and filter factory for Angular registry and add $inject prop if needed (Pipe)`, ()=> {
 
+      @Injectable()
       class MyService{}
 
       @Pipe({ name: 'fooYo' } )
@@ -83,12 +92,13 @@ describe( `di/provider`, ()=> {
 
       expect( ngContainerName ).to.deep.equal( 'fooYo' );
       expect( isFunction( filterFactory ) ).to.deep.equal( true );
-      expect( FooPipe.$inject ).to.deep.equal( [ 'myService' ] );
+      expect( FooPipe.$inject ).to.deep.equal( [ 'myService#1' ] );
 
     } );
 
     it( `should return string name and directiveFactory for Angular registry and add $inject prop if needed (Directive)`, ()=> {
 
+      @Injectable()
       class MyService{}
 
       @Directive({
@@ -104,13 +114,14 @@ describe( `di/provider`, ()=> {
       expect( ngContainerName ).to.deep.equal( 'myFoo' );
       expect( isFunction( filterFactory ) ).to.deep.equal( true );
 
-      expect(FooDirective.$inject).to.deep.equal(['myService']);
+      expect(FooDirective.$inject).to.deep.equal(['myService#1']);
       //expect( filterFactory().controller ).to.equal( FooDirective );
 
     } );
 
     it( `should return string name and directiveFactory for Angular registry and add $inject prop if needed (Component)`, ()=> {
 
+      @Injectable()
       class MyService{}
 
       @Component({
@@ -118,7 +129,10 @@ describe( `di/provider`, ()=> {
         template:`hello`
       })
       class FooComponent{
-        constructor(@Inject(MyService) private mySvc,@Inject('$element') private $element){}
+        constructor(
+          @Inject(MyService) private mySvc,
+          @Inject('$element') private $element
+        ){}
       }
 
       const actual = provide(FooComponent);
@@ -127,7 +141,7 @@ describe( `di/provider`, ()=> {
       expect( ngContainerName ).to.deep.equal( 'myFoo' );
       expect( isFunction( filterFactory ) ).to.deep.equal( true );
 
-      expect(FooComponent.$inject).to.deep.equal(['myService','$element']);
+      expect(FooComponent.$inject).to.deep.equal(['myService#1','$element']);
       expect( filterFactory().controller ).to.equal( FooComponent );
 
     } );
@@ -166,72 +180,69 @@ describe( `di/provider`, ()=> {
 
   } );
 
-  describe( `private API`, ()=> {
+  describe( `#getInjectableName`, ()=> {
 
-    describe( `#_getTokenStringFromInjectable`, ()=> {
+    it( `should return string if injectable is string for @Inject(token)`, ()=> {
 
-      it( `should return string if injectable is string for @Inject(token)`, ()=> {
+      const actual = getInjectableName('$http');
+      const expected = '$http';
 
-        const actual = _getTokenStringFromInjectable('$http');
-        const expected = '$http';
-
-        expect( actual ).to.equal( expected );
-
-      } );
-      it( `should return string if injectable is OpaqueToken for @Inject(token)`, ()=> {
-
-        const token = new OpaqueToken('MY_CONSTANTS');
-        const actual = _getTokenStringFromInjectable(token);
-        const expected = 'MY_CONSTANTS';
-
-        expect( actual ).to.equal( expected );
-
-      } );
-      it( `should return string if injectable is pure class for @Inject(token)`, ()=> {
-
-        class Service{}
-
-        const actual = _getTokenStringFromInjectable(Service);
-        const expected = 'service';
-
-        expect( actual ).to.equal( expected );
-
-      } );
-      it( `should return string if injectable is @Injectable() for @Inject(token)`, ()=> {
-
-        @Injectable()
-        class MyNewService{}
-
-        const actual = _getTokenStringFromInjectable(MyNewService);
-        const expected = 'myNewService';
-
-        expect( actual ).to.equal( expected );
-
-      } );
-      it( `should return string if injectable is @Directive() for @Inject(token)`, ()=> {
-
-        @Directive({selector:'[myFoo]'})
-        class MyFooDirective{}
-
-        const actual = _getTokenStringFromInjectable(MyFooDirective);
-        const expected = 'myFoo';
-
-        expect( actual ).to.equal( expected );
-
-      } );
-      it( `should return string if injectable is @Pipe() for @Inject(token)`, ()=> {
-
-        @Pipe({name:'ngUppercase'})
-        class UppercasePipe{}
-
-        const actual = _getTokenStringFromInjectable(UppercasePipe);
-        const expected = 'ngUppercase';
-
-        expect( actual ).to.equal( expected );
-
-      } );
+      expect( actual ).to.equal( expected );
 
     } );
+    it( `should return string if injectable is OpaqueToken for @Inject(token)`, ()=> {
+
+      const token = new OpaqueToken('MY_CONSTANTS');
+      const actual = getInjectableName(token);
+      const expected = 'MY_CONSTANTS';
+
+      expect( actual ).to.equal( expected );
+
+    } );
+    it( `should throw trying to get injectable from pure class for @Inject(token)`, ()=> {
+
+      class Service{}
+
+      expect( ()=>getInjectableName( Service ) ).to.throw();
+
+    } );
+    it( `should return string if injectable is @Injectable() for @Inject(token)`, ()=> {
+
+      @Injectable()
+      class MyNewService{}
+
+      const actual = getInjectableName(MyNewService);
+      const expected = 'myNewService#1';
+
+      expect( actual ).to.equal( expected );
+
+    } );
+    it( `should return string if injectable is @Directive() for @Inject(token)`, ()=> {
+
+      @Directive({selector:'[myFoo]'})
+      class MyFooDirective{}
+
+      const actual = getInjectableName(MyFooDirective);
+      const expected = 'myFoo';
+
+      expect( actual ).to.equal( expected );
+
+    } );
+    it( `should return string if injectable is @Pipe() for @Inject(token)`, ()=> {
+
+      @Pipe({name:'ngUppercase'})
+      class UppercasePipe{}
+
+      const actual = getInjectableName(UppercasePipe);
+      const expected = 'ngUppercase';
+
+      expect( actual ).to.equal( expected );
+
+    } );
+
+  } );
+
+  describe( `private API`, ()=> {
 
     describe( `#_areDirectiveInjectionsNoAtTail`, ()=> {
 
@@ -382,6 +393,7 @@ describe( `di/provider`, ()=> {
         @Directive({selector:'[myMyDrr]'})
         class MyFooDirective{}
 
+        @Injectable()
         class Foo {
           constructor(
             @Inject( '$log' ) $log,
@@ -393,7 +405,7 @@ describe( `di/provider`, ()=> {
         }
 
         const actual = _dependenciesFor(Foo);
-        const expected = ['$log','svcYo', 'oh_My'];
+        const expected = ['$log','svcYo#1', 'oh_My'];
 
         expect( actual ).to.deep.equal( expected );
 
