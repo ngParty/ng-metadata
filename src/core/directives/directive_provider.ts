@@ -31,7 +31,37 @@ export class DirectiveProvider {
     controller: noop,
     link: { pre: noop, post: noop }
   };
+  private static _controllerAs = `$ctrl`;
+  private static _transclude = false;
 
+  /**
+   * creates directiveName and DirectiveFactory for angularJS container
+   *
+   * it produces directive for classes decorated with @Directive with following DDO:
+   * ```
+   * {
+   * require: ['directiveName'],
+   * controller: ClassDirective,
+   * link: postLinkFn
+   * }
+   * ```
+   *
+   * it produces component for classes decorated with @Component with following DDO:
+   * ```
+   * {
+   * require: ['directiveName'],
+   * controller: ClassDirective,
+   * controllerAs: '$ctrl',
+   * template: 'component template string',
+   * scope:{},
+   * bindToController:{},
+   * transclude: false,
+   * link: postLinkFn
+   * }
+   * ```
+   * @param type
+   * @returns {string|function(): ng.IDirective[]}
+   */
   createFromType( type: Type ): [string,ng.IDirectiveFactory] {
 
     const metadata: DirectiveMetadata | ComponentMetadata = this.directiveResolver.resolve( type );
@@ -57,9 +87,9 @@ export class DirectiveProvider {
       const componentSpecificDDO = {
         scope: {},
         bindToController: this._createComponentBindings( inputs, attrs, outputs ),
-        controllerAs: 'ctrl',
+        controllerAs: DirectiveProvider._controllerAs,
         link: this._createLink( type, metadata, lfHooks, requireMap ),
-        transclude: true
+        transclude: DirectiveProvider._transclude
       } as ng.IDirective;
 
       if ( metadata.template && metadata.templateUrl ) {

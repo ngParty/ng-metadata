@@ -211,13 +211,13 @@ describe( `directives/directive_provider`, ()=> {
       },
       require: [ 'jediMaster' ],
       controller: JediMasterCmp,
-      controllerAs: 'ctrl',
+      controllerAs: '$ctrl',
       link: {
         pre: (ddo.link as ng.IDirectivePrePost).pre,
         post: (ddo.link as ng.IDirectivePrePost).post
       },
       template: `<div>Click me to attack!</div>`,
-      transclude: true
+      transclude: false
     } );
 
     const howShoulsLinkLookLike = {
