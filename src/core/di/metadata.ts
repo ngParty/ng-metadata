@@ -119,7 +119,14 @@ export class OptionalMetadata {
  * ```
  */
 @CONST()
-export class InjectableMetadata {}
+export class InjectableMetadata {
+
+  constructor(private _id?: string){}
+
+  get id(): string { return this._id}
+
+  set id( newID: string ) { this._id = newID}
+}
 
 /**
  * Specifies that an {@link Injector} should retrieve a dependency only from itself.
