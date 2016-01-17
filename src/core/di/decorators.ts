@@ -69,7 +69,7 @@ export const Optional: OptionalFactory = makeParamDecorator(OptionalMetadata);
 /**
  * Factory for creating {@link InjectableMetadata}.
  */
-export const Injectable: InjectableFactory = <InjectableFactory>makeDecorator(InjectableMetadata);
+export const Injectable: InjectableFactory = makeDecorator(InjectableMetadata) as InjectableFactory;
 
 /**
  * Factory for creating {@link SelfMetadata}.
