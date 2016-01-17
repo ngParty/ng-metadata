@@ -23,7 +23,7 @@ describe( `reflection/reflector`, ()=> {
       class Test{}
 
       const actual = reflector.annotations(Test);
-      const expected = [new InjectableMetadata('Test#1')];
+      const expected = [new InjectableMetadata('test#1')];
 
       expect(actual).to.deep.equal(expected);
 

@@ -186,7 +186,7 @@ export function resolveDirectiveNameFromSelector( selector: string ): string {
 
 export function getTypeName(type): string{
 
-  const typeName = _getFuncName(type);
+  const typeName = getFuncName(type);
   return firstToLowerCase( typeName );
 
 }
@@ -197,7 +197,7 @@ export function getTypeName(type): string{
  * @returns {string}
  * @private
  */
-function _getFuncName( func: Function ): string {
+export function getFuncName( func: Function ): string {
 
   const parsedFnStatement = /function\s*([^\s(]+)/.exec(stringify(func));
   const [,name=''] = parsedFnStatement || [];

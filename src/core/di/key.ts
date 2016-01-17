@@ -7,6 +7,7 @@ import {isString} from '../../facade/lang';
 import {OpaqueToken} from './opaque_token';
 import {ListWrapper} from '../../facade/collections';
 import {isType} from '../../facade/lang';
+import {getTypeName} from '../../facade/lang';
 
 /**
  * @TODO
@@ -96,7 +97,7 @@ export class KeyRegistry {
                         you'v tried to create a key for \`${ token }\`
                         creating and getting key tokens is avaialable only for Type` );
     }
-    const newKey = `${ stringify( token ) }${ KeyRegistry._suffix }${ this._uniqueId() }`;
+    const newKey = `${ getTypeName( token ) }${ KeyRegistry._suffix }${ this._uniqueId() }`;
     this._allKeys.push( newKey );
 
     return newKey;

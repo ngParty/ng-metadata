@@ -26,11 +26,11 @@ describe( `di/key`, ()=> {
     class Foo{}
     class Moo{}
 
-    expect( globalKeyRegistry.get( Foo ) ).to.equal( 'Foo#1' );
-    expect( globalKeyRegistry.get( Moo ) ).to.equal( 'Moo#2' );
+    expect( globalKeyRegistry.get( Foo ) ).to.equal( 'foo#1' );
+    expect( globalKeyRegistry.get( Moo ) ).to.equal( 'moo#2' );
 
     expect( globalKeyRegistry.numberOfKeys ).to.equal( 2 );
-    expect( globalKeyRegistry.allKeys ).to.deep.equal( [ 'Foo#1', 'Moo#2' ] );
+    expect( globalKeyRegistry.allKeys ).to.deep.equal( [ 'foo#1', 'moo#2' ] );
 
   } );
 
