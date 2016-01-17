@@ -12,6 +12,7 @@
 
 import './core/di/decorators.spec';
 import './core/di/provider.spec';
+import './core/di/key.spec';
 import './core/util/decorators.spec';
 import './core/reflection/reflection.spec';
 import './core/linker/pipe_resolver.spec';

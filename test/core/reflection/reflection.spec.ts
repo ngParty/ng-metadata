@@ -8,9 +8,14 @@ import {HostMetadata} from '../../../src/core/di/metadata';
 import {assign} from '../../../src/facade/lang';
 import {InjectMetadata} from '../../../src/core/di/metadata';
 import {reflector} from '../../../src/core/reflection/reflection';
+import {globalKeyRegistry} from '../../../src/core/di/key';
 
 
 describe( `reflection/reflector`, ()=> {
+
+  beforeEach( ()=> {
+    globalKeyRegistry._reset();
+  } );
 
     it( `should extract class annotation if present`, ()=> {
 
@@ -18,7 +23,7 @@ describe( `reflection/reflector`, ()=> {
       class Test{}
 
       const actual = reflector.annotations(Test);
-      const expected = [InjectableMetadata.prototype];
+      const expected = [new InjectableMetadata('Test#1')];
 
       expect(actual).to.deep.equal(expected);
 

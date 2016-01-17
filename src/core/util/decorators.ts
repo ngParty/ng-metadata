@@ -1,5 +1,8 @@
 import {global, Type, isFunction, isString, isPresent} from '../../facade/lang';
 import {reflector} from '../reflection/reflection';
+import {InjectableMetadata} from '../di/metadata';
+import {stringify} from '../../facade/lang';
+import {globalKeyRegistry} from '../di/key';
 
 /**
  * An interface implemented by all Angular type decorators,
@@ -32,9 +35,9 @@ export function makeDecorator(
   chainFn: ( fn: Function ) => void = null
 ): ( ...args: any[] ) => ( cls: any ) => any {
 
-  function DecoratorFactory( objOrType ): ( cls: any ) => any {
+  function DecoratorFactory( objOrType ): ClassDecorator {
 
-    var annotationInstance = new AnnotationCls( objOrType );
+    const annotationInstance = new AnnotationCls( objOrType );
 
     if ( this instanceof AnnotationCls ) {
 
@@ -47,18 +50,6 @@ export function makeDecorator(
       //  : [];
       //chainAnnotation.push(annotationInstance);
 
-      function TypeDecorator( cls ): TypeDecorator {
-
-        let annotations = reflector.annotations(cls);
-
-        annotations = annotations || [];
-        annotations.push( annotationInstance );
-        reflector.registerAnnotation(annotations,cls);
-
-        return cls;
-
-      }
-
       if ( chainFn ) {
         chainFn( TypeDecorator );
       }
@@ -66,10 +57,33 @@ export function makeDecorator(
       return TypeDecorator;
 
     }
+
+    function TypeDecorator( cls ): TypeDecorator {
+
+      /**
+       * here we are creating generated name for Services
+       * so we can acquire the key for AngularJS DI
+       * and we have unique names after mangling our JS
+       */
+      if ( annotationInstance instanceof InjectableMetadata ) {
+        annotationInstance.id = globalKeyRegistry.get( cls );
+      }
+
+      let annotations = reflector.annotations(cls);
+
+      annotations = annotations || [];
+      annotations.push( annotationInstance );
+      reflector.registerAnnotation(annotations,cls);
+
+      return cls;
+
+    }
+
   }
 
   //DecoratorFactory.prototype = Object.create(annotationCls.prototype);
   return DecoratorFactory;
+
 }
 
 export function makeParamDecorator( annotationCls, overrideParamDecorator: Function = null ): any {
