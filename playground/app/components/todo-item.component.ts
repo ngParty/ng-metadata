@@ -3,7 +3,10 @@ import { TodoModel } from '../stores/todoStore.service';
 
 @Component({
   selector: 'todo-item',
-  templateUrl: './app/components/todo-item.html'
+  templateUrl: './app/components/todo-item.html',
+  legacy: {
+    transclude: true
+  }
 })
 export class TodoItemCmp{
 

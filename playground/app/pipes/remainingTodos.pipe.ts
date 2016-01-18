@@ -6,7 +6,7 @@ import { TodoModel } from '../stores/todoStore.service';
 } )
 export class RemainingTodosPipe {
 
-  transform( todos: TodoModel[] ): string {
+  transform( todos: TodoModel[] = [] ): string {
 
 
     // method to iterate the todo items and return

@@ -31,6 +31,5 @@ export class ElementReadyDirective implements OnInit {
     //this.$scope.$watch( componentHandler.upgradeAllRegistered )
 
   }
-  }
 
 }
