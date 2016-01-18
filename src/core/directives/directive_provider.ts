@@ -353,8 +353,11 @@ export class DirectiveProvider {
 
         // AfterContentInit/AfterViewInit Hooks
         // call one of those methods if implemented
-        if ( lfHooks.ngAfterViewInit || lfHooks.ngAfterContentInit ) {
-          (ctrl[ 'ngAfterContentInit'] || ctrl['ngAfterViewInit' ])();
+        if ( lfHooks.ngAfterViewInit ) {
+          ctrl.ngAfterViewInit();
+        }
+        if ( lfHooks.ngAfterContentInit ) {
+          ctrl.ngAfterContentInit();
         }
 
         // destroy
