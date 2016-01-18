@@ -10,9 +10,10 @@ npm-debug.log
 *.js
 *.map
 *.d.ts
-!src/globals.d.ts
+!manual_typings/globals.d.ts
 !playground/ng-metadata.legacy.d.ts
 typings
+test/__uglifyTest.js
 
 #################
 ## JetBrains

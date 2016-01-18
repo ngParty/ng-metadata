@@ -5,8 +5,10 @@
   "devDependencies": {
   },
   "ambientDependencies": {
+    "node": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/node/node.d.ts",
     "chai": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/chai/chai.d.ts",
     "mocha": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/mocha/mocha.d.ts",
+    "sinon": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/sinon/sinon.d.ts",
     "angular": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/angularjs/angular.d.ts",
     "jquery": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/jquery/jquery.d.ts"
   }

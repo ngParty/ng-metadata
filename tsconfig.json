@@ -7,12 +7,10 @@
     "experimentalDecorators": true,
     "declaration": true
   },
-  "files": [
-    "ng-metadata.ts",
-    "ng-metadata.test.ts",
-    "typings/browser.d.ts"
-  ],
   "exclude": [
+    "typings/main",
+    "typings/main.d.ts",
+    "playground",
     "node_modules"
   ]
 }

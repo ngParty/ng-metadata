@@ -1,4 +1,4 @@
-declare module ngMetadata{
+declare module ngMetadataPlatform{
 
   type AppRoot = string | Element | Document;
   function bootstrap(ngModule: ng.IModule, {element, strictDi}?: {
@@ -6,11 +6,29 @@ declare module ngMetadata{
     strictDi?: boolean;
   }): void;
 
-  function provide(Type: any, {useAlias}?: {
-    useAlias?: string;
-  }): string;
-  function makeDirective(Type: any): ng.IDirectiveFactory;
-  function makePipe(Type: any): ($injector: ng.auto.IInjectorService) => any;
+}
+declare module ngMetadataCore{
+
+  export interface Type extends Function {}
+
+  export class OpaqueToken {
+    private _desc;
+    constructor(_desc: string);
+    desc: string;
+    toString(): string;
+  }
+
+  export type ProviderType = Type | string | OpaqueToken;
+  /**
+   * should extract the string token from provided Type and add $inject angular 1 annotation to constructor if @Inject
+   * was used
+   * @param type
+   * @returns {string}
+   */
+  export function provide(type: ProviderType, {useClass, useValue}?: {
+    useClass?: Type;
+    useValue?: any;
+  }): [string, Type];
 
   function Directive({selector, legacy}: {
     selector: string;
@@ -34,6 +52,9 @@ declare module ngMetadata{
     pure?: boolean;
   }): ClassDecorator;
 
+  export function Optional(): ParameterDecorator;
+  export function Host(): ParameterDecorator;
+  export function Parent(): ParameterDecorator;
 
   interface InjectableServiceConfigStatic {
     _name?: string
@@ -85,6 +106,22 @@ declare module ngMetadata{
   }
 
 }
-declare module "ng-metadata/ng-metadata" {
-  export = ngMetadata;
+declare module "ng-metadata/core" {
+  export = ngMetadataCore;
+}
+declare module "ng-metadata/platform" {
+  export = ngMetadataPlatform;
+}
+
+declare type Type = Function;
+declare type ProvideSpreadType = string|Type;
+
+declare module angular {
+  interface IModule {
+    // constant(object: Object): IModule;
+    // value(object: Object): IModule;
+    directive(...args: ProvideSpreadType[]): IModule;
+    filter(...args: ProvideSpreadType[]): IModule;
+    service(...args: ProvideSpreadType[]): IModule;
+  }
 }

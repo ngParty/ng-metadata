@@ -1,5 +1,5 @@
 import * as angular from 'angular';
-import { provide, makeDirective, makePipe } from 'ng-metadata/ng-metadata';
+import { provide } from 'ng-metadata/core';
 
 import { TodoAppCmp } from './components/todo-app.component';
 import { TodoItemCmp } from './components/todo-item.component';
@@ -13,12 +13,9 @@ import { ElementReadyDirective } from './directives/element-ready.directive';
 
 export const AppModule = angular.module( 'app', [] )
 
-  .directive( provide( TodoAppCmp ), makeDirective( TodoAppCmp ) )
-  .directive( provide( AddTodoCmp ), makeDirective( AddTodoCmp ) )
-  .directive( provide( TodoItemCmp ), makeDirective( TodoItemCmp ) )
-
-  .filter( provide( RemainingTodosPipe ), makePipe( RemainingTodosPipe ) )
-
-  .service( provide( TodoStore ), TodoStore )
-
-  .directive( provide( ElementReadyDirective ), makeDirective( ElementReadyDirective ) );
+  .directive( ...provide( TodoAppCmp ) )
+  .directive( ...provide( AddTodoCmp ) )
+  .directive( ...provide( TodoItemCmp ) )
+  .filter( ...provide( RemainingTodosPipe ) )
+  .service( ...provide( TodoStore ) )
+  .directive( ...provide( ElementReadyDirective ) );

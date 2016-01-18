@@ -2,16 +2,15 @@
   "name": "ng-metadata",
   "version": "1.0.0-beta.5",
   "description": "Angular 2 style decorators and utils for Angular 1.x",
-  "main": "ng-metadata.js",
-  "typings": "./ng-metadata.d.ts",
   "scripts": {
     "typings": "typings install",
-    "prepublish": "npm run typings && tsc",
+    "prepublish": "npm run typings && tsc && ./scripts/create_core.sh",
     "start": "tsc -w",
-    "test": "mocha ng-metadata.test.js",
-    "test:live": "mocha ng-metadata.test.js -w",
+    "test": "mocha ./test/index.js",
+    "test:live": "mocha ./test/index.js -w",
     "commit": "git-cz",
-    "playground": "tsc -p playground -w & live-server --no-browser"
+    "playground": "tsc -p playground -w & live-server --no-browser",
+    "uglify": "uglifyjs test/host.spec.js --beautify --mangle --compress --output test/__uglifyTest.js"
   },
   "repository": {
     "type": "git",
@@ -36,6 +35,7 @@
     "ghooks": "1.0.1",
     "live-server": "0.8.2",
     "mocha": "2.3.4",
+    "sinon": "1.17.2",
     "systemjs": "0.19.6",
     "systemjs-builder": "0.14.11",
     "typescript": "1.7.3",
@@ -48,7 +48,7 @@
   },
   "config": {
     "ghooks": {
-      "pre-commit": "npm test"
+      "pre-commit": "tsc && npm test"
     }
   }
 }
