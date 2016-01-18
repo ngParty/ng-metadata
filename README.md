@@ -52,7 +52,7 @@ ng-metadata can be used as part of an upgrade strategy, which may also include *
 ## Learn
 
 - Browse the [API Reference](docs/API.md)
-- How to migrate es5 to typescript+ngMetadata [Design Patterns](docs/DESIGN_PATTERNS.md)
+- How to migrate es5 to typescript+ngMetadata [Design Patterns](docs/DESIGN-PATTERNS.md)
 - explore the [TODO app](playground)
 - check [FAQ](docs/FAQ.md) for more explanation why this exist
 
