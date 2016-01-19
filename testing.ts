@@ -1,2 +1,1 @@
-// @TODO export public testing helpers
-//import {} from './testing/utils';
+export {renderFactory,getInput,IRender} from './src/testing/utils';
