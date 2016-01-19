@@ -1,5 +1,9 @@
 import {isNumber} from "./lang";
 
+
+const _kebabCase = _caseTransformerFactory('-');
+const _snakeCase = _caseTransformerFactory('_');
+
 export class StringWrapper {
   static fromCharCode( code: number ): string { return String.fromCharCode( code ); }
 
@@ -99,6 +103,31 @@ export class StringWrapper {
     const lastIndex = subjectString.indexOf( searchString, position );
     return lastIndex !== -1 && lastIndex === position;
 
+  }
+
+  static kebabCase( name: string ) {
+    return _kebabCase( name );
+  }
+  static snakeCase( name: string ) {
+    return _snakeCase( name );
+  }
+
+}
+
+function _caseTransformerFactory( separator: string ): ( name: string )=>string {
+
+  const SNAKE_CASE_REGEXP = /[A-Z]/g;
+
+  return _caseTransform;
+
+  function _caseTransform( name ) {
+    return name.replace( SNAKE_CASE_REGEXP, function ( match: string, offset: number ) {
+      return (
+          offset
+            ? separator
+            : ''
+        ) + match.toLowerCase();
+    } );
   }
 
 }

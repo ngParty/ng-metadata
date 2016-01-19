@@ -42,4 +42,28 @@ describe( `facade/primitives`, ()=> {
 
   } );
 
+  describe( `string transforms`, ()=> {
+
+    it( `should convert camelCase to kebabCase`, ()=> {
+
+      const str = 'mooFooYooBoo';
+      const actual = StringWrapper.kebabCase(str);
+      const expected = 'moo-foo-yoo-boo';
+
+      expect( actual ).to.equal( expected );
+
+    } );
+
+    it( `should convert camelCase to snakeCase`, ()=> {
+
+      const str = 'mooFooYooBoo';
+      const actual = StringWrapper.snakeCase(str);
+      const expected = 'moo_foo_yoo_boo';
+
+      expect( actual ).to.equal( expected );
+
+    } );
+
+  } );
+
 } );
