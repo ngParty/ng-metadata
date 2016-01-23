@@ -29,6 +29,8 @@ import {
 import {pipeProvider} from "../pipes/pipe_provider";
 import {directiveProvider} from "../directives/directive_provider";
 import {getFuncName} from '../../facade/lang';
+import {ListWrapper} from '../../facade/collections';
+import {ComponentMetadata} from '../directives/metadata_directives';
 
 
 export type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
@@ -77,37 +79,62 @@ class ProviderBuilder{
       throw new Error( `
       Provider registration: "${stringify( injectableType )}":
       =======================================================
-      token ${ stringify( injectableType ) } must be type of Type, You cannot provide non class
+      token ${ stringify( injectableType ) } must be type of Type, You cannot provide none class
       ` );
 
     }
 
-    const [annotation] = reflector.annotations( injectableType );
+    /**
+     *
+     * @type {any[]}
+     */
+    const annotations = reflector.annotations( injectableType );
 
-    if ( isBlank( annotation ) ) {
+    const [rootAnnotation] = annotations;
+
+    if ( ListWrapper.isEmpty( annotations ) ) {
 
       throw new Error( `
       Provider registration: "${ stringify(injectableType) }":
       =======================================================
       cannot create appropriate construct from provided Type.
-       -> Type "${ stringify(injectableType) }" must be on of [ @Pipe(), @Component(), @Directive(), @Injectable() ]
+       -> Type "${ stringify(injectableType) }" must have one of class decorators: [ @Pipe(), @Component(), @Directive(), @Injectable() ]
       ` );
+
+    }
+
+    if ( ListWrapper.size( annotations ) > 1 ) {
+
+      const hasComponentAnnotation = annotations.some( meta=>isComponent( meta ) );
+      const hasNotAllowedSecondAnnotation = annotations.some( meta=> {
+        return isDirective( meta ) || isService( meta ) || isPipe( meta );
+      } );
+
+      if ( !hasComponentAnnotation || (hasNotAllowedSecondAnnotation && hasComponentAnnotation) ) {
+        throw Error( `
+        Provider registration: "${ stringify( injectableType ) }":
+        =======================================================
+        - you cannot use more than 1 class decorator,
+        - you've used ${ annotations.map(meta=>stringify(meta.constructor)) }
+        Multiple class decorators are allowed only for component class: [ @Component, @StateConfig? ]
+        ` )
+      }
 
     }
 
     injectableType.$inject = _dependenciesFor( injectableType );
 
-    if ( annotation instanceof PipeMetadata ) {
+    if (rootAnnotation instanceof PipeMetadata ) {
       return pipeProvider.createFromType( injectableType );
     }
 
-    if ( annotation instanceof DirectiveMetadata ) {
+    if (rootAnnotation instanceof DirectiveMetadata ) {
       return directiveProvider.createFromType( injectableType );
     }
 
-    if ( annotation instanceof InjectableMetadata ) {
+    if (rootAnnotation instanceof InjectableMetadata ) {
       return [
-        overrideName || annotation.id,
+        overrideName ||rootAnnotation.id,
         injectableType
       ];
     }
@@ -236,8 +263,8 @@ export function getInjectableName(injectable: ProviderType): string{
 
     if ( isBlank( annotation ) ) {
       throw new Error( `
-        cannot get injectable name token from non decorated class ${ getFuncName( injectable ) }
-        Only @Injectable/@Directive/@Component/@Pipe decorated classes can be injected by reference
+        cannot get injectable name token from none decorated class ${ getFuncName( injectable ) }
+        Only decorated classes by one of [ @Injectable,@Directive,@Component,@Pipe ], can be injected by reference
       ` );
     }
 
@@ -292,4 +319,19 @@ export function _areAllDirectiveInjectionsAtTail( metadata: ParamMetaInst[][] ):
 
   } );
 
+}
+
+
+function isDirective( annotation: DirectiveMetadata ): boolean {
+  return isString( annotation.selector ) && annotation instanceof DirectiveMetadata;
+}
+function isComponent( annotation: ComponentMetadata ): boolean {
+  const hasTemplate = !isBlank( annotation.template || annotation.templateUrl );
+  return isString( annotation.selector ) && hasTemplate && annotation instanceof ComponentMetadata
+}
+function isService(annotation: InjectableMetadata): boolean{
+  return annotation instanceof InjectableMetadata;
+}
+function isPipe(annotation: PipeMetadata): boolean{
+  return isString(annotation.name) && annotation instanceof PipeMetadata;
 }
