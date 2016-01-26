@@ -1,23 +1,32 @@
 import * as sinon from 'sinon';
-import {expect} from 'chai';
-
-import {noop,isFunction,isBlank} from '../../../src/facade/lang';
-import {AfterContentInit,OnDestroy,OnInit} from '../../../src/core/linker/directive_lifecycle_interfaces';
-import {Component,Directive,Input,Attr,Output,HostListener,HostBinding} from '../../../src/core/directives/decorators';
-import {Inject,Host} from '../../../src/core/di/decorators';
-import {DirectiveMetadata} from '../../../src/core/directives/metadata_directives';
-import {$Scope,$Attrs,ElementFactory} from '../../../src/testing/utils';
-
+import { expect } from 'chai';
+import { noop, isFunction, isBlank } from '../../../src/facade/lang';
+import {
+  AfterContentInit,
+  OnDestroy,
+  OnInit,
+  AfterViewInit
+} from '../../../src/core/linker/directive_lifecycle_interfaces';
+import {
+  Component,
+  Directive,
+  Input,
+  Attr,
+  Output,
+  HostListener,
+  HostBinding
+} from '../../../src/core/directives/decorators';
+import { Inject, Host } from '../../../src/core/di/decorators';
+import { DirectiveMetadata } from '../../../src/core/directives/metadata_directives';
+import { $Scope, $Attrs, ElementFactory } from '../../../src/testing/utils';
 import {
   directiveProvider,
-  DirectiveProvider,
   _setHostBindings,
   _assignRequiredCtrlInstancesToHostCtrl,
   _getHostListenerCbParams,
   _setHostListeners,
   _createDirectiveBindings
 } from '../../../src/core/directives/directive_provider';
-import {AfterViewInit} from '../../../src/core/linker/directive_lifecycle_interfaces';
 
 describe( `directives/directive_provider`, ()=> {
 
@@ -67,8 +76,6 @@ describe( `directives/directive_provider`, ()=> {
     const [directiveName,directiveFactory] = directiveProvider.createFromType( MyClicker );
     const ddo: ng.IDirective = directiveFactory();
 
-    //console.log( ddo.link.pre.toString() );
-    //console.log( ddo.link.post.toString() );
 
     expect( directiveName ).to.equal( 'myClicker' );
     expect( isFunction( directiveFactory ) ).to.equal( true );
@@ -271,6 +278,121 @@ describe( `directives/directive_provider`, ()=> {
 
       }
     };
+
+
+  } );
+
+  describe( `static DDO methods on class`, ()=> {
+
+    describe( `compile function`, ()=> {
+
+      it( `should allow to define compile ddo function as static method`, ()=> {
+
+        const spyFromCompile = sinon.spy();
+
+        @Directive({selector:'[with-compile]'})
+        class WithCompileDirective{
+          static compile(tElement:ng.IAugmentedJQuery,tAttrs:ng.IAttributes){
+            spyFromCompile();
+          }
+        }
+
+        const [,directiveFactory] = directiveProvider.createFromType( WithCompileDirective );
+        const ddo: ng.IDirective = directiveFactory();
+
+        expect( isFunction(ddo.compile) ).to.equal(true);
+
+        expect( ddo ).to.deep.equal( {
+          require: [ 'withCompile' ],
+          controller: WithCompileDirective,
+          compile: ddo.compile,
+          link: ddo.link as ng.IDirectiveLinkFn
+        } );
+
+        expect( spyFromCompile.called ).to.equal( false );
+
+        const linkFromCompileFn = ddo.compile({} as ng.IAugmentedJQuery,{} as ng.IAttributes, noop as ng.ITranscludeFunction)
+        expect( linkFromCompileFn ).to.equal( ddo.link );
+        expect( spyFromCompile.called ).to.equal( true );
+
+      } );
+
+      it( `should return the link fn from compile if it returns function`, ()=> {
+
+        const spyFromCompile = sinon.spy();
+        const spyFromLink = sinon.spy();
+
+        @Directive( { selector: '[with-compile]' } )
+        class WithCompileDirective {
+          static compile( tElement: ng.IAugmentedJQuery, tAttrs: ng.IAttributes ) {
+            spyFromCompile();
+            return function postLink( scope, element, attrs, controller, transclude ) {
+              spyFromLink();
+            }
+          }
+        }
+
+        const [,directiveFactory] = directiveProvider.createFromType( WithCompileDirective );
+        const ddo: ng.IDirective = directiveFactory();
+        const ddoLinkSpy = sinon.spy( ddo, 'link' );
+
+        expect( spyFromCompile.called ).to.equal( false );
+        expect( ddoLinkSpy.called ).to.equal( false );
+
+        const linkFromCompileFn = ddo.compile( {} as ng.IAugmentedJQuery,
+          {} as ng.IAttributes,
+          noop as ng.ITranscludeFunction ) as Function;
+
+        expect( spyFromCompile.called ).to.equal( true );
+        expect( linkFromCompileFn ).to.not.equal( ddo.link );
+
+        linkFromCompileFn( {}, {}, {}, noop, noop );
+        expect( spyFromLink.called ).to.equal( true );
+
+      } );
+
+    } );
+
+    describe( `link function`, ()=> {
+
+      it( `should allow to define link ddo function as static method`, ()=> {
+
+        const spyFromLink = sinon.spy();
+
+        @Directive({selector:'[with-compile]'})
+        class WithLink{
+          static link(scope,el,attrs,ctrl,translcude){
+            spyFromLink();
+          }
+        }
+
+        const [,directiveFactory] = directiveProvider.createFromType( WithLink );
+        const ddo: ng.IDirective = directiveFactory();
+
+        expect( isFunction( ddo.link ) ).to.equal( true );
+        expect( ddo.link ).to.equal( WithLink.link );
+
+        expect( ddo ).to.deep.equal( {
+          require: [ 'withCompile' ],
+          controller: WithLink,
+          link: WithLink.link as ng.IDirectiveLinkFn
+        } );
+
+        expect( spyFromLink.called ).to.equal( false );
+
+        (ddo.link as ng.IDirectiveLinkFn)(
+          {} as ng.IScope,
+          {} as ng.IAugmentedJQuery,
+          {} as ng.IAttributes,
+          noop,
+          noop as ng.ITranscludeFunction
+        );
+
+        expect( spyFromLink.called ).to.equal( true );
+
+      } );
+
+    } );
 
 
   } );

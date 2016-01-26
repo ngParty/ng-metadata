@@ -1,11 +1,19 @@
-import {DirectiveResolver} from "../linker/directive_resolver";
-import {Type,assign,isBlank,isPresent,isFunction,noop,resolveDirectiveNameFromSelector} from "../../facade/lang";
-import {StringWrapper} from "../../facade/primitives";
-import {StringMapWrapper} from "../../facade/collections";
-import {hasLifecycleHook} from "../linker/directive_lifecycles_reflector";
-import {LifecycleHooks} from "../linker/directive_lifecycle_interfaces";
-import {DirectiveMetadata,ComponentMetadata,LegacyDirectiveDefinition} from "./metadata_directives";
-import {stringify} from '../../facade/lang';
+import { DirectiveResolver } from '../linker/directive_resolver';
+import {
+  Type,
+  assign,
+  isPresent,
+  isFunction,
+  noop,
+  resolveDirectiveNameFromSelector,
+  stringify,
+  isJsObject
+} from '../../facade/lang';
+import { StringWrapper } from '../../facade/primitives';
+import { StringMapWrapper } from '../../facade/collections';
+import { hasLifecycleHook } from '../linker/directive_lifecycles_reflector';
+import { LifecycleHooks } from '../linker/directive_lifecycle_interfaces';
+import { DirectiveMetadata, ComponentMetadata, LegacyDirectiveDefinition } from './metadata_directives';
 
 export type HostBindingsProcessed = {
   classes: StringMap,
@@ -114,6 +122,27 @@ export class DirectiveProvider {
 
     }
 
+
+    // allow compile defined as static method on Type
+    if ( isFunction( (type as any).compile ) ) {
+      _ddo.compile = function compile( tElement, tAttrs ) {
+        const linkFn = (type as any).compile( tElement, tAttrs );
+
+        // if user custom compile fn returns link use that one instead use generated
+        return isJsObject( linkFn )
+          ? linkFn
+          : this.link;
+      }
+    }
+
+    // allow link defined as static method on Type override the created one
+    // you should not use this very often
+    // Note: if you use this any @Host property decorators or lifeCycle hooks wont work
+    if ( isFunction((type as any).link) ) {
+      _ddo.link = (type as any).link;
+    }
+
+    // legacy property overrides all generated DDO stuff
     const ddo = this._createDDO( _ddo, metadata.legacy );
 
     return [
