@@ -282,6 +282,60 @@ describe( `directives/directive_provider`, ()=> {
 
   } );
 
+  describe( `local directive injections`, ()=> {
+
+    it( `should correctly inject and bind directive to instance by string`, ()=> {
+
+      @Directive({selector:'[validator]'})
+      class MyValidator{
+        constructor(
+          @Inject('$log') $log: ng.ILogService,
+          @Inject('ngModel') @Host() private ngModel
+        ){}
+      }
+
+      const [directiveName,directiveFactory] = directiveProvider.createFromType( MyValidator );
+      const ddo: ng.IDirective = directiveFactory();
+
+      expect( directiveName ).to.equal( 'validator' );
+      expect( isFunction( directiveFactory ) ).to.equal( true );
+      expect( directiveFactory() ).to.deep.equal( {
+        require: [ 'validator','^ngModel' ],
+        controller: MyValidator,
+        link: ddo.link as ng.IDirectiveLinkFn
+      } );
+
+    } );
+
+    it( `should correctly inject and bind directive to instance by Injectable `, ()=> {
+
+      @Directive({selector:'[my-css-mutator]'})
+      class CssHandler{}
+
+      @Directive({selector:'[validator]'})
+      class MyValidator{
+        constructor(
+          @Inject('$log') $log: ng.ILogService,
+          @Inject('ngModel') @Host() private ngModel,
+          @Inject(CssHandler) @Host() private myCssMutator
+        ){}
+      }
+
+      const [directiveName,directiveFactory] = directiveProvider.createFromType( MyValidator );
+      const ddo: ng.IDirective = directiveFactory();
+
+      expect( directiveName ).to.equal( 'validator' );
+      expect( isFunction( directiveFactory ) ).to.equal( true );
+      expect( directiveFactory() ).to.deep.equal( {
+        require: [ 'validator','^ngModel','^myCssMutator' ],
+        controller: MyValidator,
+        link: ddo.link as ng.IDirectiveLinkFn
+      } );
+
+    } );
+
+  } );
+
   describe( `static DDO methods on class`, ()=> {
 
     describe( `compile function`, ()=> {

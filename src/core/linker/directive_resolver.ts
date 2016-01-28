@@ -1,6 +1,6 @@
-import {Type, isPresent, isBlank, stringify, assign} from '../../facade/lang';
-import {StringMapWrapper, ListWrapper} from "../../facade/collections";
-import {reflector} from '../reflection/reflection';
+import { Type, isPresent, stringify, assign, isType } from '../../facade/lang';
+import { StringMapWrapper, ListWrapper } from '../../facade/collections';
+import { reflector } from '../reflection/reflection';
 import {
   DirectiveMetadata,
   ComponentMetadata,
@@ -16,8 +16,8 @@ import {
   ContentChildMetadata,
   ViewChildMetadata
 } from '../directives/metadata_di';
-import {InjectMetadata,HostMetadata,SelfMetadata,SkipSelfMetadata,OptionalMetadata} from "../di/metadata";
-import {ParamMetaInst,PropMetaInst} from '../di/provider';
+import { InjectMetadata, HostMetadata, SelfMetadata, SkipSelfMetadata, OptionalMetadata } from '../di/metadata';
+import { ParamMetaInst, PropMetaInst, getInjectableName } from '../di/provider';
 
 function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;
@@ -63,7 +63,9 @@ function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[] ): String
   }
 
   const requireExpressionPrefix = `${optionalType}${locateType}`;
-  const directiveName = injectInst.token;
+  const directiveName = isType( injectInst.token )
+    ? getInjectableName( injectInst.token )
+    : injectInst.token;
 
   return {
     [directiveName]: `${ requireExpressionPrefix }${ directiveName }`

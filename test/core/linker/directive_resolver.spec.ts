@@ -1,6 +1,6 @@
-import {expect} from 'chai';
-import {stringify} from '../../../src/facade/lang';
-import {DirectiveMetadata,ComponentMetadata} from '../../../src/core/directives/metadata_directives';
+import { expect } from 'chai';
+import { stringify } from '../../../src/facade/lang';
+import { DirectiveMetadata, ComponentMetadata } from '../../../src/core/directives/metadata_directives';
 import {
   Directive,
   Component,
@@ -10,16 +10,8 @@ import {
   HostListener,
   Attr
 } from '../../../src/core/directives/decorators';
-import {DirectiveResolver} from '../../../src/core/linker/directive_resolver';
-import {Inject} from '../../../src/core/di/decorators';
-import {Host} from '../../../src/core/di/decorators';
-import {Self} from '../../../src/core/di/decorators';
-import {Optional} from '../../../src/core/di/decorators';
-import {InjectMetadata} from '../../../src/core/di/metadata';
-import {HostMetadata} from '../../../src/core/di/metadata';
-import {SelfMetadata} from '../../../src/core/di/metadata';
-import {OptionalMetadata} from '../../../src/core/di/metadata';
-import {SkipSelf} from '../../../src/core/di/decorators';
+import { DirectiveResolver } from '../../../src/core/linker/directive_resolver';
+import { Inject, Host, Self, Optional, SkipSelf } from '../../../src/core/di/decorators';
 
 
 describe( `linker/directive_resolver`, ()=> {
@@ -217,6 +209,43 @@ describe( `linker/directive_resolver`, ()=> {
           @Inject('clicker') @Host() private clicker,
           @Inject('api') @Host() @Optional() private api,
           @Inject('ngModel') @Host() @Self() private ngModel
+        ) {}
+
+      }
+
+      const resolver = new DirectiveResolver();
+      const actual = resolver.getRequiredDirectivesMap(Foo);
+      const expected = {
+        clicker: '^clicker',
+        api: '?^api',
+        ngModel: 'ngModel'
+      };
+
+      expect(actual).to.deep.equal(expected);
+
+    } );
+
+    it( `should support reference as Injectable for directives and return require expression map`, ()=> {
+
+
+      @Directive({selector:'[clicker]'})
+      class MyClickerDirective{}
+
+      @Directive({selector:'[ng-model]'})
+      class NgModelDirective{}
+
+      @Directive({selector:'[api]'})
+      class ApiDirective{}
+
+      @Directive({selector:'[foo]'})
+      class Foo{
+
+        constructor(
+          @Inject( '$log' ) private $log,
+          @Inject( '$attrs' ) private $attrs,
+          @Inject(MyClickerDirective) @Host() private clicker,
+          @Inject(ApiDirective) @Host() @Optional() private api,
+          @Inject(NgModelDirective) @Host() @Self() private ngModel
         ) {}
 
       }
