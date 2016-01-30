@@ -1,5 +1,5 @@
-import {isPresent, CONST, Type} from '../../facade/lang';
-import {InjectableMetadata} from '../di/metadata';
+import { CONST, Type } from '../../facade/lang';
+import { InjectableMetadata } from '../di/metadata';
 
 export type LegacyDirectiveDefinition = {
   compile?: ng.IDirectiveCompileFn;
@@ -921,7 +921,7 @@ export class ComponentMetadata extends DirectiveMetadata {
   pipes: Array<Type | any[]>;
 
   constructor({
-    selector, inputs, attrs, outputs, host, exportAs,providers, viewProviders, queries, templateUrl, template,
+    selector, inputs, attrs, outputs, host, exportAs, providers, viewProviders, queries, templateUrl, template,
     styleUrls, styles, directives, pipes, legacy
   }: {
     selector?: string,

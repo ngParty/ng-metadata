@@ -1,19 +1,6 @@
-import {
-  makeDecorator,
-  makePropDecorator,
-  TypeDecorator
-} from '../util/decorators';
-
-import {Type} from '../../facade/lang';
-
-import {
-  ContentChildrenMetadata,
-  ContentChildMetadata,
-  ViewChildrenMetadata,
-  ViewChildMetadata,
-  ViewQueryMetadata
-} from './metadata_di';
-
+import { makeDecorator, makePropDecorator, TypeDecorator } from '../util/decorators';
+import { Type } from '../../facade/lang';
+import { ContentChildrenMetadata, ContentChildMetadata, ViewChildrenMetadata, ViewChildMetadata } from './metadata_di';
 import {
   ComponentMetadata,
   DirectiveMetadata,
@@ -21,9 +8,9 @@ import {
   AttrMetadata,
   OutputMetadata,
   HostBindingMetadata,
-  HostListenerMetadata
+  HostListenerMetadata,
+  LegacyDirectiveDefinition
 } from './metadata_directives';
-import {LegacyDirectiveDefinition} from "./metadata_directives";
 
 
 /**
@@ -202,8 +189,7 @@ export interface HostListenerFactory {
 }
 
 
-export const Component: ComponentFactory =
-  makeDecorator(ComponentMetadata/*, (fn: any) => fn.View = View*/) as ComponentFactory;
+export const Component: ComponentFactory = makeDecorator(ComponentMetadata) as ComponentFactory;
 
 export const Directive: DirectiveFactory = <DirectiveFactory>makeDecorator(DirectiveMetadata);
 

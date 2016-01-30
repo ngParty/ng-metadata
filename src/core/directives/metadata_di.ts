@@ -1,5 +1,113 @@
-import {CONST, Type, stringify, isPresent, isString} from '../../facade/lang';
+import { CONST, Type, stringify, isString } from '../../facade/lang';
+import { resolveForwardRef } from '../di/forward_ref';
 
+/**
+ * Declares an injectable parameter to be a live list of directives or variable
+ * bindings from the content children of a directive.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/lY9m8HLy7z06vDoUaSN2?p=preview))
+ *
+ * Assume that `<tabs>` component would like to get a list its children `<pane>`
+ * components as shown in this example:
+ *
+ * ```html
+ * <tabs>
+ *   <pane title="Overview">...</pane>
+ *   <pane *ngFor="#o of objects" [title]="o.title">{{o.text}}</pane>
+ * </tabs>
+ * ```
+ *
+ * The preferred solution is to query for `Pane` directives using this decorator.
+ *
+ * ```javascript
+ * @Component({
+ *   selector: 'pane',
+ *   inputs: ['title']
+ * })
+ * class Pane {
+ *   title:string;
+ * }
+ *
+ * @Component({
+ *  selector: 'tabs',
+ *  template: `
+ *    <ul>
+ *      <li *ngFor="#pane of panes">{{pane.title}}</li>
+ *    </ul>
+ *    <content></content>
+ *  `
+ * })
+ * class Tabs {
+ *   panes: QueryList<Pane>;
+ *   constructor(@Query(Pane) panes:QueryList<Pane>) {
+  *    this.panes = panes;
+  *  }
+ * }
+ * ```
+ *
+ * A query can look for variable bindings by passing in a string with desired binding symbol.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/sT2j25cH1dURAyBRCKx1?p=preview))
+ * ```html
+ * <seeker>
+ *   <div #findme>...</div>
+ * </seeker>
+ *
+ * @Component({ selector: 'seeker' })
+ * class Seeker {
+ *   constructor(@Query('findme') elList: QueryList<ElementRef>) {...}
+ * }
+ * ```
+ *
+ * In this case the object that is injected depend on the type of the variable
+ * binding. It can be an ElementRef, a directive or a component.
+ *
+ * Passing in a comma separated list of variable bindings will query for all of them.
+ *
+ * ```html
+ * <seeker>
+ *   <div #find-me>...</div>
+ *   <div #find-me-too>...</div>
+ * </seeker>
+ *
+ *  @Component({
+ *   selector: 'seeker'
+ * })
+ * class Seeker {
+ *   constructor(@Query('findMe, findMeToo') elList: QueryList<ElementRef>) {...}
+ * }
+ * ```
+ *
+ * Configure whether query looks for direct children or all descendants
+ * of the querying element, by using the `descendants` parameter.
+ * It is set to `false` by default.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/wtGeB977bv7qvA5FTYl9?p=preview))
+ * ```html
+ * <container #first>
+ *   <item>a</item>
+ *   <item>b</item>
+ *   <container #second>
+ *     <item>c</item>
+ *   </container>
+ * </container>
+ * ```
+ *
+ * When querying for items, the first container will see only `a` and `b` by default,
+ * but with `Query(TextDirective, {descendants: true})` it will see `c` too.
+ *
+ * The queried directives are kept in a depth-first pre-order with respect to their
+ * positions in the DOM.
+ *
+ * Query does not look deep into any subcomponent views.
+ *
+ * Query is updated as part of the change-detection cycle. Since change detection
+ * happens after construction of a directive, QueryList will always be empty when observed in the
+ * constructor.
+ *
+ * The injected object is an unmodifiable live list.
+ * See {@link QueryList} for more details.
+ */
 @CONST()
 export class QueryMetadata {
   /**
@@ -25,7 +133,7 @@ export class QueryMetadata {
   /**
    * what this is querying for.
    */
-  get selector() { return this._selector; }
+  get selector() { return resolveForwardRef(this._selector); }
 
   /**
    * whether this is querying for a variable binding or a directive.
@@ -63,10 +171,7 @@ export class QueryMetadata {
  */
 @CONST()
 export class ContentChildrenMetadata extends QueryMetadata {
-  constructor(
-    _selector: Type | string,
-    {descendants = false}: {descendants?: boolean} = {}
-  ) {
+  constructor( _selector: Type | string, { descendants = false}: {descendants?: boolean} = {} ) {
     super( _selector, { descendants: descendants } );
   }
 }
@@ -202,5 +307,7 @@ export class ViewChildrenMetadata extends ViewQueryMetadata {
  */
 @CONST()
 export class ViewChildMetadata extends ViewQueryMetadata {
-  constructor(_selector: Type | string) { super(_selector, {descendants: true, first: true}); }
+  constructor(_selector: Type | string) {
+    super(_selector, {descendants: true, first: true});
+  }
 }

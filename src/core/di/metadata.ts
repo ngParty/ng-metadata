@@ -1,5 +1,4 @@
-import {CONST, stringify, isBlank, isPresent, isString} from "../../facade/lang";
-import {InjectFactory} from "./decorators";
+import { CONST, stringify } from '../../facade/lang';
 
 /**
  * A parameter metadata that specifies a dependency.
