@@ -8,7 +8,10 @@ import {
   Output,
   HostBinding,
   HostListener,
-  Attr
+  Attr,
+  ContentChild,
+  ViewChildren,
+  ContentChildren
 } from '../../../src/core/directives/decorators';
 import { DirectiveResolver } from '../../../src/core/linker/directive_resolver';
 import { Inject, Host, Self, Optional, SkipSelf } from '../../../src/core/di/decorators';
@@ -66,6 +69,9 @@ describe( `linker/directive_resolver`, ()=> {
 
     it( `should update Class Metadata object accordingly with provided property Annotations`, ()=> {
 
+      @Directive({selector:'[someChild]'})
+      class SomeChild{}
+
       @Directive( {
         selector: '[myClicker]'
       } )
@@ -85,6 +91,8 @@ describe( `linker/directive_resolver`, ()=> {
 
         @HostListener( 'mousemove', [ '$event.target' ] )
         onMove() {}
+
+        @ContentChild(SomeChild) someChild: SomeChild;
 
       }
 
@@ -107,7 +115,9 @@ describe( `linker/directive_resolver`, ()=> {
           '(mousemove)': 'onMove($event.target)',
         },
         exportAs: undefined,
-        queries: {},
+        queries: {
+          someChild: new ContentChild(SomeChild)
+        },
         providers: undefined
       } );
 
@@ -116,6 +126,15 @@ describe( `linker/directive_resolver`, ()=> {
     } );
 
     it( `should update merge Class Metadata object with provided property Annotations`, ()=> {
+
+      @Directive({selector:'[anotherChild]'})
+      class AnotherChild{}
+
+      @Directive({selector:'[someContentChild]'})
+      class SomeContentChild{}
+
+      @Component({selector:'list',template:'im tree list'})
+      class List{}
 
       @Component( {
         selector: 'jedi',
@@ -126,6 +145,9 @@ describe( `linker/directive_resolver`, ()=> {
         host: {
           '[class.enabled]': 'isEnabled',
           '(mouseout)': 'onMoveOut()'
+        },
+        queries:{
+          anotherChild: new ContentChild(AnotherChild)
         },
         legacy: {
           controllerAs: 'jedi'
@@ -139,19 +161,22 @@ describe( `linker/directive_resolver`, ()=> {
         noAlias: string;
 
         public one: string;
-        @Input( 'outsideAlias' )
-        inside: string;
-        public onOne: Function;
-        @Output( 'onOutsideAlias' )
-        onInside: Function;
 
-        @HostBinding( 'class.disabled' )
-        isDisabled: boolean;
+        @Input( 'outsideAlias' ) inside: string;
+
+        public onOne: Function;
+
+        @Output( 'onOutsideAlias' ) onInside: Function;
+
+        @HostBinding( 'class.disabled' ) isDisabled: boolean;
 
         private get isEnabled() { return true };
 
         @HostListener( 'mousemove', [ '$event.target' ] )
         onMove() {}
+
+        @ViewChildren(List) listViewChildren: List[];
+        @ContentChildren(SomeContentChild) someContentChildren: SomeContentChild;
 
         onMoveOut() {}
 
@@ -183,7 +208,11 @@ describe( `linker/directive_resolver`, ()=> {
           '(mouseout)': 'onMoveOut()'
         },
         exportAs: undefined,
-        queries: {},
+        queries: {
+          anotherChild: new ContentChild(AnotherChild),
+          someContentChildren: new ContentChildren(SomeContentChild),
+          listViewChildren: new ViewChildren(List)
+        },
         providers: undefined,
         legacy: {
           controllerAs: 'jedi'
