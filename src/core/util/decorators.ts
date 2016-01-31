@@ -1,8 +1,7 @@
-import {global, Type, isFunction, isString, isPresent} from '../../facade/lang';
-import {reflector} from '../reflection/reflection';
-import {InjectableMetadata} from '../di/metadata';
-import {stringify} from '../../facade/lang';
-import {globalKeyRegistry} from '../di/key';
+import { Type, isFunction, isPresent } from '../../facade/lang';
+import { reflector } from '../reflection/reflection';
+import { InjectableMetadata } from '../di/metadata';
+import { globalKeyRegistry } from '../di/key';
 
 /**
  * An interface implemented by all Angular type decorators,
@@ -81,7 +80,8 @@ export function makeDecorator(
 
   }
 
-  //DecoratorFactory.prototype = Object.create(annotationCls.prototype);
+  DecoratorFactory.prototype = Object.create(AnnotationCls.prototype);
+
   return DecoratorFactory;
 
 }
@@ -144,7 +144,7 @@ export function makeParamDecorator( annotationCls, overrideParamDecorator: Funct
 
   }
 
-  //ParamDecoratorFactory.prototype = Object.create(annotationCls.prototype);
+  ParamDecoratorFactory.prototype = Object.create(annotationCls.prototype);
 
   return ParamDecoratorFactory;
 
@@ -157,6 +157,9 @@ export function makePropDecorator( decoratorCls ): any {
     var decoratorInstance = Object.create( decoratorCls.prototype );
     decoratorCls.apply( decoratorInstance, args );
 
+    // check if this decorator was already invoked
+    // - if it was return it again, just with newly applied arguments
+    // - this is possible thanks to PropDecoratorFactory.prototype = Object.create(decoratorCls.prototype);
     if ( this instanceof decoratorCls ) {
 
       return decoratorInstance;
@@ -173,14 +176,14 @@ export function makePropDecorator( decoratorCls ): any {
 
         reflector.registerPropMetadata(meta,target.constructor);
 
-
       };
 
     }
 
   }
 
-  //PropDecoratorFactory.prototype = Object.create(decoratorCls.prototype);
+  // caching
+  PropDecoratorFactory.prototype = Object.create(decoratorCls.prototype);
 
   return PropDecoratorFactory;
 
