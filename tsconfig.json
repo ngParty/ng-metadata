@@ -7,10 +7,13 @@
     "experimentalDecorators": true,
     "declaration": true
   },
-  "exclude": [
-    "typings/main",
-    "typings/main.d.ts",
-    "playground",
-    "node_modules"
+  "files": [
+    "manual_typings/globals.d.ts",
+    "typings/browser.d.ts",
+    "common.ts",
+    "core.ts",
+    "testing.ts",
+    "platform.ts",
+    "test/index.ts"
   ]
 }
