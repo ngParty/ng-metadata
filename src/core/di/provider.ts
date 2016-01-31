@@ -1,36 +1,29 @@
 import {
   Type,
-  isFunction,
   isString,
   isBlank,
   isType,
-  getTypeName,
   resolveDirectiveNameFromSelector,
   isPresent,
-  stringify
+  stringify,
+  getFuncName
 } from '../../facade/lang';
-import {reflector} from "../reflection/reflection";
-import {OpaqueToken} from "./opaque_token";
-import {PipeMetadata} from "../pipes/metadata";
+import { reflector } from '../reflection/reflection';
+import { OpaqueToken } from './opaque_token';
+import { PipeMetadata } from '../pipes/metadata';
 import {
   DirectiveMetadata,
   OutputMetadata,
   HostBindingMetadata,
   HostListenerMetadata,
-  InputMetadata
-} from "../directives/metadata_directives";
-import {
-  InjectMetadata,
-  InjectableMetadata,
-  SkipSelfMetadata,
-  SelfMetadata,
-  HostMetadata
-} from './metadata';
-import {pipeProvider} from "../pipes/pipe_provider";
-import {directiveProvider} from "../directives/directive_provider";
-import {getFuncName} from '../../facade/lang';
-import {ListWrapper} from '../../facade/collections';
-import {ComponentMetadata} from '../directives/metadata_directives';
+  InputMetadata,
+  ComponentMetadata
+} from '../directives/metadata_directives';
+import { InjectMetadata, InjectableMetadata, SkipSelfMetadata, SelfMetadata, HostMetadata } from './metadata';
+import { pipeProvider } from '../pipes/pipe_provider';
+import { directiveProvider } from '../directives/directive_provider';
+import { ListWrapper } from '../../facade/collections';
+import { resolveForwardRef } from './forward_ref';
 
 
 export type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
@@ -67,8 +60,8 @@ class ProviderBuilder{
     }
 
     const injectableType = isString( type )
-      ? useClass
-      : type as Type;
+      ? resolveForwardRef(useClass as Type)
+      : resolveForwardRef(type as Type);
 
     const overrideName = isString( type )
       ? type
@@ -210,7 +203,7 @@ export function _extractToken( metadata: ParamMetaInst[] ): string {
 
   const {token} = injectMetadata;
 
-  return getInjectableName(token);
+  return getInjectableName( resolveForwardRef( token ) );
 
 }
 

@@ -1,11 +1,8 @@
-import {
-  Type,
-  isPresent,
-  stringify
-} from '../../facade/lang';
-import {ListWrapper} from '../../facade/collections';
-import {PipeMetadata} from '../pipes/metadata';
-import {reflector} from '../reflection/reflection';
+import { Type, isPresent, stringify } from '../../facade/lang';
+import { ListWrapper } from '../../facade/collections';
+import { PipeMetadata } from '../pipes/metadata';
+import { reflector } from '../reflection/reflection';
+import { resolveForwardRef } from '../di/forward_ref';
 
 function _isPipeMetadata( type: any ): boolean {
   return type instanceof PipeMetadata;
@@ -21,7 +18,7 @@ export class PipeResolver {
    */
   resolve( type: Type ): PipeMetadata {
 
-    const metas = reflector.annotations( type );
+    const metas = reflector.annotations( resolveForwardRef(type) );
 
     if ( isPresent( metas ) ) {
       const annotation = ListWrapper.find(metas, _isPipeMetadata );

@@ -1,6 +1,6 @@
 ## API
 
-Angular 1 boostraper:
+Angular 1 bootstrap:
 
 `ng-metadata/platform`
 - [bootstrap](#bootstrap)
@@ -10,6 +10,7 @@ Angular 1 container registration helper Methods:
 `ng-metadata/core` 
 - [provide](#provide)
 - [getInjectableName](#getinjectablename)
+- [forwardRef](#forwardref)
 
 Testing helpers:
 
@@ -54,6 +55,10 @@ Static methods on Component/Directive classes (angular 1 specific API)
 - [link](#ddolink)
 
 
+---
+
+**Angular 1 bootstrap:**
+
 ## bootstrap
 
 > **module:** `ng-metadata/platform`
@@ -90,6 +95,9 @@ returns `undefined`
 `angular.bootstrap` is called on the page element that matches the element parameter or by default on `document`. 
 This action is invoked inside `angular.element( document ).ready` function. 
 
+---
+
+**Angular 1 container registration helper Methods:**
 
 ## provide 
 
@@ -236,6 +244,58 @@ expect(getInjectableName(MyComponent)).to.equal('myCmp');
 expect(getInjectableName(MyPipe)).to.equal('kebabCase');
 ```
 
+## forwardRef
+
+> **module:** `ng-metadata/core`
+
+Allows to refer to references which are not yet defined.
+
+For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of DI is declared,
+but not yet defined. It is also used when the `token` which we use when creating a query is not yet defined.
+
+###### Parameters
+
+| Parameter         | Type                  | Description                               |
+| ----------------- | ----------------------|------------------------------------------ |
+| **forwardRefFn**  | `ForwardRefFn`        | callback function which returns demanded Injectable |
+
+> ForwardRefFn:
+>   An interface that a function passed into forwardRef has to implement. `const ref = forwardRef(() => Lock);`
+ 
+*example:*
+
+```typescript
+import * as angular from 'angular';
+import {Injectable, Inject, forwardRef, provide, getInjectableName} from 'ng-metadata/core';
+
+@Injectable()
+class Door {
+  lock: Lock;
+  constructor(@Inject(forwardRef(() => Lock)) lock: Lock) { this.lock = lock; }
+}
+
+// Only at this point Lock is defined.
+@Injectable()
+class Lock {}
+
+angular.module('myApp',[])
+  .service(...provide(Lock))
+  .service(...provide(Door));
+
+
+//test.ts
+import { expect } from 'chai';
+
+const $injector = angular.injector(['ng','myApp']);
+
+const door = $injector.get(getInjectableName(Door));
+expect(door instanceof Door).to.equal(true);
+expect(door.lock instanceof Lock).to.equal(true);
+```
+
+---
+
+**Testing helpers:**
 
 ## renderFactory
  

@@ -18,6 +18,7 @@ import {
 } from '../directives/metadata_di';
 import { InjectMetadata, HostMetadata, SelfMetadata, SkipSelfMetadata, OptionalMetadata } from '../di/metadata';
 import { ParamMetaInst, PropMetaInst, getInjectableName } from '../di/provider';
+import { resolveForwardRef } from '../di/forward_ref';
 
 function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;
@@ -63,8 +64,8 @@ function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[] ): String
   }
 
   const requireExpressionPrefix = `${optionalType}${locateType}`;
-  const directiveName = isType( injectInst.token )
-    ? getInjectableName( injectInst.token )
+  const directiveName = isType( resolveForwardRef( injectInst.token ) )
+    ? getInjectableName( resolveForwardRef( injectInst.token ) )
     : injectInst.token;
 
   return {
@@ -136,7 +137,7 @@ export class DirectiveResolver {
    */
   private _getDirectiveMeta( type: Type ): DirectiveMetadata {
 
-    const typeMetadata = reflector.annotations( type );
+    const typeMetadata = reflector.annotations( resolveForwardRef( type ) );
 
     if ( isPresent( typeMetadata ) ) {
 
@@ -279,9 +280,9 @@ export class DirectiveResolver {
 
     if ( dm instanceof ComponentMetadata ) {
 
-      const componentSettings = assign(
+      const componentSettings = StringMapWrapper.assign(
         {},
-        directiveSettings,
+        directiveSettings as ComponentMetadata,
         {
           template: dm.template,
           templateUrl: dm.templateUrl
