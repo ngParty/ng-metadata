@@ -1,5 +1,6 @@
 import { CONST, Type, stringify, isString } from '../../facade/lang';
 import { resolveForwardRef } from '../di/forward_ref';
+import { DependencyMetadata } from '../di/metadata';
 
 /**
  * Declares an injectable parameter to be a live list of directives or variable
@@ -109,7 +110,7 @@ import { resolveForwardRef } from '../di/forward_ref';
  * See {@link QueryList} for more details.
  */
 @CONST()
-export class QueryMetadata {
+export class QueryMetadata extends DependencyMetadata {
   /**
    * whether we want to query only direct children (false) or all
    * children (true).
@@ -121,6 +122,7 @@ export class QueryMetadata {
     private _selector: Type | string,
     {descendants = false, first = false}: {descendants?: boolean, first?: boolean} = {}
   ) {
+    super();
     this.descendants = descendants;
     this.first = first;
   }
@@ -144,7 +146,11 @@ export class QueryMetadata {
    * returns a list of variable bindings this is querying for.
    * Only applicable if this is a variable bindings query.
    */
-  get varBindings(): string[] { return (this.selector as string).split(','); }
+  get varBindings(): string[] {
+    return this.isVarBindingQuery
+      ? (this.selector as string).split( ',' )
+      : [];
+  }
 
   toString(): string { return `@Query(${stringify(this.selector)})`; }
 }
