@@ -1,5 +1,14 @@
 import { CONST, stringify } from '../../facade/lang';
 
+
+/**
+ * `DependencyMetadata` is used by the framework to extend DI.
+ * This is internal to Angular and should not be used directly.
+ */
+@CONST()
+export class DependencyMetadata {
+  get token() { return null; }
+}
 /**
  * A parameter metadata that specifies a dependency.
  *
