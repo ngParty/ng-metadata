@@ -191,7 +191,7 @@ export interface HostListenerFactory {
 
 export const Component: ComponentFactory = makeDecorator(ComponentMetadata) as ComponentFactory;
 
-export const Directive: DirectiveFactory = <DirectiveFactory>makeDecorator(DirectiveMetadata);
+export const Directive: DirectiveFactory = makeDecorator(DirectiveMetadata) as DirectiveFactory;
 
 export const ContentChildren: ContentChildrenFactory = makePropDecorator(ContentChildrenMetadata);
 
