@@ -1,22 +1,8 @@
-import {expect} from 'chai';
-import {
-  Inject,
-  Host,
-  Injectable,
-  Optional,
-  Self,
-  SkipSelf
-} from '../../../src/core/di/decorators';
-import {
-  InjectMetadata,
-  HostMetadata,
-  InjectableMetadata,
-  OptionalMetadata,
-  SelfMetadata,
-  SkipSelfMetadata
-} from '../../../src/core/di/metadata';
+import { expect } from 'chai';
+import { Inject, Host, Injectable } from '../../../src/core/di/decorators';
+import { InjectMetadata, HostMetadata } from '../../../src/core/di/metadata';
 import { reflector } from '../../../src/core/reflection/reflection';
-import {isArray,isBlank,isPresent} from '../../../src/facade/lang'
+import { isArray, isBlank } from '../../../src/facade/lang';
 
 describe( 'di/decorators', () => {
 

@@ -1,7 +1,6 @@
-import {expect} from 'chai';
-import {OpaqueToken} from '../../../src/core/di/opaque_token';
-import {globalKeyRegistry} from '../../../src/core/di/key';
-import {Injectable} from '../../../src/core/di/decorators';
+import { expect } from 'chai';
+import { OpaqueToken } from '../../../src/core/di/opaque_token';
+import { globalKeyRegistry } from '../../../src/core/di/key';
 
 describe( `di/key`, ()=> {
 
