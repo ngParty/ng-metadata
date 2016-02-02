@@ -928,9 +928,9 @@ You can Inject also local DI ( other directives/components ), but for this you h
 - `@SkipSelf`
 
 Also when injecting other controllers there are 2 constrains that must be met:
-- all `@Inject` must be at tail of constuctor arguments call
+- all `@Inject` must be at tail of constructor arguments call
   - we throw explanatory errors if you'll break this rule
-- Injectable has to have the same name as the argument name, which will be bind to controller instance 
+- Injectable has to have the same name as the argument name, which will be bind to controller instance
 
 *Example:*
 
@@ -981,8 +981,66 @@ class HostCmp{
     @Inject(FooDirective) @Host() @Optional() private foo: FooDirective
   ){}
 }
-
 ```
+
+> NOTE:
+- when injecting a class from parent es2015 module in which is imported this class, you need to use [forwardRef](#forwardref), 
+because parent class won't be available during module loading
+
+*Example:*
+
+This will throw `Reference error`
+```typescript
+// index.ts
+import {AService} from './fileA';
+import {BService} from './fileB';
+
+// fileA.ts
+import {BService} from './fileB';
+import { Inject, Injectable } from 'ng-metadata/core';
+
+Injectable()
+class AService{
+  constructor(@Inject(BService) private bSvc: BService){}
+}
+
+// fileB.ts
+import {AService} from './fileA';
+import { Inject, Injectable } from 'ng-metadata/core';
+
+
+Injectable()
+class BService{
+  constructor(@Inject(AService) private aSvc: AService){}
+}
+```
+
+This will work thanks to `forwardRef`
+```typescript
+// index.ts
+import {AService} from './fileA';
+import {BService} from './fileB';
+
+// fileA.ts
+import {BService} from './fileB';
+import { Inject, Injectable,forwardRef } from 'ng-metadata/core';
+
+Injectable()
+class AService{
+  constructor(@Inject(BService) private bSvc: BService){}
+}
+
+// fileB.ts
+import {AService} from './fileA';
+import { Inject, Injectable, forwardRef } from 'ng-metadata/core';
+
+
+Injectable()
+class BService{
+  constructor(@Inject(forwardRef(()=>AService)) private aSvc: AService){}
+}
+```
+
 
 ###### Parameters
 
