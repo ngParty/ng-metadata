@@ -1,3 +1,24 @@
+<a name="1.0.0-rc.2"></a>
+# [1.0.0-rc.2](https://github.com/ngParty/ng-metadata/compare/1.0.0-rc.1...v1.0.0-rc.2) (2016-02-07)
+
+
+### Bug Fixes
+
+* **core/linker/DirectiveResolver:** correctly resolve directive names when used Type withing @Inject ([938d54b](https://github.com/ngParty/ng-metadata/commit/938d54b))
+
+### Features
+
+* **core/di/forward_ref:** implement forward_ref for dependency injection ([69cf90c](https://github.com/ngParty/ng-metadata/commit/69cf90c))
+* **core/di/provider:** throw error if more than one class decorator is used on non @Component+@StateCon ([9980df6](https://github.com/ngParty/ng-metadata/commit/9980df6))
+* **core/directives/@Query:** add support to @ViewChild/@ViewChildren and @ContentChild/@ContentChildren decor ([789b91c](https://github.com/ngParty/ng-metadata/commit/789b91c)), closes [#39](https://github.com/ngParty/ng-metadata/issues/39) [#42](https://github.com/ngParty/ng-metadata/issues/42)
+* **core/directives/@Query:** call AfterContentChecked/AfterViewChecked hooks automatically from children ([e01679c](https://github.com/ngParty/ng-metadata/commit/e01679c)), closes [#44](https://github.com/ngParty/ng-metadata/issues/44)
+* **core/directives/provider:** allow to define custom compile or link function as static methods on class ([2bfc1c8](https://github.com/ngParty/ng-metadata/commit/2bfc1c8))
+* **directives/linker:** add new lifecycle hooks and implementation checker ([ba70779](https://github.com/ngParty/ng-metadata/commit/ba70779))
+* **playground:** add @Query decorators example ([4444320](https://github.com/ngParty/ng-metadata/commit/4444320))
+* **util/decorators:** add decorators caching ([5c8e0e5](https://github.com/ngParty/ng-metadata/commit/5c8e0e5))
+
+
+
 <a name="1.0.0-rc.1"></a>
 # [1.0.0-rc.1](https://github.com/ngParty/ng-metadata/compare/1.0.0-rc.0...1.0.0-rc.1) (2016-01-19)
 
