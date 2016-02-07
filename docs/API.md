@@ -33,6 +33,10 @@ Decorators:
 - [@Attr](#output)
 - [@HostBinding](#hostbinding)
 - [@HostListener](#hostlistener)
+- [@ViewChild](#viewchild)
+- [@ViewChildren](#viewchildren)
+- [@ContentChild](#contentchild)
+- [@ContentChildren](#contentchildren)
 - [@Pipe](#pipe)
 - [@Inject](#inject)
 - [@Injectable](#injectable)
@@ -46,7 +50,9 @@ Lifecycle hooks:
 `ng-metadata/core`
 - [OnInit](#oninit)
 - [AfterContentInit](#aftercontentinit)
+- [AfterContentChecked](#aftercontentchecked)
 - [AfterViewInit](#afterviewtinit)
+- [AfterViewChecked](#afterviewchecked)
 - [OnDestroy](#ondestroy)
 
 Static methods on Component/Directive classes (angular 1 specific API)
@@ -872,7 +878,295 @@ class CountClicks {
 | **args?**  | `string[]` | string path which property from $event should be passed to callback method |
 
 ###### Behind scenes
-manualy registers event listeners on host element via `.on(eventName)` and executes provided method within listener callback wrapped with `#scope.$applyAsync()` to notify whole app about possible changes
+manually registers event listeners on host element via `.on(eventName)` and executes provided method within listener callback wrapped with `#scope.$applyAsync()` to notify whole app about possible changes
+
+
+
+## @ViewChild
+
+> **module:** `ng-metadata/core`
+
+- property decorator
+
+Configures a view query.
+Queries component view, for only first match
+View queries are set before the `ngAfterViewInit` callback is called.
+
+**Note**
+> if you are using ngIf/ngRepeat those instances won't be available during `ngAfterViewInit`
+> if you implement this decorator and you wanna get notified about changes, implement `ngAfterViewChecked`
+ and also inject this class to queried child
+
+An alternative and more declarative way to using the [query](#query) property on `@Component`/`@Directive`.
+
+
+*Example:*
+```typescript
+import {Component, Inject, forwardRef, ViewChild} from 'ng-metadata/core';
+
+@Component({
+  selector: 'item',
+  template: `hello`
+})
+class ItemComponent{
+  constructor(@Inject(forwardRef(()=>MyComponent)) private myCmp){}
+}
+
+@Component({
+  selector:'my-cmp',
+  directives:[ItemComponent],
+  template: `
+    <item> a </item>
+    <item> b </item>
+    <item> c </item>
+    <div> hello </div>
+  `
+})
+class MyComponent {
+  
+  @ViewChild(ItemComponent) item: ItemComponent;
+  @ViewChild('div') jqDiv: ng.IAugmentedJQuery;
+  
+  ngAfterViewInit(){
+    console.assert(this.item instanceof ItemComponent);
+    console.assert(this.jqDiv[0] instanceof HTMLDivElement);
+  }
+  
+  ngAfterViewChecked(){
+    console.log('view changed');
+    console.log('you wont get notified if DIV changed, so beware of querying for DOM elements');
+  }
+
+}
+```
+
+###### Parameters
+
+| Parameter     | Type     | Description                               |
+| ------------- | ---------|------------------------------------------ |
+| **selector**  | `Type` or `string` | Child Directive/Component class reference to Query. If string it will query the DOM and return jqLite instance|
+
+###### Behind scenes
+extracts the selectro from Type, queries the DOM for first match, then calls on found jqLite `.controller()`
+to get queried component/directive. If not found returns `null`
+
+
+## @ViewChildren
+
+> **module:** `ng-metadata/core`
+
+- property decorator
+
+Similar to [@ViewChild](#viewchild), but querying for all occurrences not just one
+
+*Example:*
+```typescript
+import {Component, Inject, forwardRef,ViewChildren} from 'ng-metadata/core';
+
+@Component({
+  selector: 'item',
+  template: `hello`
+})
+class ItemComponent{
+  constructor(@Inject(forwardRef(()=>MyComponent)) private myCmp){}
+}
+
+@Component({
+  selector:'my-cmp',
+  directives:[ItemComponent],
+  template: `
+    <item> a </item>
+    <item> b </item>
+    <item> c </item>
+    <div> hello </div>
+    <div> hello </div>
+  `
+})
+class MyComponent {
+  
+  @ViewChildren(ItemComponent) item: ItemComponent[];
+  @ViewChildren('div') jqDiv: ng.IAugmentedJQuery[];
+  
+  ngAfterViewInit(){
+    console.assert(this.item.length === 3);
+    console.assert(this.jqDiv.length === 3);
+  }
+  
+  ngAfterViewChecked(){
+    console.log('view changed');
+    console.log('you wont get notified if DIV changed, so beware of quering for DOM elements');
+  }
+
+}
+```
+
+###### Parameters
+
+| Parameter     | Type     | Description                               |
+| ------------- | ---------|------------------------------------------ |
+| **selector**  | `Type` or `string` | Child Directive/Component class reference to Query. If string it will query the DOM and return jqLite instances|
+
+returns `Array<T>`
+
+###### Behind scenes
+extracts the selector from Type, queries the DOM for all matches, then calls on found jqLite matches `.controller()`
+to get queried component/directive. If not found returns `null`
+
+
+## @ContentChild
+
+> **module:** `ng-metadata/core`
+
+- property decorator
+
+Configures a content query.
+Queries component content( html which is projected to `ng-transclude` slot), for only first match
+Content queries are set before the `ngAfterContentInit` callback is called.
+
+**Note**
+> if you are using ngIf/ngRepeat those instances won't be available during `ngAfterContentInit`
+> if you implement this decorator and you wanna get notified about changes, implement `ngAfterContentChecked`
+ and also inject this class to queried child
+
+An alternative and more declarative way to using the [query](#query) property on `@Component`/`@Directive`.
+
+
+*Example:*
+```typescript
+import {Component, Inject, forwardRef, ContentChild} from 'ng-metadata/core';
+
+@Component({
+  selector: 'item',
+  template: `hello`
+})
+class ItemComponent{
+  // we need to inject this to notify parents ngAfterContentChecked with updates 
+  constructor(@Inject(forwardRef(()=>MyComponent)) private myCmp){}
+}
+
+@Component({
+  selector:'parent',
+  directives:[MyComponent,ItemComponent],
+  template:`
+    <my-cmp>
+      <item> a </item>
+      <item> b </item>
+      <item> c </item>
+      <div> hello </div>
+      <div> hello </div>
+    </my-cmp>
+  `
+})
+class ParentComponent{}
+
+@Component({
+  selector:'my-cmp',
+  template: `
+    <ng-transclude></ng-transclude>
+  `,
+  legacy:{transclude:true}
+})
+class MyComponent {
+  
+  @ContentChild(ItemComponent) item: ItemComponent;
+  @ContentChild('div') jqDiv: ng.IAugmentedJQuery;
+  
+  ngAfterContentInit(){
+    console.assert(this.item instanceof ItemComponent);
+    console.assert(this.jqDiv[0] instanceof HTMLDivElement);
+  }
+  
+  ngAfterContentChecked(){
+    console.log('view changed');
+    console.log('you wont get notified if DIV changed, so beware of quering for DOM elements');
+  }
+
+}
+```
+
+###### Parameters
+
+| Parameter     | Type     | Description                               |
+| ------------- | ---------|------------------------------------------ |
+| **selector**  | `Type` or `string` | Child Directive/Component class reference to Query. If string it will query the DOM and return jqLite instance|
+
+###### Behind scenes
+extracts the selectro from Type, queries the DOM from `ng-transclude` for first match, then calls on found jqLite `.controller()`
+to get queried component/directive. If not found returns `null`
+
+
+
+## @ContentChildren
+
+> **module:** `ng-metadata/core`
+
+- property decorator
+
+Similar to [@ContentChild](#contentchild), but querying for all ocurrences not just one
+
+*Example:*
+```typescript
+import {Component, Inject, forwardRef, ContentChildren} from 'ng-metadata/core';
+
+@Component({
+  selector: 'item',
+  template: `hello`
+})
+class ItemComponent{
+  constructor(@Inject(forwardRef(()=>MyComponent)) private myCmp){}
+}
+
+@Component({
+  selector:'parent',
+  directives:[MyComponent,ItemComponent],
+  template:`
+    <my-cmp>
+      <item> a </item>
+      <item> b </item>
+      <item> c </item>
+      <div> hello </div>
+      <div> hello </div>
+    </my-cmp>
+  `
+})
+class ParentComponent{}
+
+@Component({
+  selector:'my-cmp',
+  template: `
+    <ng-transclude></ng-transclude>
+  `,
+  legacy:{transclude:true}
+})
+class MyComponent {
+  
+  @ContentChildren(ItemComponent) item: ItemComponent[];
+  @ContentChildren('div') jqDiv: ng.IAugmentedJQuery[];
+  
+  ngAfterContentInit(){
+    console.assert(this.item.length === 3);
+    console.assert(this.jqDiv.length === 3);
+  }
+  
+  ngAfterContentChecked(){
+    console.log('view changed');
+    console.log('you wont get notified if DIV changed, so beware of quering for DOM elements');
+  }
+
+}
+```
+
+###### Parameters
+
+| Parameter     | Type     | Description                               |
+| ------------- | ---------|------------------------------------------ |
+| **selector**  | `Type` or `string` | Child Directive/Component class reference to Query. If string it will query the DOM and return jqLite instances|
+
+returns `Array<T>`
+
+###### Behind scenes
+extracts the selector from Type, queries the DOM within `ng-transclude` for all matches, then calls on found jqLite matches `.controller()`
+to get queried component/directive. If not found returns `null`
 
 
 ## @Pipe
@@ -1309,6 +1603,11 @@ It is invoked every time when the directive is instantiated.
 
 In angular 1 terms, this method is invoked from `postLink`
 
+**Note:**
+> when `@Query` decorators are used, you can be 100% sure that during this life cycle all queried instances/jqElements
+**which are not transcluded(behind ng-if or ng-repeat)** will be resolved
+> If you wanna query results from repeater or dynamically, implement `AfterViewChecked` to get notifications ans updated instance properties
+
 _Example:_
 
 ```typescript
@@ -1317,6 +1616,33 @@ _Example:_
 ###### Members
 
 - `ngAfterViewInit()`
+
+
+## AfterViewChecked
+
+> **module:** `ng-metadata/core`
+
+Implement this interface to get notified after every check of your component's view.
+
+`ngAfterViewChecked` is called after all directive's view children(view==template) have been resolved and rendered. 
+
+It is invoked every time when the directive is instantiated/destroyed. 
+
+In angular 1 terms, this method is invoked from it's own `postLink` and from childrens's `postLink` and `scope.$on('$destroy')` , to prevent memory leaks
+
+**Note:**
+> Implement this interface only on parent component which uses one of `@ViewChild`/`@ViewChildren` decorators
+> To get notified you must explicitly `@Inject` your parent component to child, so it knows about it's parent
+and calls life cycle hooks properly
+
+_Example:_
+
+```typescript
+```
+
+###### Members
+
+- `ngAfterViewChecked()`
 
 
 ## AfterContentInit
@@ -1333,6 +1659,11 @@ It is invoked every time when the directive is instantiated.
 
 In angular 1 terms, this method is invoked from `postLink`
 
+**Note:**
+> when `@Query` decorators are used, you can be 100% sure that during this life cycle all queried instances/jqElements 
+which are projected via ng-transclude and **which are not dynamicly rendered(with ng-if or ng-repeat)** will be resolved
+> If you wanna query results from repeater or dynamically, implement `AfterContentChecked` to get notifications ans updated instance properties
+
 _Example:_
 
 ```typescript
@@ -1341,6 +1672,33 @@ _Example:_
 ###### Members
 
 - `ngAfterContentInit()`
+
+
+## AfterContentChecked
+
+> **module:** `ng-metadata/core`
+
+Implement this interface to get notified after every check of your directive's content.
+
+`ngAfterContentChecked` is called after all directive's content children(content projected via `ng-transclude`) have been resolved and rendered. 
+
+It is invoked every time when the directive is instantiated and when content directives are created/destroyed. 
+
+In angular 1 terms, this method is invoked from it's own `postLink` and from children's `postLink` and `scope.$on('$destroy')` , to prevent memory leaks
+
+**Note:**
+> Implement this interface only on parent component/directive which uses one of `@ContentChild`/`@ContentChildren` decorators
+> To get notified you must explicitly `@Inject` your parent component/directive to child, so it know about it's parent
+and calls life cycle hooks properly
+
+_Example:_
+
+```typescript
+```
+
+###### Members
+
+- `ngAfterContentChecked()`
 
 
 ## OnDestroy
