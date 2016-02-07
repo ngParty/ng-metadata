@@ -1,7 +1,11 @@
 import { getInjectableName } from '../../di/provider';
-import { isString, isType, getFuncName, global } from '../../../facade/lang';
+import { isString, isType, getFuncName, global, noop } from '../../../facade/lang';
 import { reflector } from '../../reflection/reflection';
 import { DirectiveMetadata } from '../metadata_directives';
+import { ListWrapper, StringMapWrapper } from '../../../facade/collections';
+import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces';
+import { QueryMetadata } from '../metadata_di';
+import { DirectiveCtrl } from '../directive_provider';
 
 /**
  * resolving DOM instances by provided @ContentChild(ren)/@ViewChild(ren)
@@ -135,5 +139,79 @@ export function _getSelector( selector: string|Type ): string {
   }
 
   throw new Error( `cannot query for non Directive/Component type ${ getFuncName( selector as any )}` );
+
+}
+
+/**
+ * creates functions which will be called from parent component which is querying this component
+ * - component which queries needs to be injected to child,
+ * here child creates special callbacks by type of @Query which will be called from postLink and on scope destroy so
+ * we clean up GC
+ * @param ctrl
+ * @param requiredCtrls
+ * @returns {Object|Array|T|function()[]}
+ * @private
+ */
+export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Object[] ): Function[] {
+
+  const parentCheckedNotifiers = requiredCtrls.reduce(
+    ( acc, requiredCtrl: DirectiveCtrl )=> {
+
+      const Ctor = requiredCtrl.constructor;
+
+      if ( !isType( Ctor ) ) {
+        return acc;
+      }
+      const propMeta = reflector.propMetadata( Ctor );
+      if ( !StringMapWrapper.size( propMeta ) ) {
+        return acc;
+      }
+
+      const _parentCheckedNotifiers = [];
+      StringMapWrapper.forEach( propMeta, ( propMetaPropArr: any[] )=> {
+
+        propMetaPropArr
+          .filter( ( propMetaInstance )=> {
+
+            if ( !((propMetaInstance instanceof QueryMetadata ) && isType( propMetaInstance.selector )) ) {
+              return false;
+            }
+            return ctrl instanceof propMetaInstance.selector;
+
+          } )
+          .forEach( ( propMetaInstance )=> {
+
+            if ( !propMetaInstance.isViewQuery ) {
+
+              _parentCheckedNotifiers.push(
+                ()=>requiredCtrl._ngOnChildrenChanged(
+                  ChildrenChangeHook.FromContent,
+                  [ requiredCtrl.ngAfterContentChecked.bind( requiredCtrl ) ]
+                )
+              );
+
+            }
+            if ( propMetaInstance.isViewQuery ) {
+
+              _parentCheckedNotifiers.push(
+                ()=>requiredCtrl._ngOnChildrenChanged(
+                  ChildrenChangeHook.FromView,
+                  [ requiredCtrl.ngAfterViewChecked.bind( requiredCtrl ) ]
+                )
+              );
+
+            }
+
+          } );
+
+      } );
+
+      return [ ...acc, ..._parentCheckedNotifiers ];
+
+    }, [] );
+
+  return ListWrapper.size( parentCheckedNotifiers )
+    ? parentCheckedNotifiers
+    : [ noop ];
 
 }

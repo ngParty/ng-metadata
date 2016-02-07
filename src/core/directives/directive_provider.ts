@@ -31,7 +31,7 @@ import {
   ContentChildMetadata,
   ContentChildrenMetadata
 } from './metadata_di';
-import { _resolveChildrenFactory } from './util/util';
+import { _resolveChildrenFactory, _getParentCheckNotifiers } from './util/util';
 
 export type HostBindingsProcessed = {
   classes: StringMap,
@@ -419,8 +419,10 @@ export class DirectiveProvider {
         // setup @HostListeners
         _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
 
+        const parentCheckedNotifiers = _getParentCheckNotifiers(ctrl,requiredCtrls);
+        _watchers.push(...parentCheckedNotifiers);
         // setup @ContentChild/@ContentChildren/@ViewChild/@ViewChildren
-        _setQuery( scope, element, ctrl, metadata.queries );
+         _setQuery( scope, element, ctrl, metadata.queries );
 
 
         // AfterContentInit/AfterViewInit Hooks
@@ -428,16 +430,19 @@ export class DirectiveProvider {
         if ( StringMapWrapper.size( metadata.queries ) ) {
 
           ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromView, [
+            parentCheckedNotifiers.forEach(cb=>cb()),
             ctrl.ngAfterViewInit && ctrl.ngAfterViewInit.bind( ctrl ),
             ctrl.ngAfterViewChecked && ctrl.ngAfterViewChecked.bind( ctrl ),
           ] );
           ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromContent, [
+            parentCheckedNotifiers.forEach(cb=>cb()),
             ctrl.ngAfterContentInit && ctrl.ngAfterContentInit.bind( ctrl ),
-            ctrl.ngAfterContentChecked && ctrl.ngAfterContentChecked.bind( ctrl )
+            ctrl.ngAfterContentChecked && ctrl.ngAfterContentChecked.bind( ctrl ),
           ] );
 
         } else {
 
+          parentCheckedNotifiers.forEach(cb=>cb());
           ctrl.ngAfterViewInit && ctrl.ngAfterViewInit();
           ctrl.ngAfterContentInit && ctrl.ngAfterContentInit();
 
@@ -496,6 +501,9 @@ export class DirectiveProvider {
         // setup @HostListeners
         _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
 
+        const parentCheckedNotifiers = _getParentCheckNotifiers(ctrl,requiredCtrls);
+        _watchers.push(...parentCheckedNotifiers);
+
         // setup @ContentChild/@ContentChildren
         _setQuery( scope, element, ctrl, metadata.queries );
 
@@ -503,11 +511,13 @@ export class DirectiveProvider {
         // if there are query defined schedule $evalAsync semaphore
         if ( StringMapWrapper.size( metadata.queries ) ) {
           ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromContent, [
+            parentCheckedNotifiers.forEach(cb=>cb()),
             ctrl.ngAfterContentInit && ctrl.ngAfterContentInit.bind( ctrl ),
             ctrl.ngAfterContentChecked && ctrl.ngAfterContentChecked.bind( ctrl )
           ] );
         } else {
           // no @ContentChild(ren) decorators exist, call just controller init method
+          parentCheckedNotifiers.forEach(cb=>cb());
           ctrl.ngAfterContentInit && ctrl.ngAfterContentInit();
         }
 

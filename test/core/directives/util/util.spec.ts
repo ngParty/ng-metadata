@@ -1,15 +1,26 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
-import { Directive, Component } from '../../../../src/core/directives/decorators';
+import {
+  Directive,
+  Component,
+  HostBinding,
+  HostListener,
+  ViewChild,
+  ContentChild
+} from '../../../../src/core/directives/decorators';
 import {
   _getSelector,
   _getSelectorAndCtrlName,
   getController,
   _getChildElements,
-  _resolveChildrenFactory
+  _resolveChildrenFactory,
+  _getParentCheckNotifiers
 } from '../../../../src/core/directives/util/util';
 import { ElementFactory } from '../../../../src/testing/utils';
-import { global } from '../../../../src/facade/lang';
+import { global, noop } from '../../../../src/facade/lang';
+import { DirectiveCtrl } from '../../../../src/core/directives/directive_provider';
+import { Inject } from '../../../../src/core/di/decorators';
+import { forwardRef } from '../../../../src/core/di/forward_ref';
 
 describe( `directives/util`, ()=> {
 
@@ -278,6 +289,118 @@ describe( `directives/util`, ()=> {
 
     } );
 
+
+  } );
+
+  describe( `#_getParentCheckNotifiers`, ()=> {
+
+    it( `should return empty array with noop if no queries found on parent`, ()=> {
+
+      @Component( { selector: 'ctrl', template: 'this is it' } )
+      class Ctrl {
+      }
+
+      const actual = _getParentCheckNotifiers( new Ctrl() as DirectiveCtrl, [ {} ] );
+      const expected = [noop];
+
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
+    it( `should return empty array with noop if no property decorators exist on parent`, ()=> {
+
+      @Component( { selector: 'foo', template: 'hello' } )
+      class Foo {
+      }
+
+      @Component( { selector: 'ctrl', template: 'this is it' } )
+      class Ctrl {
+      }
+
+      const requiredCtrl = [ new Foo() ];
+      const ctrl = new Ctrl() as DirectiveCtrl;
+
+      const actual = _getParentCheckNotifiers( ctrl, requiredCtrl );
+      const expected = [ noop ];
+
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
+    it( `should return skip non @Query parameter decorators`, ()=> {
+
+      @Component( { selector: 'foo', template: 'hello' } )
+      class Foo {
+        @HostBinding('attr.aria-disabled') isDisabled: boolean;
+        @HostListener('blur') onBlur(){}
+      }
+
+      @Component( { selector: 'ctrl', template: 'this is it' } )
+      class Ctrl {
+      }
+
+      const requiredCtrl = [ new Foo() ];
+      const ctrl = new Ctrl() as DirectiveCtrl;
+
+      const actual = _getParentCheckNotifiers( ctrl, requiredCtrl );
+      const expected = [ noop ];
+
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
+    it( `should return notifier functions if parent @Queryies child and child @Injects parent`, ()=> {
+
+      @Component( { selector: 'ctrl', template: 'this is it' } )
+      class Ctrl {
+        constructor(
+          @Inject(forwardRef(()=>Foo)) private foo
+        ){}
+      }
+
+      @Component( { selector: 'ctrl-content', template: 'this is it' } )
+      class CtrlContent {
+        constructor(
+          @Inject(forwardRef(()=>Foo)) private foo
+        ){}
+      }
+
+      @Component( { selector: 'foo', template: 'hello' } )
+      class Foo {
+        @ViewChild(Ctrl) _ctrl: Ctrl;
+        @ContentChild(CtrlContent) _ctrlContent: CtrlContent;
+        @HostListener('blur') onBlur(){}
+
+        ngAfterViewInit(){}
+        ngAfterViewChecked(){}
+        ngAfterContentChecked(){}
+        ngAfterContentInit(){}
+        _ngOnChildrenChanged(){}
+      }
+
+      let requiredCtrl = [ new Foo() ];
+      let ctrlInView = new Ctrl(new Foo());
+      let ctrlInContent = new CtrlContent(new Foo());
+
+      const spyParentChildrenChanged = sinon.spy(requiredCtrl[0],'_ngOnChildrenChanged');
+      const viewChildActual = _getParentCheckNotifiers( ctrlInView as any, requiredCtrl );
+      const contentChildActual = _getParentCheckNotifiers( ctrlInContent as any, requiredCtrl );
+
+      expect( viewChildActual.length ).to.equal( 1 );
+      expect( viewChildActual[0] ).to.not.equal( noop );
+
+      expect( contentChildActual.length ).to.equal( 1 );
+      expect( contentChildActual[0] ).to.not.equal( noop );
+
+      viewChildActual[ 0 ]();
+
+      expect( spyParentChildrenChanged.calledOnce ).to.equal( true );
+
+      contentChildActual[ 0 ]();
+
+      expect( spyParentChildrenChanged.calledTwice ).to.equal( true );
+
+    } );
 
   } );
 
