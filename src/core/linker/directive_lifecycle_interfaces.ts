@@ -2,7 +2,10 @@ export enum LifecycleHooks {
   OnInit,
   OnDestroy,
   AfterContentInit,
-  AfterViewInit
+  AfterContentChecked,
+  AfterViewInit,
+  AfterViewChecked,
+  _OnChildrenChanged
 }
 
 /**
@@ -12,14 +15,24 @@ export var LIFECYCLE_HOOKS_VALUES = [
   LifecycleHooks.OnInit,
   LifecycleHooks.OnDestroy,
   LifecycleHooks.AfterContentInit,
-  LifecycleHooks.AfterViewInit
+  LifecycleHooks.AfterContentChecked,
+  LifecycleHooks.AfterViewInit,
+  LifecycleHooks.AfterViewChecked,
+  LifecycleHooks._OnChildrenChanged
 ];
+
+export enum ChildrenChangeHook{
+  FromView,
+  FromContent
+}
 
 /**
  * Lifecycle hooks are guaranteed to be called in the following order:
  * - `OnInit` (after the first check only),
  * - `AfterContentInit`,
+ * - `AfterContentChecked`,
  * - `AfterViewInit`,
+ * - `AfterViewChecked`,
  * - `OnDestroy` (at the very end before destruction)
  */
 
@@ -212,6 +225,54 @@ export interface OnDestroy { ngOnDestroy(); }
 export interface AfterContentInit { ngAfterContentInit(); }
 
 /**
+ * Implement this interface to get notified after every check of your directive's content.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/tGdrytNEKQnecIPkD7NU?p=preview))
+ *
+ * ```typescript
+ * @Component({selector: 'child-cmp', template: `{{where}} child`})
+ * class ChildComponent {
+ *   @Input() where: string;
+ * }
+ *
+ * @Component({selector: 'parent-cmp', template: `<ng-content></ng-content>`})
+ * class ParentComponent implements AfterContentChecked {
+ *   @ContentChild(ChildComponent) contentChild: ChildComponent;
+ *
+ *   constructor() {
+ *     // contentChild is not initialized yet
+ *     console.log(this.getMessage(this.contentChild));
+ *   }
+ *
+ *   ngAfterContentChecked() {
+ *     // contentChild is updated after the content has been checked
+ *     console.log('AfterContentChecked: ' + this.getMessage(this.contentChild));
+ *   }
+ *
+ *   private getMessage(cmp: ChildComponent): string {
+ *     return cmp ? cmp.where + ' child' : 'no child';
+ *   }
+ * }
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: `
+ *     <parent-cmp>
+ *       <button (click)="hasContent = !hasContent">Toggle content child</button>
+ *       <child-cmp *ngIf="hasContent" where="content"></child-cmp>
+ *     </parent-cmp>`,
+ *   directives: [NgIf, ParentComponent, ChildComponent]
+ * })
+ * export class App {
+ *   hasContent = true;
+ * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
+ * ```
+ */
+export interface AfterContentChecked { ngAfterContentChecked(); }
+
+/**
  * Implement this interface to get notified when your component's view has been fully initialized.
  *
  * ### Example ([live demo](http://plnkr.co/edit/LhTKVMEM0fkJgyp4CI1W?p=preview))
@@ -257,3 +318,63 @@ export interface AfterContentInit { ngAfterContentInit(); }
  * ```
  */
 export interface AfterViewInit { ngAfterViewInit(); }
+
+/**
+ * Implement this interface to get notified after every check of your component's view.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/0qDGHcPQkc25CXhTNzKU?p=preview))
+ *
+ * ```typescript
+ * @Component({selector: 'child-cmp', template: `{{where}} child`})
+ * class ChildComponent {
+ *   @Input() where: string;
+ * }
+ *
+ * @Component({
+ *   selector: 'parent-cmp',
+ *   template: `
+ *     <button (click)="showView = !showView">Toggle view child</button>
+ *     <child-cmp *ngIf="showView" where="view"></child-cmp>`,
+ *   directives: [NgIf, ChildComponent]
+ * })
+ * class ParentComponent implements AfterViewChecked {
+ *   @ViewChild(ChildComponent) viewChild: ChildComponent;
+ *   showView = true;
+ *
+ *   constructor() {
+ *     // viewChild is not initialized yet
+ *     console.log(this.getMessage(this.viewChild));
+ *   }
+ *
+ *   ngAfterViewChecked() {
+ *     // viewChild is updated after the view has been checked
+ *     console.log('AfterViewChecked: ' + this.getMessage(this.viewChild));
+ *   }
+ *
+ *   private getMessage(cmp: ChildComponent): string {
+ *     return cmp ? cmp.where + ' child' : 'no child';
+ *   }
+ * }
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: `<parent-cmp></parent-cmp>`,
+ *   directives: [ParentComponent]
+ * })
+ * export class App {
+ * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
+ * ```
+ */
+export interface AfterViewChecked { ngAfterViewChecked(); }
+
+
+/**
+ * this is a private interface which method is called from within postLink Fn or
+ * from children which are queryied via one of `@Query*` decorators.
+ * Component/Directive which is queried needs to call this from one of After(View|Content)Init methods to notify
+ * origin component about changes within After(Contet|View)Checked
+ * @private
+ */
+export interface OnChildrenChanged { _ngOnChildrenChanged?(type: ChildrenChangeHook, onFirstChangeDoneCb?: Function[]); }

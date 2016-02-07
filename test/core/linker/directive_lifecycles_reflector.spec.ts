@@ -1,6 +1,9 @@
-import {expect} from 'chai';
-import {hasLifecycleHook} from '../../../src/core/linker/directive_lifecycles_reflector';
-import {LifecycleHooks} from '../../../src/core/linker/directive_lifecycle_interfaces';
+import { expect } from 'chai';
+import {
+  hasLifecycleHook,
+  resolveImplementedLifeCycleHooks
+} from '../../../src/core/linker/directive_lifecycles_reflector';
+import { LifecycleHooks } from '../../../src/core/linker/directive_lifecycle_interfaces';
 
 describe( `linker/lifecycles_reflector`, ()=> {
 
@@ -20,6 +23,31 @@ describe( `linker/lifecycles_reflector`, ()=> {
 
     expect( hasLifecycleHook( LifecycleHooks.OnInit, Test ) ).to.equal( true );
     expect( hasLifecycleHook( LifecycleHooks.OnDestroy, Test ) ).to.equal( true );
+
+  } );
+
+  it( `should create BooleanMap with implemented lifecycles`, ()=> {
+
+    class Foo {
+      ngOnInit() {}
+
+      ngAfterViewInit() {}
+
+      ngOnDestroy() {}
+    }
+
+    const actual = resolveImplementedLifeCycleHooks(Foo);
+    const expected = {
+      ngOnInit: true,
+      ngAfterContentInit: false,
+      ngAfterContentChecked: false,
+      ngAfterViewInit: true,
+      ngAfterViewChecked: false,
+      ngOnDestroy: true,
+      _ngOnChildrenChanged: false
+    };
+
+    expect( actual ).to.deep.equal( expected );
 
   } );
 
