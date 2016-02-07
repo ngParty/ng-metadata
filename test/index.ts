@@ -9,6 +9,7 @@ import './core/pipes/pipe_provider.spec';
 import './core/linker/directive_lifecycles_reflector.spec';
 import './core/linker/directive_resolver.spec';
 import './core/directives/directive_provider.spec';
+import './core/directives/util/util.spec';
 import './facade/lang.spec';
 import './facade/primitives.spec';
 import './facade/collections.spec';

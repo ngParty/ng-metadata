@@ -1,6 +1,7 @@
-import {isFunction} from '../facade/lang';
-import {getInjectableName} from '../core/di/provider';
-import {StringWrapper} from '../facade/primitives';
+import { isFunction } from '../facade/lang';
+import { getInjectableName } from '../core/di/provider';
+import { StringWrapper } from '../facade/primitives';
+import { isArray } from 'util';
 
 // public helpers
 
@@ -207,9 +208,13 @@ export class $Attrs {
  * @constructor
  */
 export function ElementFactory() {
-  return {
+
+  const _$element = {
     _eventListeners:[],
-    '0': {},
+    '0': {
+      querySelector(selector:string){},
+      querySelectorAll(selector:string){}
+    },
     classList: {},
     attributes: {},
     toggleClass( className, toggle? ){
@@ -227,8 +232,20 @@ export function ElementFactory() {
     },
     off(eventName?){
 
-    }
-  }
+    },
+    eq(idx:number){
+      return isArray(_$element) ? _$element[idx] : _$element
+    },
+
+    // these need to be stubbed in tests
+    parent(){},
+    data(){},
+    inheritedData(){},
+    controller( ctrlName: string ){}
+  };
+
+  return _$element;
+
 }
 
 

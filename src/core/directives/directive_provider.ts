@@ -11,9 +11,27 @@ import {
 } from '../../facade/lang';
 import { StringWrapper } from '../../facade/primitives';
 import { StringMapWrapper } from '../../facade/collections';
-import { hasLifecycleHook } from '../linker/directive_lifecycles_reflector';
-import { LifecycleHooks } from '../linker/directive_lifecycle_interfaces';
+import { resolveImplementedLifeCycleHooks, ImplementedLifeCycleHooks } from '../linker/directive_lifecycles_reflector';
+import {
+  AfterContentInit,
+  AfterContentChecked,
+  AfterViewInit,
+  AfterViewChecked,
+  OnInit,
+  OnDestroy,
+  OnChildrenChanged,
+  ChildrenChangeHook
+} from '../linker/directive_lifecycle_interfaces';
 import { DirectiveMetadata, ComponentMetadata, LegacyDirectiveDefinition } from './metadata_directives';
+import {
+  QueryMetadata,
+  ViewChildMetadata,
+  ViewChildrenMetadata,
+  ViewQueryMetadata,
+  ContentChildMetadata,
+  ContentChildrenMetadata
+} from './metadata_di';
+import { _resolveChildrenFactory } from './util/util';
 
 export type HostBindingsProcessed = {
   classes: StringMap,
@@ -25,6 +43,18 @@ export type HostProcessed = {
   hostStatic: StringMap,
   hostBindings: HostBindingsProcessed,
   hostListeners: HostListenersProcessed
+}
+export interface DirectiveCtrl extends
+  AfterContentInit,
+  AfterContentChecked,
+  AfterViewInit,
+  AfterViewChecked,
+  OnInit,
+  OnDestroy,
+  OnChildrenChanged {
+  __readChildrenOrderScheduled?: boolean
+  __readViewChildrenOrderScheduled?: boolean
+  __readContentChildrenOrderScheduled?: boolean
 }
 
 /**
@@ -75,12 +105,7 @@ export class DirectiveProvider {
     const metadata: DirectiveMetadata | ComponentMetadata = this.directiveResolver.resolve( type );
     const directiveName = resolveDirectiveNameFromSelector( metadata.selector );
     const requireMap = this.directiveResolver.getRequiredDirectivesMap( type );
-    const lfHooks = {
-      ngOnInit: hasLifecycleHook( LifecycleHooks.OnInit, type ),
-      ngAfterContentInit: hasLifecycleHook( LifecycleHooks.AfterContentInit, type ),
-      ngAfterViewInit: hasLifecycleHook( LifecycleHooks.AfterViewInit, type ),
-      ngOnDestroy: hasLifecycleHook( LifecycleHooks.OnDestroy, type )
-    };
+    const lfHooks = resolveImplementedLifeCycleHooks(type);
 
     const {inputs,attrs,outputs,host,queries,legacy} = metadata;
 
@@ -324,14 +349,28 @@ export class DirectiveProvider {
   _createLink(
     type: Type,
     metadata: DirectiveMetadata | ComponentMetadata,
-    lfHooks: {ngOnInit:boolean,ngAfterContentInit: boolean, ngAfterViewInit: boolean, ngOnDestroy: boolean},
+    lfHooks: ImplementedLifeCycleHooks,
     requireMap: StringMap
   ): ng.IDirectiveLinkFn | ng.IDirectivePrePost {
 
+    if ( (lfHooks.ngAfterContentChecked || lfHooks.ngAfterViewChecked) && StringMapWrapper.size(metadata.queries)===0 ) {
+      throw new Error( `
+              Hooks Impl for ${ stringify( type ) }:
+              ===================================
+              You've implement AfterContentChecked/AfterViewChecked lifecycle, but @ViewChild(ren)/@ContentChild(ren) decorators are not used.
+              we cannot invoke After(Content|View)Checked without provided @Query decorators
+              ` )
+    }
+
+    // we need to implement this if query are present on class, because during postLink _ngOnChildrenChanged is not yet
+    // implemented on controller instance
+    if ( StringMapWrapper.size(metadata.queries) ) {
+      type.prototype._ngOnChildrenChanged = noop;
+    }
+
     const requiredCtrlVarNames = Object.keys( requireMap );
     const hostProcessed = this._processHost( metadata.host );
-    // @TODO
-    //const queriesProcessed;
+
     let preLink: ng.IDirectiveLinkFn;
     let postLink: ng.IDirectiveLinkFn;
 
@@ -343,23 +382,23 @@ export class DirectiveProvider {
     // postLink
     if ( metadata instanceof ComponentMetadata ) {
 
-      if ( lfHooks.ngAfterContentInit && lfHooks.ngAfterViewInit ) {
 
+      if ( (lfHooks.ngAfterContentInit || lfHooks.ngAfterContentChecked) && !StringMapWrapper.getValueFromPath( metadata,
+          'legacy.transclude' ) ) {
         throw new Error( `
-        Hooks Impl for ${ stringify( type ) }:
-        ===================================
-        You cannot implement both AfterContentInit and AfterViewInit, because they're doing the same in
-        component context. For Components please prefer AfterViewInit
-        ` )
-
+              Hooks Impl for ${ stringify( type ) }:
+              ===================================
+              You cannot implement AfterContentInit lifecycle, without allowed transclusion.
+              turn transclusion on within decorator like this: @Component({legacy:{transclude:true}})
+              ` )
       }
 
       postLink = function (
         scope: ng.IScope,
         element: ng.IAugmentedJQuery,
         attrs: ng.IAttributes,
-        controller: any[],
-        transclude
+        controller: [DirectiveCtrl,any],
+        transclude?: ng.ITranscludeFunction
       ) {
 
         const _watchers = [];
@@ -380,13 +419,28 @@ export class DirectiveProvider {
         // setup @HostListeners
         _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
 
+        // setup @ContentChild/@ContentChildren/@ViewChild/@ViewChildren
+        _setQuery( scope, element, ctrl, metadata.queries );
+
+
         // AfterContentInit/AfterViewInit Hooks
-        // call one of those methods if implemented
-        if ( lfHooks.ngAfterViewInit ) {
-          ctrl.ngAfterViewInit();
-        }
-        if ( lfHooks.ngAfterContentInit ) {
-          ctrl.ngAfterContentInit();
+        // if there are query defined schedule $evalAsync semaphore
+        if ( StringMapWrapper.size( metadata.queries ) ) {
+
+          ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromView, [
+            ctrl.ngAfterViewInit && ctrl.ngAfterViewInit.bind( ctrl ),
+            ctrl.ngAfterViewChecked && ctrl.ngAfterViewChecked.bind( ctrl ),
+          ] );
+          ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromContent, [
+            ctrl.ngAfterContentInit && ctrl.ngAfterContentInit.bind( ctrl ),
+            ctrl.ngAfterContentChecked && ctrl.ngAfterContentChecked.bind( ctrl )
+          ] );
+
+        } else {
+
+          ctrl.ngAfterViewInit && ctrl.ngAfterViewInit();
+          ctrl.ngAfterContentInit && ctrl.ngAfterContentInit();
+
         }
 
         // destroy
@@ -398,14 +452,14 @@ export class DirectiveProvider {
     } else {
 
       // Directive postLink
-      if ( lfHooks.ngAfterViewInit ) {
+      if ( lfHooks.ngAfterViewInit || lfHooks.ngAfterViewChecked ) {
 
         throw new Error( `
         Hooks Impl for ${ stringify( type ) }:
         ===================================
-        You cannot implement AfterViewInit for @Directive,
+        You cannot implement AfterViewInit/AfterViewChecked for @Directive,
         because directive doesn't have View so you probably doing something wrong.
-        @Directive support only AfterContentInit hook which is triggered from postLink
+        @Directive support only AfterContentInit/AfterContentChecked hook which is triggered from postLink
         ` )
 
       }
@@ -414,8 +468,8 @@ export class DirectiveProvider {
         scope: ng.IScope,
         element: ng.IAugmentedJQuery,
         attributes: ng.IAttributes,
-        controller: any[],
-        transclude
+        controller: [DirectiveCtrl,any],
+        transclude: ng.ITranscludeFunction
       ) {
 
         const _watchers = [];
@@ -442,9 +496,19 @@ export class DirectiveProvider {
         // setup @HostListeners
         _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
 
+        // setup @ContentChild/@ContentChildren
+        _setQuery( scope, element, ctrl, metadata.queries );
+
         // AfterContent Hooks
-        if ( lfHooks.ngAfterContentInit ) {
-          ctrl.ngAfterContentInit();
+        // if there are query defined schedule $evalAsync semaphore
+        if ( StringMapWrapper.size( metadata.queries ) ) {
+          ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromContent, [
+            ctrl.ngAfterContentInit && ctrl.ngAfterContentInit.bind( ctrl ),
+            ctrl.ngAfterContentChecked && ctrl.ngAfterContentChecked.bind( ctrl )
+          ] );
+        } else {
+          // no @ContentChild(ren) decorators exist, call just controller init method
+          ctrl.ngAfterContentInit && ctrl.ngAfterContentInit();
         }
 
         // destroy
@@ -761,6 +825,165 @@ export function _extractBindings( bindings: string[], typeSymbol: string = '', S
   }, {} as StringMap );
 
 }
+
+
+/**
+ * setups watchers for children component/directives provided by @Query decorators
+ * @param scope
+ * @param element
+ * @param ctrl
+ * @param queries
+ * @private
+ */
+export function _setQuery(
+  scope: ng.IScope,
+  element: ng.IAugmentedJQuery,
+  ctrl: DirectiveCtrl,
+  queries: {[key:string]:QueryMetadata|ViewQueryMetadata}
+) {
+
+  const SEMAPHORE_PROP_NAMES = Object.freeze({
+    view: '__readViewChildrenOrderScheduled',
+    content: '__readContentChildrenOrderScheduled'
+  });
+  const DOM_RESOLVER_TYPES = Object.freeze( {
+    view: 'view',
+    content: 'content'
+  } );
+
+  if ( StringMapWrapper.size( queries ) === 0 ) {
+    return;
+  }
+
+  const onChildrenChangedCb = _getOnChildrenResolvers( element, ctrl, queries );
+
+  ctrl.__readContentChildrenOrderScheduled = false;
+  ctrl.__readViewChildrenOrderScheduled = false;
+  // this is our created _ngOnChildrenChanged which will be called by children directives
+  const _ngOnChildrenChanged = function (
+    type: ChildrenChangeHook,
+    onFirstChangeDoneCb: Function[] = [],
+    domResolverCb = onChildrenChangedCb
+  ) {
+
+    let orderScheduledSemaphorePropName = '';
+    let domResolverCbType = '';
+
+    if ( type === ChildrenChangeHook.FromView ) {
+      orderScheduledSemaphorePropName = SEMAPHORE_PROP_NAMES.view;
+      domResolverCbType = DOM_RESOLVER_TYPES.view;
+    } else if ( type === ChildrenChangeHook.FromContent ) {
+      domResolverCbType = DOM_RESOLVER_TYPES.content;
+      orderScheduledSemaphorePropName = SEMAPHORE_PROP_NAMES.content;
+    } else {
+      throw new Error( `_ngOnChildrenChanged: queryType(${type}) must be one of FromView|FromContent` );
+    }
+
+    if ( ctrl[ orderScheduledSemaphorePropName ] ) {
+      return;
+    }
+
+    ctrl[ orderScheduledSemaphorePropName ] = true;
+    // we execute callback within $evalAsync to extend $digest loop count, which will not trigger another
+    // $rootScope.$digest === #perfmatters
+    scope.$evalAsync( () => {
+
+      // turn semaphore On back again
+      ctrl[ orderScheduledSemaphorePropName ] = false;
+
+      // query DOM and assign instances/jqLite to controller properties
+      domResolverCb[ domResolverCbType ].forEach( cb=>cb() );
+
+      // when DOM is queried we can execute DirectiveComponent life cycles which have been registered
+      // AfterViewInit | AfterContentInit
+      onFirstChangeDoneCb.forEach( ( cb )=> { isFunction( cb ) && cb() } );
+    } );
+
+  };
+
+  // this method needs to be called from children which are we querying
+  // if they are rendered dynamically/async
+  ctrl._ngOnChildrenChanged = _ngOnChildrenChanged.bind(ctrl);
+
+
+  /**
+   * get all callbacks which will be executed withing $scope.$evalAsync,
+   * which are querying for DOM elements and gets controller instances from host element children
+   * @param element
+   * @param ctrl
+   * @param queries
+   * @returns {view: Function[], content: Function[]}
+   * @private
+   */
+  function _getOnChildrenResolvers(
+    element: ng.IAugmentedJQuery,
+    ctrl: any,
+    queries: {[key:string]:QueryMetadata|ViewQueryMetadata}
+  ) {
+
+    const _onChildrenChangedCbMap = {
+      [DOM_RESOLVER_TYPES.view]: [],
+      [DOM_RESOLVER_TYPES.content]: []
+    };
+    StringMapWrapper.forEach( queries, function ( meta: QueryMetadata|ViewQueryMetadata, key: string ) {
+
+      if ( meta instanceof ViewChildMetadata ) {
+
+        _onChildrenChangedCbMap[DOM_RESOLVER_TYPES.view].push( _resolveViewChild( element, ctrl, key, meta ) );
+
+      }
+
+      if ( meta instanceof ViewChildrenMetadata ) {
+
+        _onChildrenChangedCbMap[DOM_RESOLVER_TYPES.view].push( _resolveViewChildren( element, ctrl, key, meta ) );
+
+      }
+
+      if ( meta instanceof ContentChildMetadata ) {
+
+        _onChildrenChangedCbMap[DOM_RESOLVER_TYPES.content].push( _resolveContentChild( element, ctrl, key, meta ) );
+
+      }
+
+      if ( meta instanceof ContentChildrenMetadata ) {
+
+        _onChildrenChangedCbMap[DOM_RESOLVER_TYPES.content].push( _resolveContentChildren( element, ctrl, key, meta ) );
+
+      }
+
+    } );
+
+    return _onChildrenChangedCbMap;
+
+    function _resolveViewChild( element: ng.IAugmentedJQuery, ctrl: any, key: string, meta: QueryMetadata|ViewQueryMetadata ) {
+
+      return _resolveChildrenFactory( element, ctrl, key, meta.selector, DOM_RESOLVER_TYPES.view, true );
+
+    }
+
+    function _resolveContentChild( element: ng.IAugmentedJQuery, ctrl: any, key: string, meta: QueryMetadata|ViewQueryMetadata ) {
+
+      return _resolveChildrenFactory( element, ctrl, key, meta.selector, DOM_RESOLVER_TYPES.content, true );
+
+    }
+
+    function _resolveViewChildren(element: ng.IAugmentedJQuery, ctrl: any, key: string, meta: QueryMetadata|ViewQueryMetadata) {
+
+      return _resolveChildrenFactory( element, ctrl, key, meta.selector, DOM_RESOLVER_TYPES.view );
+
+    }
+
+    function _resolveContentChildren(element: ng.IAugmentedJQuery, ctrl: any, key: string, meta: QueryMetadata|ViewQueryMetadata) {
+
+      return _resolveChildrenFactory( element, ctrl, key, meta.selector, DOM_RESOLVER_TYPES.content );
+
+    }
+
+  }
+
+}
+
+
 
 
 export const directiveProvider = new DirectiveProvider( new DirectiveResolver() );

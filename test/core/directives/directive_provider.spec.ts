@@ -169,7 +169,7 @@ describe( `directives/directive_provider`, ()=> {
       },
       template: `<div>Click me to attack!</div>`
     } )
-    class JediMasterCmp implements OnDestroy,AfterContentInit,OnInit {
+    class JediMasterCmp implements OnDestroy,AfterViewInit,OnInit {
 
       static test = {
         destroy: false,
@@ -197,7 +197,7 @@ describe( `directives/directive_provider`, ()=> {
 
       ngOnInit() { JediMasterCmp.test.init = true }
 
-      ngAfterContentInit() { JediMasterCmp.test.init = true }
+      ngAfterViewInit() { JediMasterCmp.test.init = true }
 
       ngOnDestroy() { JediMasterCmp.test.destroy = true }
 
@@ -264,7 +264,7 @@ describe( `directives/directive_provider`, ()=> {
           } );
 
         // AfterContent Hooks
-        ctrl.ngAfterContentInit();
+        ctrl.ngAfterViewInit();
 
         // destroy
         scope.$on( '$destroy', ()=> {
