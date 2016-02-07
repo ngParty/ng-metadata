@@ -20,3 +20,21 @@
 
   </li>
 </ul>
+
+<hr>
+
+<button  
+  class="mdl-button mdl-js-button mdl-button--accent"
+  ng-click="$ctrl.showQueryExample=!$ctrl.showQueryExample">{{ $ctrl.showQueryExample ? 'hide' : 'show'}} <code>@Query</code> decorators example
+</button>
+<div ng-if="$ctrl.showQueryExample">
+  <h3>check your console logs mate!</h3>
+<tabs>
+  <tabs-content-child></tabs-content-child>
+  <button ng-click="$ctrl.addItem()">add contentChild</button>
+  <ul><li ng-repeat="item in $ctrl.items">
+    <tabs-content-child id="item"></tabs-content-child>
+    <button ng-click="$ctrl.removeItem(item)">remove</button>
+  </li></ul>
+</tabs>
+</div>

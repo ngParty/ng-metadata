@@ -3,7 +3,8 @@ import { TodoModel, TodoStore } from '../stores/todoStore.service';
 
 @Component( {
   selector: 'todo-app',
-  templateUrl: './app/components/todo-app.html'
+  templateUrl: './app/components/todo-app.html',
+  legacy:{transclude:true}
 } )
 export class TodoAppCmp{
 
@@ -14,6 +15,15 @@ export class TodoAppCmp{
   ) {
 
     this.todos = this.todoStore.todos;
+  }
+  
+  ngAfterViewInit(){
+    console.info('viewINit');
+    
+  }
+  ngAfterContentInit(){
+    
+    console.info('contentINit');
   }
 
   createTodo( todo: TodoModel ) {
@@ -48,6 +58,19 @@ export class TodoAppCmp{
     this.todoStore.todos = this.todos;
 
   }
+
+  items = ['OOONE','TTTTTWO','THREEEE'];
+  removeItem(item){
+    const idx = this.items.indexOf(item);
+    if(idx!==-1){
+      this.items.splice(idx,1);
+    }
+  }
+  addItem(){
+    const newId = this.items[this.items.length-1]+Date.now();
+    this.items.push(newId);
+  }
+
 
 
 }

@@ -28,3 +28,15 @@ todo-item{
 todo-item .todo__list--complete input+span{
   text-decoration: line-through;
 }
+
+tabs{
+  display: block;
+  background-color:antiquewhite;
+  padding: 1rem;
+}
+tabs [ng-transclude],
+tabs ng-transclude{
+  border: 1px dashed brown;
+  background-color: coral;
+  padding: .4rem;
+}
