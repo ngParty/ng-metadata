@@ -25,7 +25,7 @@ all this goodness with ES6 if you prefer pure JS
 
 ## Installation
 
-`npm i --save ng-metadata@beta`
+`npm i --save ng-metadata`
 
 You have to allow nodeJS module resolution style in your `tsconfig.json`
 
