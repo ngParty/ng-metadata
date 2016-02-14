@@ -1,4 +1,4 @@
-import { Type, isPresent, stringify, assign, isType } from '../../facade/lang';
+import { Type, isPresent, stringify, assign, isType, getFuncName } from '../../facade/lang';
 import { StringMapWrapper, ListWrapper } from '../../facade/collections';
 import { reflector } from '../reflection/reflection';
 import {
@@ -24,46 +24,51 @@ function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;
 }
 
+/**
+ * return required string map for provided local DI
+ * ```typescript
+ * // for constructor(@Inject('ngModel') @Self() @Optional() ngModel){}
+ * // it returns:
+ * { ngModel: '?ngModel' }
+ * ```
+ * @param paramsMeta
+ * @returns {{[directiveName]:string}}
+ * @private
+ */
 function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[] ): StringMap {
 
+  // if there is just @Inject return
   if ( paramsMeta.length < 2 ) {
     return;
   }
 
   const injectInst = ListWrapper.find( paramsMeta, param=>param instanceof InjectMetadata ) as InjectMetadata;
-  const isHost = ListWrapper.find( paramsMeta, param=>param instanceof HostMetadata ) !== -1;
-
-  if ( !(isHost || injectInst) ) {
-    return;
-  }
 
   if ( !injectInst.token ) {
-    throw new Error( 'no Directive instance name provided within @Inject()' );
+    throw new Error( `no Directive instance name provided within @Inject()` );
   }
 
+  const isHost = ListWrapper.findIndex( paramsMeta, param=>param instanceof HostMetadata ) !== -1;
   const isOptional = ListWrapper.findIndex( paramsMeta, param=>param instanceof OptionalMetadata ) !== -1;
   const isSelf = ListWrapper.findIndex( paramsMeta, param=>param instanceof SelfMetadata ) !== -1;
   const isSkipSelf = ListWrapper.findIndex( paramsMeta, param=>param instanceof SkipSelfMetadata ) !== -1;
 
+  if ( isOptional && paramsMeta.length !== 3 ) {
+    throw new Error( `
+    you cannot use @Optional() without related decorator for injecting Directives. use one of @Host|@Self()|@SkipSelf() + @Optional()`
+    );
+  }
   if ( isSelf && isSkipSelf ) {
-    throw new Error( `you cannot provide both @Self() and @SkipSelf() for @Inject(${injectInst.token})` );
+    throw new Error( `you cannot provide both @Self() and @SkipSelf() with @Inject(${injectInst.token}) for Directive Injection` );
+  }
+  if( (isHost && isSelf) || (isHost && isSkipSelf)){
+    throw new Error( `you cannot provide both @Host(),@SkipSelf() or @Host(),@Self() with @Inject(${getFuncName(injectInst.token)}) for Directive Injections` );
   }
 
-  let locateType = '';
-  let optionalType = isOptional
-    ? '?'
-    : '';
-  if ( isHost ) {
-    locateType = '^';
-  }
-  if ( isSelf ) {
-    locateType = '';
-  }
-  if ( isSkipSelf ) {
-    locateType = '^^';
-  }
+  const locateType = _getLocateTypeSymbol();
+  const optionalType = isOptional ? '?' : '';
 
-  const requireExpressionPrefix = `${optionalType}${locateType}`;
+  const requireExpressionPrefix = `${ optionalType }${ locateType }`;
   const directiveName = isType( resolveForwardRef( injectInst.token ) )
     ? getInjectableName( resolveForwardRef( injectInst.token ) )
     : injectInst.token;
@@ -71,6 +76,20 @@ function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[] ): String
   return {
     [directiveName]: `${ requireExpressionPrefix }${ directiveName }`
   };
+
+  function _getLocateTypeSymbol(): string {
+
+    if ( isSelf ) {
+      return '';
+    }
+    if ( isHost ) {
+      return '^';
+    }
+    if ( isSkipSelf ) {
+      return '^^';
+    }
+
+  }
 
 }
 
@@ -98,6 +117,14 @@ export class DirectiveResolver {
    * map consist of :
    *  - key == name of directive
    *  - value == Angular 1 require expression
+   *  ```js
+   *  {
+   *    ngModel: 'ngModel',
+   *    form: '^^form',
+   *    foo: '^foo',
+   *    moo: '?^foo',
+   *  }
+   *  ```
    *
    * @param {Type} type
    * @returns {StringMap}

@@ -1,6 +1,6 @@
 import * as sinon from 'sinon';
 import { expect } from 'chai';
-import { noop, isFunction, isBlank } from '../../../src/facade/lang';
+import { noop, isFunction } from '../../../src/facade/lang';
 import {
   AfterContentInit,
   OnDestroy,
@@ -22,7 +22,6 @@ import { $Scope, $Attrs, ElementFactory } from '../../../src/testing/utils';
 import {
   directiveProvider,
   _setHostBindings,
-  _assignRequiredCtrlInstancesToHostCtrl,
   _getHostListenerCbParams,
   _setHostListeners,
   _createDirectiveBindings
@@ -76,86 +75,77 @@ describe( `directives/directive_provider`, ()=> {
     const [directiveName,directiveFactory] = directiveProvider.createFromType( MyClicker );
     const ddo: ng.IDirective = directiveFactory();
 
-
     expect( directiveName ).to.equal( 'myClicker' );
     expect( isFunction( directiveFactory ) ).to.equal( true );
+
     expect( directiveFactory() ).to.deep.equal( {
       require: [ 'myClicker' ],
-      controller: MyClicker,
-      link: {
-        pre: (ddo.link as ng.IDirectivePrePost).pre,
-        post: (ddo.link as ng.IDirectivePrePost).post
-      },
+      controller: ddo.controller,
+      link: (ddo.link as ng.IDirectivePrePost),
     } );
 
-    const howShouldLinkFnLookLike = {
-      pre: function ( scope, element, attrs, controller ) {
-        const [ctrl] = controller;
-        ctrl.ngOnInit();
-      },
-      post: function ( scope, element, attrs: ng.IAttributes, controller ) {
+    const howShouldLinkFnLookLike = function postLink( scope, element, attrs: ng.IAttributes, controller ) {
 
-        const _watchers = [];
-        const _observers = [];
+      const _watchers = [];
+      const _observers = [];
 
-        const [ctrl] = controller;
+      const [ctrl] = controller;
 
-        // setup Inputs
-        _watchers.push(
-          scope.$watch( (attrs as any).enableColor, ( newValue )=> {
-            ctrl.isDisabled = newValue;
-          } )
-        );
-        // setup Attrs
-        _observers.push(
-          attrs.$observe( 'defaultColor', ( value )=> {
-            ctrl.defaultColor = value;
-          } )
-        );
-        // setup Outputs
-        ctrl.execMe = ()=> { scope.$eval( (attrs as any).execMe ) };
+      // setup Inputs
+      _watchers.push(
+        scope.$watch( (attrs as any).enableColor, ( newValue )=> {
+          ctrl.isDisabled = newValue;
+        } )
+      );
+      // setup Attrs
+      _observers.push(
+        attrs.$observe( 'defaultColor', ( value )=> {
+          ctrl.defaultColor = value;
+        } )
+      );
+      // setup Outputs
+      ctrl.execMe = ()=> { scope.$eval( (attrs as any).execMe ) };
 
-        // setup host attributes
-        attrs.$set( 'tabindex', '1' );
-        attrs.$set( 'role', 'button' );
+      // setup host attributes
+      attrs.$set( 'tabindex', '1' );
+      attrs.$set( 'role', 'button' );
 
-        // setup @HostBindings
-        _watchers.push(
-          scope.$watch( ()=>ctrl.isDisabled, ( newValue )=> {
-            if ( newValue ) {
-              attrs.$addClass( 'isDisabled' )
-            } else {
-              attrs.$removeClass( 'isDisabled' )
-            }
-          } )
-        );
+      // setup @HostBindings
+      _watchers.push(
+        scope.$watch( ()=>ctrl.isDisabled, ( newValue )=> {
+          if ( newValue ) {
+            attrs.$addClass( 'isDisabled' )
+          } else {
+            attrs.$removeClass( 'isDisabled' )
+          }
+        } )
+      );
 
-        // setup @HostListeners
-        element
-          .on( 'click', function ( $event ) {
+      // setup @HostListeners
+      element
+        .on( 'click', function ( $event ) {
 
-            const noPreventDefault = Boolean( ctrl.onClick() );
-            if ( noPreventDefault ) {
-              $event.preventDefault();
-            }
-
-          } );
-
-        // AfterContent Hooks
-        ctrl.ngAfterContentInit();
-
-        // destroy
-        scope.$on( '$destroy', ()=> {
-
-          ctrl.ngOnDestroy();
-
-          _watchers.forEach( _watcherDispose=>_watcherDispose() );
-          _observers.forEach( _observerDispose=>_observerDispose() );
-          element.off();
+          const noPreventDefault = Boolean( ctrl.onClick() );
+          if ( noPreventDefault ) {
+            $event.preventDefault();
+          }
 
         } );
 
-      }
+      // AfterContent Hooks
+      ctrl.ngAfterContentInit();
+
+      // destroy
+      scope.$on( '$destroy', ()=> {
+
+        ctrl.ngOnDestroy();
+
+        _watchers.forEach( _watcherDispose=>_watcherDispose() );
+        _observers.forEach( _observerDispose=>_observerDispose() );
+        element.off();
+
+      } );
+
     };
 
   } );
@@ -217,12 +207,9 @@ describe( `directives/directive_provider`, ()=> {
         onLightsaberAttack: '&'
       },
       require: [ 'jediMaster' ],
-      controller: JediMasterCmp,
+      controller: ddo.controller,
       controllerAs: '$ctrl',
-      link: {
-        pre: (ddo.link as ng.IDirectivePrePost).pre,
-        post: (ddo.link as ng.IDirectivePrePost).post
-      },
+      link: (ddo.link as ng.IDirectivePrePost),
       template: `<div>Click me to attack!</div>`,
       transclude: false
     } );
@@ -301,7 +288,7 @@ describe( `directives/directive_provider`, ()=> {
       expect( isFunction( directiveFactory ) ).to.equal( true );
       expect( directiveFactory() ).to.deep.equal( {
         require: [ 'validator','^ngModel' ],
-        controller: MyValidator,
+        controller: ddo.controller,
         link: ddo.link as ng.IDirectiveLinkFn
       } );
 
@@ -328,7 +315,7 @@ describe( `directives/directive_provider`, ()=> {
       expect( isFunction( directiveFactory ) ).to.equal( true );
       expect( directiveFactory() ).to.deep.equal( {
         require: [ 'validator','^ngModel','^myCssMutator' ],
-        controller: MyValidator,
+        controller: ddo.controller,
         link: ddo.link as ng.IDirectiveLinkFn
       } );
 
@@ -358,7 +345,7 @@ describe( `directives/directive_provider`, ()=> {
 
         expect( ddo ).to.deep.equal( {
           require: [ 'withCompile' ],
-          controller: WithCompileDirective,
+          controller: ddo.controller,
           compile: ddo.compile,
           link: ddo.link as ng.IDirectiveLinkFn
         } );
@@ -428,7 +415,7 @@ describe( `directives/directive_provider`, ()=> {
 
         expect( ddo ).to.deep.equal( {
           require: [ 'withCompile' ],
-          controller: WithLink,
+          controller: ddo.controller,
           link: WithLink.link as ng.IDirectiveLinkFn
         } );
 
@@ -463,30 +450,6 @@ describe( `directives/directive_provider`, ()=> {
       $scope = new $Scope();
       $attrs = new $Attrs();
       $transclude = noop();
-
-    } );
-    it( `should call ngOnInit only if it's implemented from preLink`, ()=> {
-
-      @Directive({selector:'[myDir]'})
-      class MyDirective{
-        ngOnInit(){}
-      }
-
-      const ctrl = [ new MyDirective() ];
-      const spy = sinon.spy( ctrl[0],'ngOnInit' );
-
-      const directiveProviderArr = directiveProvider.createFromType( MyDirective );
-      const ddo = directiveProviderArr[ 1 ]();
-      const link: ng.IDirectivePrePost = ddo.link;
-
-      expect( isFunction( link.pre ) ).to.equal( true );
-      expect( isFunction( link.post ) ).to.equal( true );
-      expect( spy.called ).to.equal( false );
-
-      link.pre( $scope, $element, $attrs, ctrl, $transclude );
-      expect( spy.called ).to.equal( true );
-
-      spy.restore();
 
     } );
     it( `should call ngOnDestroy only if it's implemented from postLink`, ()=> {
@@ -565,7 +528,7 @@ describe( `directives/directive_provider`, ()=> {
 
     } );
 
-    it( `should call all hooks if they are implemented`, ()=> {
+    it( `should call all hooks if they are implemented from postLink expect ngOnInit which is called form Ctrl`, ()=> {
 
       @Directive({selector:'[myDir]'})
       class MyDirective{
@@ -581,69 +544,29 @@ describe( `directives/directive_provider`, ()=> {
 
       const directiveProviderArr = directiveProvider.createFromType( MyDirective );
       const ddo = directiveProviderArr[ 1 ]();
-      const link: ng.IDirectivePrePost = ddo.link;
+      const link: ng.IDirectiveLinkFn = ddo.link as ng.IDirectiveLinkFn;
 
-      expect( isFunction( link.pre ) ).to.equal( true );
-      expect( isFunction( link.post ) ).to.equal( true );
+      expect( isFunction( link ) ).to.equal( true );
 
       expect( spyInit.called ).to.equal( false );
       expect( spyAfterContentInit.called ).to.equal( false );
       expect( spyDestroy.called ).to.equal( false );
 
-      link.pre( $scope, $element, $attrs, ctrl, $transclude );
-      expect( spyInit.called ).to.equal( true );
-      expect( spyAfterContentInit.called ).to.equal( false );
-      expect( spyDestroy.called ).to.equal( false );
+      link( $scope, $element, $attrs, ctrl, $transclude );
 
-      link.post( $scope, $element, $attrs, ctrl, $transclude );
-
-      expect( spyInit.called ).to.equal( true );
+      expect( spyInit.called ).to.equal( false );
       expect( spyAfterContentInit.called ).to.equal( true );
       expect( spyDestroy.called ).to.equal( false );
 
       $scope.$emit( '$destroy' );
 
-      expect( spyInit.called ).to.equal( true );
+      expect( spyInit.called ).to.equal( false );
       expect( spyAfterContentInit.called ).to.equal( true );
       expect( spyDestroy.called ).to.equal( true );
 
       spyInit.restore();
       spyAfterContentInit.restore();
       spyDestroy.restore();
-
-    } );
-
-    it( `should attach required directives instances to current instance from preLink if ngOnInit impl`, ()=> {
-
-      class OverrideMe{}
-      class NgModel{}
-
-      @Directive({selector:'[myDir]'})
-      class MyDirective implements OnInit{
-        constructor(@Inject('ngModel') @Host() private ngModel ){}
-        ngOnInit(){}
-      }
-
-      const ctrl = [ new MyDirective( null ), new NgModel() ];
-
-      const directiveProviderArr = directiveProvider.createFromType( MyDirective );
-      const ddo = directiveProviderArr[ 1 ]();
-      const link: ng.IDirectivePrePost = ddo.link;
-
-      const [ownCtrl] = ctrl;
-
-      expect( isBlank( ownCtrl[ 'ngModel' ] ) ).to.equal( true );
-
-      link.pre( $scope, $element, $attrs, ctrl, $transclude );
-
-      expect( ownCtrl[ 'ngModel' ] instanceof NgModel ).to.equal( true );
-
-      // override ngModel to check that it wont be set again in postLink
-      ctrl[ 1 ] = new OverrideMe();
-
-      link.post( $scope, $element, $attrs, ctrl, $transclude );
-
-      expect( ownCtrl[ 'ngModel' ] instanceof NgModel ).to.equal( true );
 
     } );
 
@@ -682,13 +605,14 @@ describe( `directives/directive_provider`, ()=> {
 
       it( `should create bindings from inputs,attrs,outputs`, ()=> {
 
-        const inputs = [ 'one', 'two: twoAlias' ];
+        const inputs = [ 'one', 'two: twoAlias', 'oneOpt: ?oneOpt' ];
         const attrs = [ 'color', 'brood: broodAlias' ];
         const outputs = [ 'onFoo', 'onMoo: onMooAlias' ];
 
         const actual = directiveProvider._createComponentBindings( inputs, attrs, outputs );
         const expected = {
           one: '=',
+          oneOpt: '=?oneOpt',
           two: '=twoAlias',
           color: '@',
           brood: '@broodAlias',
@@ -825,28 +749,6 @@ describe( `directives/directive_provider`, ()=> {
     } );
 
     describe( `link fn creators helpers`, ()=> {
-
-      describe( `#_assignRequiredCtrlInstancesToHostCtrl`, ()=> {
-
-        it( `should extend ctrl instances with requiredCtrl names with proper require ctrl instances`, ()=> {
-
-          const ngModel = { $modelValue: undefined, $viewValue: '123', $setViewValue: noop };
-          const emSomeDirective = { callMe: noop };
-          const requiredCtrlVarNames = [ 'ngModelCtrl', 'someDirective' ];
-          const requiredCtrls = [ ngModel, emSomeDirective ];
-          const ctrl = {};
-
-          _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
-          const expected = {
-            ngModelCtrl: ngModel,
-            someDirective: emSomeDirective
-          };
-
-          expect( ctrl ).to.deep.equal( expected );
-
-        } );
-
-      } );
 
       describe( `#_setHostBindings`, ()=> {
 

@@ -31,7 +31,7 @@ import {
   ContentChildMetadata,
   ContentChildrenMetadata
 } from './metadata_di';
-import { _resolveChildrenFactory, _getParentCheckNotifiers } from './util/util';
+import { _resolveChildrenFactory, _getParentCheckNotifiers, directiveControllerFactory } from './util/util';
 
 export type HostBindingsProcessed = {
   classes: StringMap,
@@ -106,22 +106,33 @@ export class DirectiveProvider {
     const directiveName = resolveDirectiveNameFromSelector( metadata.selector );
     const requireMap = this.directiveResolver.getRequiredDirectivesMap( type );
     const lfHooks = resolveImplementedLifeCycleHooks(type);
-
     const {inputs,attrs,outputs,host,queries,legacy} = metadata;
 
-    let _ddo = {} as ng.IDirective;
-    const _basicDDO = {
-      controller: type,
-      require: this._createRequires( requireMap, directiveName ),
+    // Component controllers must be created from a factory. Checkout out
+    // util/directive-controller.js for more information about what's going on here
+    __controller.$inject = ['$scope', '$element', '$attrs', '$transclude', '$injector'];
+    function __controller($scope: any, $element: any, $attrs: any, $transclude: any, $injector: any): any{
+
+      const locals = { $scope, $element, $attrs, $transclude };
+
+      return directiveControllerFactory(this, type, $injector, locals, requireMap);
+
+    }
+
+    const _ddo = {
+      controller: __controller,
+      link: this._createLink( type, metadata, lfHooks ),
+      // @TODO this will be removed after @Query handling is moved to directiveControllerFactory
+      require: this._createRequires( requireMap, directiveName )
     } as ng.IDirective;
 
+    // specific DDO augmentation for @Component
     if ( metadata instanceof ComponentMetadata ) {
 
       const componentSpecificDDO = {
         scope: {},
         bindToController: this._createComponentBindings( inputs, attrs, outputs ),
         controllerAs: DirectiveProvider._controllerAs,
-        link: this._createLink( type, metadata, lfHooks, requireMap ),
         transclude: DirectiveProvider._transclude
       } as ng.IDirective;
 
@@ -135,18 +146,9 @@ export class DirectiveProvider {
         componentSpecificDDO.templateUrl = metadata.templateUrl;
       }
 
-      StringMapWrapper.assign( _ddo, _basicDDO, componentSpecificDDO );
-
-    } else {
-
-      const directiveSpecificDDO = {
-        link: this._createLink( type, metadata, lfHooks, requireMap )
-      } as ng.IDirective;
-
-      StringMapWrapper.assign( _ddo, _basicDDO, directiveSpecificDDO );
+      StringMapWrapper.assign( _ddo, componentSpecificDDO );
 
     }
-
 
     // allow compile defined as static method on Type
     if ( isFunction( (type as any).compile ) ) {
@@ -338,20 +340,19 @@ export class DirectiveProvider {
    * Component lifeCycles:
    * - ngOnInit from preLink (controller require ready)
    * - ngAfterViewInit from postLink ( all children in view+content compiled and DOM ready )
+   * - ngAfterContentInit from postLink ( same as ngAfterViewInit )
    * - ngOnDestroy from postLink
    * @param type
    * @param metadata
    * @param lfHooks
-   * @param requireMap
    * @private
    * @internal
    */
   _createLink(
     type: Type,
     metadata: DirectiveMetadata | ComponentMetadata,
-    lfHooks: ImplementedLifeCycleHooks,
-    requireMap: StringMap
-  ): ng.IDirectiveLinkFn | ng.IDirectivePrePost {
+    lfHooks: ImplementedLifeCycleHooks
+  ): ng.IDirectiveLinkFn {
 
     if ( (lfHooks.ngAfterContentChecked || lfHooks.ngAfterViewChecked) && StringMapWrapper.size(metadata.queries)===0 ) {
       throw new Error( `
@@ -368,16 +369,9 @@ export class DirectiveProvider {
       type.prototype._ngOnChildrenChanged = noop;
     }
 
-    const requiredCtrlVarNames = Object.keys( requireMap );
     const hostProcessed = this._processHost( metadata.host );
 
-    let preLink: ng.IDirectiveLinkFn;
     let postLink: ng.IDirectiveLinkFn;
-
-    // preLink
-    if ( lfHooks.ngOnInit ) {
-      preLink = _preLinkFnFactory(requiredCtrlVarNames);
-    }
 
     // postLink
     if ( metadata instanceof ComponentMetadata ) {
@@ -403,11 +397,6 @@ export class DirectiveProvider {
 
         const _watchers = [];
         const [ctrl,...requiredCtrls] = controller;
-
-        // if OnInit implemented don't create controller properties again
-        if ( !lfHooks.ngOnInit ) {
-          _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
-        }
 
         _setHostStaticAttributes( element, hostProcessed.hostStatic );
 
@@ -481,11 +470,6 @@ export class DirectiveProvider {
         const _observers = [];
         const [ctrl,...requiredCtrls] = controller;
 
-        // if OnInit implemented don't create controller properties again
-        if ( !lfHooks.ngOnInit ) {
-          _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
-        }
-
         const _disposables = _createDirectiveBindings( scope, attributes, ctrl, metadata );
         _watchers.push( ..._disposables.watchers );
         _observers.push( ..._disposables.observers );
@@ -528,9 +512,7 @@ export class DirectiveProvider {
 
     }
 
-    return isFunction( preLink )
-      ? { pre: preLink, post: postLink }
-      : postLink;
+    return postLink;
 
   }
 
@@ -538,27 +520,6 @@ export class DirectiveProvider {
 
 
 // private helpers
-
-/**
- * creates preLink Function
- * assigns required controller instances to current directive instance
- * Note: it is not safe to do following in preLink:
- *  - attaching event listeners
- *  - doing DOM manipulation
- * @private
- */
-function _preLinkFnFactory(requiredCtrlVarNames: string[]) {
-
-  return function preLink( scope, element, attrs, controller, transclude ) {
-
-    const [ctrl,...requiredCtrls] = controller;
-    _assignRequiredCtrlInstancesToHostCtrl( requiredCtrlVarNames, requiredCtrls, ctrl );
-
-    ctrl.ngOnInit();
-
-  }
-
-}
 
 /**
  *
@@ -593,22 +554,6 @@ function _setupDestroyHandler(
 
   } );
 
-}
-
-/**
- *
- * @param requiredCtrlVarNames
- * @param requiredCtrls
- * @param ctrl
- * @internal
- * @private
- */
-export function _assignRequiredCtrlInstancesToHostCtrl(
-  requiredCtrlVarNames: string[],
-  requiredCtrls: Object[],
-  ctrl: any
-): void {
-  requiredCtrlVarNames.forEach( ( varName, idx )=>ctrl[ varName ] = requiredCtrls[ idx ] );
 }
 
 /**

@@ -171,17 +171,7 @@ export function _dependenciesFor(typeOrFunc: Type): string[] {
 
   }
 
-  if ( !_areAllDirectiveInjectionsAtTail( params ) ) {
-    throw new Error( `
-      ${ stringify( typeOrFunc ) } :
-      -------------------------------------------------
-      you cannot mix Directive @Inject() in constructor.
-      @Host/@Self/@SkipSelf/@Optional+@Inject needs to be at last positions in constructor
-    ` );
-  }
-
   return params
-    .filter( paramMeta=>paramMeta.length === 1 )
     .map( ( p: any[] ) => _extractToken( p ) );
 
 }

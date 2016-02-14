@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { resolveForwardRef, forwardRef } from '../../../src/core/di/forward_ref';
 import { Inject, Injectable, Host } from '../../../src/core/di/decorators';
-import { provide } from '../../../src/core/di/provider';
+import { provide, getInjectableName } from '../../../src/core/di/provider';
 import { globalKeyRegistry } from '../../../src/core/di/key';
 import { Pipe } from '../../../src/core/pipes/decorators';
 import { Directive } from '../../../src/core/directives/decorators';
@@ -111,7 +111,7 @@ describe( `forward_ref`, ()=> {
 
       const [,ConsumerSvc] = provide(Consumer);
 
-      expect( ConsumerSvc.$inject ).to.deep.equal( [] );
+      expect( ConsumerSvc.$inject ).to.deep.equal( [getInjectableName(LightsaberEnhancerDirective)] );
 
     } );
 

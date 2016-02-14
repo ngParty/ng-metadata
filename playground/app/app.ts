@@ -12,6 +12,7 @@ import { RemainingTodosPipe } from './pipes/remainingTodos.pipe';
 import { TodoStore } from './stores/todoStore.service';
 
 import { ElementReadyDirective } from './directives/element-ready.directive';
+import { MyValidatorDirective } from './directives/my-validator.directive';
 
 export const AppModule = angular.module( 'app', [TabsModule] )
 
@@ -21,5 +22,6 @@ export const AppModule = angular.module( 'app', [TabsModule] )
   .filter( ...provide( RemainingTodosPipe ) )
   .service( ...provide( TodoStore ) )
   .directive( ...provide( ElementReadyDirective ) )
+  .directive( ...provide( MyValidatorDirective ) )
 
   ;

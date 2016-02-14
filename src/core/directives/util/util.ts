@@ -1,11 +1,13 @@
 import { getInjectableName } from '../../di/provider';
-import { isString, isType, getFuncName, global, noop } from '../../../facade/lang';
+import { isString, isType, getFuncName, global, noop, isArray, isJsObject, isFunction } from '../../../facade/lang';
 import { reflector } from '../../reflection/reflection';
 import { DirectiveMetadata } from '../metadata_directives';
 import { ListWrapper, StringMapWrapper } from '../../../facade/collections';
 import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces';
 import { QueryMetadata } from '../metadata_di';
 import { DirectiveCtrl } from '../directive_provider';
+
+const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
 
 /**
  * resolving DOM instances by provided @ContentChild(ren)/@ViewChild(ren)
@@ -42,7 +44,7 @@ export function _resolveChildrenFactory(
       const child = _getChildElements( element, selector, type, firstOnly );
       const childInstance = isString( cssSelector )
         ? child
-        : getController( child, childCtrlName );
+        : getControllerOnElement( child, childCtrlName );
       ctrl[ key ] = childInstance;
 
     } else {
@@ -56,7 +58,7 @@ export function _resolveChildrenFactory(
       for ( let i = 0; i < children.length; i++ ) {
 
         ctrl[ key ].push(
-          getController( (children.eq( i ) as ng.IAugmentedJQuery ), childCtrlName )
+          getControllerOnElement( (children.eq( i ) as ng.IAugmentedJQuery ), childCtrlName )
         );
       }
 
@@ -66,6 +68,15 @@ export function _resolveChildrenFactory(
 
 }
 
+/**
+ * query View/Content DOM for particular child elements/attributes selector
+ * @param $element
+ * @param selector
+ * @param type
+ * @param firstOnly
+ * @returns {IAugmentedJQuery}
+ * @private
+ */
 export function _getChildElements(
   $element: ng.IAugmentedJQuery,
   selector: string,
@@ -92,27 +103,6 @@ export function _getChildElements(
 
 }
 
-export function getController( $element: ng.IAugmentedJQuery, ctrlName: string, inheritType?: string ) {
-
-  if ( !$element ) {
-
-    return null;
-
-  }
-
-  //If only parents then start at the parent element
-  if (inheritType === '^^') {
-    $element = $element.parent() as ng.IAugmentedJQuery;
-    //Otherwise attempt getting the controller from elementControllers in case
-    //the element is transcluded (and has no data) and to avoid .data if possible
-  }
-  const dataName = `$${ ctrlName }Controller`;
-
-  //const value = inheritType ? $element.inheritedData(dataName) : $element.data(dataName);
-  //return value;
-  return $element.controller(ctrlName);
-
-}
 
 export function _getSelectorAndCtrlName( childSelector: string|Type ): {selector:string,childCtrlName:string} {
 
@@ -123,6 +113,12 @@ export function _getSelectorAndCtrlName( childSelector: string|Type ): {selector
 
 }
 
+/**
+ * get CSS selector from Component/Directive decorated class metadata
+ * @param selector
+ * @returns {string}
+ * @private
+ */
 export function _getSelector( selector: string|Type ): string {
 
   if ( isString( selector ) ) {
@@ -157,12 +153,18 @@ export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Ob
   const parentCheckedNotifiers = requiredCtrls.reduce(
     ( acc, requiredCtrl: DirectiveCtrl )=> {
 
+      if ( !isJsObject( requiredCtrl ) ) {
+        return acc;
+      }
+
       const Ctor = requiredCtrl.constructor;
 
       if ( !isType( Ctor ) ) {
         return acc;
       }
+
       const propMeta = reflector.propMetadata( Ctor );
+
       if ( !StringMapWrapper.size( propMeta ) ) {
         return acc;
       }
@@ -171,16 +173,19 @@ export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Ob
       StringMapWrapper.forEach( propMeta, ( propMetaPropArr: any[] )=> {
 
         propMetaPropArr
-          .filter( ( propMetaInstance )=> {
+          .filter( ( propMetaInstance: any )=> {
 
-            if ( !((propMetaInstance instanceof QueryMetadata ) && isType( propMetaInstance.selector )) ) {
+            // check if propMeta is one of @Query types and that it queries for Directive/Component ( typeof selector == function )
+            if ( !((propMetaInstance instanceof QueryMetadata ) && isType( (propMetaInstance as QueryMetadata).selector )) ) {
               return false;
             }
+            // check if current child is really queried from its parent
             return ctrl instanceof propMetaInstance.selector;
 
           } )
-          .forEach( ( propMetaInstance )=> {
+          .forEach( ( propMetaInstance: QueryMetadata )=> {
 
+            // parent queried for this child with one from @ContentChild/@ContentChildren
             if ( !propMetaInstance.isViewQuery ) {
 
               _parentCheckedNotifiers.push(
@@ -191,6 +196,7 @@ export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Ob
               );
 
             }
+            // parent queried for this child with one from @ViewChild/@ViewChildren
             if ( propMetaInstance.isViewQuery ) {
 
               _parentCheckedNotifiers.push(
@@ -214,4 +220,107 @@ export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Ob
     ? parentCheckedNotifiers
     : [ noop ];
 
+}
+
+export function directiveControllerFactory<T extends DirectiveCtrl,U extends Type>(
+  caller: T,
+  controller: U,
+  $injector: ng.auto.IInjectorService,
+  locals: any,
+  requireMap: StringMap
+): T&U {
+
+  // Create an instance of the controller without calling its constructor
+  const instance = Object.create(controller.prototype);
+
+  const { $element } : { $element: ng.IAugmentedJQuery } = locals;
+
+  const $requires = getRequiredControllers( requireMap, $element, controller );
+
+  // Remember, angular has already set those bindings on the `caller`
+  // argument. Now we need to extend them onto our `instance`. It is important
+  // to extend after defining the properties. That way we fire the setters.
+  StringMapWrapper.assign( instance, caller );
+
+  // console.log( locals );
+  // Finally, invoke the constructor using the injection array and the captured locals
+  $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
+
+  if ( isFunction( instance.ngOnInit ) ) {
+    instance.ngOnInit();
+  }
+
+  /*if ( isFunction( instance.ngOnDestroy ) ) {
+    $scope.$on( '$destroy', instance.ngOnDestroy.bind( instance ) );
+  }*/
+
+  /*if (typeof instance.ngAfterViewInit === 'function') {
+    ddo.ngAfterViewInitBound = instance.ngAfterViewInit.bind(instance);
+  }*/
+
+  // Return the controller instance
+  return instance;
+
+}
+
+export function getControllerOnElement( $element: ng.IAugmentedJQuery, ctrlName: string ) {
+
+  if ( !$element ) {
+
+    return null;
+
+  }
+
+  return $element.controller(ctrlName);
+
+}
+
+/**
+ * Angular 1 copy of how to require other directives
+ * @param require
+ * @param $element
+ * @param directive
+ * @returns {any|null}
+ */
+export function getRequiredControllers(
+  require: string|string[]|{[key:string]:any},
+  $element: ng.IAugmentedJQuery,
+  directive: Type
+): Object|Object[]|{[ctrlName:string]:Object} {
+
+  var value;
+
+  if (isString(require)) {
+    var match = require.match(REQUIRE_PREFIX_REGEXP);
+    var name = require.substring(match[0].length);
+    var inheritType = match[1] || match[3];
+    var optional = match[2] === '?';
+
+    //If only parents then start at the parent element
+    if ( inheritType === '^^' ) {
+      $element = $element.parent() as ng.IAugmentedJQuery;
+    }
+
+    if (!value) {
+      var dataName = `$${ name }Controller`;
+      value = inheritType ? $element.inheritedData(dataName) : $element.data(dataName);
+    }
+
+    if (!value && !optional) {
+      throw new Error(
+        `Directive/Controller '${name}', required by directive '${getFuncName(directive)}', can't be found!`);
+    }
+  } else if ( isArray( require ) ) {
+    value = [];
+    for ( var i = 0, ii = (require as string[]).length; i < ii; i++ ) {
+      value[ i ] = getRequiredControllers( require[ i ], $element, directive );
+    }
+  } else if ( isJsObject( require ) ) {
+    value = {};
+    StringMapWrapper.forEach( require, function ( controller, property ) {
+      value[ property ] = getRequiredControllers( controller, $element, directive );
+    } );
+  }
+
+  return value || null;
 }

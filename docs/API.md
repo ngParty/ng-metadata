@@ -1216,10 +1216,16 @@ Note:
 
 A parameter decorator that declares the dependencies to be injected in to the class constructor, static or regular method.
 
-You can Inject also local DI ( other directives/components ), but for this you have to provide `@Host` decorator with one of possible modifiers:
-- `@Optional`
-- `@Self`
-- `@SkipSelf`
+You can Inject also local DI ( other directives/components ), 
+but for this you have to provide additional decorator with one of possible modifiers:
+- `@Host` for requiring via `^yourDirectiveName`
+- `@Self` for requiring via `yourDirectiveName`
+- `@SkipSelf`for requiring via `^^yourDirectiveName`
+
+For optional require `?yourDirectiveName`, you have to use one of mentioned above + `@Optional`
+
+If you will combine various local injection decorators we will throw an Error, just to let you know ;)
+ 
 
 Also when injecting other controllers there are 2 constrains that must be met:
 - all `@Inject` must be at tail of constructor arguments call
@@ -1267,11 +1273,11 @@ class HostCmp{
   constructor(
     // this just annotates class $inject to ['$log']
     @Inject('@log') private $log: ng.ILogService,
-    // this will add require: ['^ngModel'] to DDO and bind the instance from ngOnInit or ngAfter***Init
-    @Inject('ngModel') @Host() private ngModel: ng.INgModelController,
-    // this will add require: ['?^foo'] to DDO and bind the instance from ngOnInit or ngAfter***Init
-    // Notice that argument name has to match to directive name, which is extracted via @Inject from decorated FooDirective
-    // @Inject(FooDirective) === 'foo' because it has selector `[foo]`
+    // this will add require: ['^ngModel'] to DDO and bind the local instance within controller
+    @Inject('ngModel') @Host() private ngModelCtrl: ng.INgModelController,
+    // Argument name doesn't have to match to directive name, which is extracted via @Inject from decorated FooDirective
+    // use whatever property name you want, we create instance via $injector.invoke with proper locals behind the scenes
+    // - this will add require: ['?^foo'] to DDO and bind the local instance within controller to property foo
     @Inject(FooDirective) @Host() @Optional() private foo: FooDirective
   ){}
 }
@@ -1363,17 +1369,9 @@ The string names are extracted from `injectables` and are added to the `$inject`
 Specifies that an injector should retrieve a local dependency from DOM until reaching the closest host.
 In Angular 1 terms, with this we are telling angular that we wanna **require** another directive via injection.
 
-It has to be used solely with `@Inject` to notify ngMetadata that it should not add this to `$inject` property on class,
-but rather to create `require` property on DDO.
+It has to be used solely with `@Inject` to notify ngMetadata that we want to inject via local and look for that kind of Directive within DOM
 
-This is the base for following Decorators related to Injection: `@Optional`/`@Self`/`@SkipSelf`
-
-> **NOTE:** 
-> directive injections has to be at tail in constructor, if you will mix the order with regular injections, we will throw proper error
-to let you know what's wrong
-> the directive name within `@Inject('directiveName')` needs to be same name as property to whic you are assigning it
-> this won't work: `constructor(@Inject('ngModel') @Host() @Self() private modelCtrl: ng.INgModelController){}`
-> this will work: `constructor(@Inject('ngModel') @Host() @Self() private ngModel: ng.INgModelController){}`  
+It can be used together with `@Optional` to not throw error when required directive is not found
 
 *example:*
 
@@ -1385,30 +1383,32 @@ import {Directive, Inject, Host} from 'ng-metadata/core';
 @Directive({selector:'[validator]'})
 class ValidatorDirective{
   constructor(@Inject('ngModel') @Host() private ngModel: ng.INgModelController){
-    // here ngModel is undefined
+    // here ngModel is defined
   }
   ngOnInit(){
-    // this is called from preLink, so controllers have been already instantiated
+    // this is called from custom controller
     this.ngModel.$validators.foo = (viewValue)=>{  /*...*/ }
   }
 }
 
-// behind the scenes this creates just
-
+// behind the scenes this creates also a require constraint
 const ddo = { require: ['validator','^ngModel'] };
 // we always require itself on first place, and after are injected directives
 ```
 
 ###### Behind the Scenes
 
+- we are creating instance within custom controller wrapper via $injector.invoke so we're traversing DOM manually via angular
+require mechanism with `^` locator
 - tells provider that this should be local dependency via `require` on ddo
-- it creates require whit `^` sign prefix to search for directives on host, and parent
+- it creates require with `^` sign prefix to search for directives on host, and parent
 
 
 ## @Optional
 
 A parameter metadata that marks a dependency as optional. Injector provides null if the dependency is not found.
-- parameter needs to have `@Inject` and `@Host` decorators
+- parameter needs to have `@Inject` and on of local constraint annotations (`@Host` | `@Self` | `@SkipSelf`)
+- if there is no local constraint annotation we will throw error to let you know that you're doing something wrong ;)
 
 *example:*
 
@@ -1418,11 +1418,10 @@ import {Directive, Inject, Host, Optional} from 'ng-metadata/core';
 @Directive({selector:'[validator]'})
 class ValidatorDirective{
   constructor(@Inject('ngModel') @Host() @Optional() private ngModel: ng.INgModelController){
-    // here ngModel is undefined
+    // here ngModel is defined and if not found it is null
   }
   ngOnInit(){
     if(this.ngModel){
-      // this is called from preLink, so controllers have been already instantiated
       this.ngModel.$validators.foo = (viewValue)=>{  /*...*/ }
     }      
   }
@@ -1442,16 +1441,18 @@ const ddo = { require: ['validator','^?ngModel'] };
 ## @Self
 
 Specifies that an Injector should retrieve a dependency only from itself.
-- parameter needs to have `@Inject` and `@Host` decorators
+- parameter needs to have `@Inject` decorator
+- it can be used together with `@Optional` to not throw error when required directive is not found
+
 
 *example:*
 
 ```typescript
-import {Directive, Inject, Host, Self} from 'ng-metadata/core';
+import {Directive, Inject, Self} from 'ng-metadata/core';
 
 @Directive({selector:'[validator]'})
 class ValidatorDirective{
-  constructor(@Inject('ngModel') @Host() @Self() private ngModel: ng.INgModelController){
+  constructor(@Inject('ngModel') @Self() private ngModel: ng.INgModelController){
     // here ngModel is undefined
   }
   ngOnInit(){    
@@ -1474,20 +1475,20 @@ just restricts `require`d directive on host ( default `^` is removed )
 ## @SkipSelf
 
 Specifies that the dependency resolution should start from the parent element.
-- parameter needs to have `@Inject` and `@Host` decorators
+- parameter needs to have `@Inject` decorator
+- it can be used together with `@Optional` to not throw error when required directive is not found
 
 *example:*
 
 ```typescript
-import {Directive, Inject, Host, SkipSelf} from 'ng-metadata/core';
+import {Directive, Inject, SkipSelf} from 'ng-metadata/core';
 
 @Directive({selector:'[validator]'})
 class ValidatorDirective{
-  constructor(@Inject('ngModel') @Host() @SkipSelf() private ngModel: ng.INgModelController){
-    // here ngModel is undefined
+  constructor(@Inject('ngModel') @SkipSelf() private ngModel: ng.INgModelController){
+    // here ngModel is defined
   }
   ngOnInit(){    
-      // this is called from preLink, so controllers have been already instantiated
       this.ngModel.$validators.foo = (viewValue)=>{  /*...*/ }
   }
 }

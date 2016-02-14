@@ -11,13 +11,15 @@ import {
 import {
   _getSelector,
   _getSelectorAndCtrlName,
-  getController,
+  getControllerOnElement,
   _getChildElements,
   _resolveChildrenFactory,
-  _getParentCheckNotifiers
+  _getParentCheckNotifiers,
+  getRequiredControllers,
+  directiveControllerFactory
 } from '../../../../src/core/directives/util/util';
-import { ElementFactory } from '../../../../src/testing/utils';
-import { global, noop } from '../../../../src/facade/lang';
+import { ElementFactory, getNg1InjectorMock, $Attrs, $Scope } from '../../../../src/testing/utils';
+import { global, noop, isFunction } from '../../../../src/facade/lang';
 import { DirectiveCtrl } from '../../../../src/core/directives/directive_provider';
 import { Inject } from '../../../../src/core/di/decorators';
 import { forwardRef } from '../../../../src/core/di/forward_ref';
@@ -213,7 +215,196 @@ describe( `directives/util`, ()=> {
 
   } );
 
-  describe( `#_getController`, ()=> {
+  describe( `#getRequiredControllers`, ()=> {
+
+    class NgModel{}
+    class Form{}
+    class MyDir{}
+    class MyOpt{}
+
+    let requiredMap: {ngModel: string; form: string; myDir: string; myOpt: string};
+    let $element;
+    let jqParentStub;
+    let jqDataStub;
+    let jqInheritedDataStub;
+
+    beforeEach( ()=> {
+
+      requiredMap = {
+        ngModel: 'ngModel',
+        form: '^^form',
+        myDir: '^myDir',
+        myOpt: '?^myOpt'
+      };
+      $element = ElementFactory();
+
+      jqParentStub = sinon.stub($element,'parent');
+      jqDataStub = sinon.stub($element,'data');
+      jqInheritedDataStub = sinon.stub($element,'inheritedData');
+
+    } );
+
+    afterEach( ()=> {
+
+      jqParentStub.restore();
+      jqDataStub.restore();
+      jqInheritedDataStub.restore();
+
+    } );
+
+    it( `should get required controllers instance as a Map`, ()=> {
+
+      jqParentStub.returns($element);
+      jqDataStub.withArgs('$ngModelController').returns(new NgModel());
+      jqInheritedDataStub.withArgs('$formController').returns(new Form());
+      jqInheritedDataStub.withArgs('$myDirController').returns(new MyDir());
+      jqInheritedDataStub.withArgs('$myOptController').returns(null);
+
+      class MyComponent{}
+      const actual = getRequiredControllers( requiredMap, $element as any, MyComponent );
+      const expected = {
+        ngModel: new NgModel(),
+        form: new Form(),
+        myDir: new MyDir(),
+        myOpt: null
+      };
+
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
+  } );
+
+  describe( `#directiveControllerFactory`, ()=> {
+
+    let $element;
+    let $scope;
+    let $attrs;
+    let $transclude = function $transclude(){};
+    let locals;
+    let $injector: angular.auto.IInjectorService;
+    let jqParentStub;
+    let jqDataStub;
+    let jqInheritedDataStub;
+
+    class NgModel{}
+    class Form{}
+
+    beforeEach( ()=> {
+
+      $element = ElementFactory();
+      $scope = new $Scope();
+      $attrs = new $Attrs();
+      locals = {$scope,$element,$attrs,$transclude};
+      $injector = getNg1InjectorMock();
+      jqParentStub = sinon.stub($element,'parent');
+      jqDataStub = sinon.stub($element,'data');
+      jqInheritedDataStub = sinon.stub($element,'inheritedData');
+
+    } );
+
+    afterEach( ()=> {
+
+      jqParentStub.restore();
+      jqDataStub.restore();
+      jqInheritedDataStub.restore();
+
+    } );
+
+    it( `should instantiate component controller`, ()=> {
+
+      function onChange(){}
+
+      const caller = {
+        someInput: 123,
+        someOutput: onChange
+      };
+      class Controller{
+        static $inject = [];
+        constructor(){}
+        ngOnInit(){}
+      }
+      const requireMap = {} as StringMap;
+
+      const actual = directiveControllerFactory(
+        caller as any,
+        Controller,
+        $injector,
+        locals,
+        requireMap
+      );
+
+      // console.log( actual );
+      expect( Object.getPrototypeOf( actual ).constructor ).to.equal( Controller );
+      expect( isFunction( actual.ngOnInit ) ).to.equal( true );
+      expect( actual.someInput ).to.equal( 123 );
+      expect( actual.someOutput ).to.equal( onChange );
+
+
+    } );
+    it( `should instantiate controller and assign required directives and other locals properly`, ()=> {
+
+      jqParentStub.returns($element);
+      jqDataStub.withArgs('$ngModelController').returns(new NgModel());
+      jqInheritedDataStub.withArgs('$formController').returns(new Form());
+      const mySvc = { hello(){} };
+
+      class Controller{
+        static $inject = ['ngModel','form','mySvc'];
+        constructor(private ngModel,private form, private mySvc){}
+        ngOnInit(){}
+      }
+      const caller = {};
+      const requireMap = {
+        ngModel:'?ngModel',
+        form:'^^form'
+      } as StringMap;
+
+      locals.mySvc = mySvc;
+
+
+      const actual = directiveControllerFactory(
+        caller as any,
+        Controller,
+        $injector,
+        locals,
+        requireMap
+      );
+
+      expect( actual.ngModel ).to.deep.equal( new NgModel() );
+      expect( actual.form ).to.deep.equal( new Form() );
+      expect( actual.mySvc ).to.equal( mySvc );
+
+    } );
+    it( `should call ngOnInit after controller instantiation if defined`, ()=> {
+
+      const caller = {};
+      class Controller{
+        static $inject = [];
+        constructor(){}
+        ngOnInit(){}
+      }
+      const requireMap = {} as StringMap;
+
+      const spy = sinon.spy( Controller.prototype, 'ngOnInit' );
+
+      expect( spy.called ).to.equal( false );
+
+      const actual = directiveControllerFactory(
+        caller as any,
+        Controller,
+        $injector,
+        locals,
+        requireMap
+      );
+
+      expect( spy.called ).to.equal( true );
+
+    } );
+
+  } );
+
+  describe( `#getControllerOnElement`, ()=> {
 
     let $element;
     beforeEach( ()=> {
@@ -228,16 +419,16 @@ describe( `directives/util`, ()=> {
       //sinon.stub( $element, 'data' ).withArgs( '$mockedCtrlController' ).returns( mockedCtrlInstance );
       sinon.stub( $element, 'controller' ).withArgs( 'mockedCtrl' ).returns( mockedCtrlInstance );
 
-      expect( getController( $element, 'mockedCtrl' ) ).to.equal( mockedCtrlInstance );
+      expect( getControllerOnElement( $element, 'mockedCtrl' ) ).to.equal( mockedCtrlInstance );
 
     } );
 
-    it( `should return null if demanded ctrl doesnt exist on provided element`, ()=> {
+    it( `should return null if demanded ctrl doesn't exist on provided element`, ()=> {
 
       //sinon.stub( $element, 'data' ).withArgs( '$mockedCtrlController' ).returns( mockedCtrlInstance );
       sinon.stub( $element, 'controller' ).withArgs( 'noneCtrl' ).returns( null );
 
-      expect( getController( $element, 'noneCtrl' ) ).to.equal( null )
+      expect( getControllerOnElement( $element, 'noneCtrl' ) ).to.equal( null )
 
     } );
 

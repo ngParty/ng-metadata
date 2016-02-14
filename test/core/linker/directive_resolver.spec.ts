@@ -237,7 +237,7 @@ describe( `linker/directive_resolver`, ()=> {
           @Inject( '$attrs' ) private $attrs,
           @Inject('clicker') @Host() private clicker,
           @Inject('api') @Host() @Optional() private api,
-          @Inject('ngModel') @Host() @Self() private ngModel
+          @Inject('ngModel') @Self() private ngModel
         ) {}
 
       }
@@ -254,8 +254,7 @@ describe( `linker/directive_resolver`, ()=> {
 
     } );
 
-    it( `should support reference as Injectable for directives and return require expression map`, ()=> {
-
+    it( `should support Injectable as reference for directives and return require expression map`, ()=> {
 
       @Directive({selector:'[clicker]'})
       class MyClickerDirective{}
@@ -274,7 +273,7 @@ describe( `linker/directive_resolver`, ()=> {
           @Inject( '$attrs' ) private $attrs,
           @Inject(MyClickerDirective) @Host() private clicker,
           @Inject(ApiDirective) @Host() @Optional() private api,
-          @Inject(NgModelDirective) @Host() @Self() private ngModel
+          @Inject(NgModelDirective) @Self() private ngModel
         ) {}
 
       }
@@ -330,15 +329,62 @@ describe( `linker/directive_resolver`, ()=> {
       @Directive({selector:'[foo]'})
       class Foo{
         constructor(
-          @Inject('ngModel') @Host() @SkipSelf() @Self() private ngModel
+          @Inject('ngModel') @SkipSelf() @Self() private ngModel
         ){}
       }
 
       const resolver = new DirectiveResolver();
 
       expect(()=>resolver.getRequiredDirectivesMap(Foo)).to.throw(
-        `you cannot provide both @Self() and @SkipSelf() for @Inject(ngModel)`
+        `you cannot provide both @Self() and @SkipSelf() with @Inject(ngModel) for Directive Injection`
       );
+
+    } );
+
+    it( `should throw if both @Host()+@SkipSelf() are used for DI`, ()=> {
+
+      @Directive({selector:'[foo]'})
+      class Foo{
+        constructor(
+          @Inject('ngModel') @Host() @SkipSelf() private ngModel
+        ){}
+      }
+
+      const resolver = new DirectiveResolver();
+
+      expect( ()=>resolver.getRequiredDirectivesMap( Foo ) ).to.throw();
+
+    } );
+
+    it( `should throw if both @Host()+@Self() are used for DI`, ()=> {
+
+      @Directive({selector:'[foo]'})
+      class Foo{
+        constructor(
+          @Inject('ngModel') @Host() @Self() private ngModel
+        ){}
+      }
+
+      const resolver = new DirectiveResolver();
+
+      expect( ()=>resolver.getRequiredDirectivesMap( Foo ) ).to.throw();
+
+    } );
+
+    it( `should throw if @Optional() is used without one of @Self|@SkipSelf|@Host`, ()=> {
+
+      @Directive({selector:'[foo]'})
+      class Foo{
+        constructor(
+          @Inject('ngModel') @Optional() private ngModel
+        ){}
+      }
+
+      const resolver = new DirectiveResolver();
+
+      expect( ()=>resolver.getRequiredDirectivesMap( Foo ) ).to.throw();
+
+
 
     } );
 

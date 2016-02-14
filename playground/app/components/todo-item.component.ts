@@ -19,8 +19,9 @@ export class TodoItemCmp{
   constructor(){
 
     this.todo = angular.copy( this._todo );
-
   }
+
+  ngOnInit(){}
 
   done(todo: TodoModel) {
 

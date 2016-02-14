@@ -23,7 +23,7 @@
 
 <hr>
 
-<button  
+<button
   class="mdl-button mdl-js-button mdl-button--accent"
   ng-click="$ctrl.showQueryExample=!$ctrl.showQueryExample">{{ $ctrl.showQueryExample ? 'hide' : 'show'}} <code>@Query</code> decorators example
 </button>
@@ -37,4 +37,20 @@
     <button ng-click="$ctrl.removeItem(item)">remove</button>
   </li></ul>
 </tabs>
+</div>
+
+<button
+  class="mdl-button mdl-js-button mdl-button--accent"
+  ng-click="$ctrl.showDirectiveDiExample=!$ctrl.showDirectiveDiExample">{{ $ctrl.showDirectiveDiExample ? 'hide' : 'show'}} <code>@Inject</code> directive
+</button>
+<div ng-if="$ctrl.showDirectiveDiExample">
+
+  <form name="diForm">
+
+    <input type="text" ng-model="$ctrl.modelMock" name="modelMock" my-validator>
+
+    <p ng-if="diForm.modelMock.$error.myValidator" style="color:red">whops error! diForm.modelMock.$errors</p>
+
+  </form>
+
 </div>

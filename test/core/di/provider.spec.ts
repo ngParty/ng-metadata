@@ -1,19 +1,19 @@
-import {expect} from 'chai';
-import {provide} from '../../../src/core/di/provider';
-import {Inject,Injectable} from '../../../src/core/di/decorators';
-import {InjectMetadata,OptionalMetadata,HostMetadata} from '../../../src/core/di/metadata';
-import {Component,Directive} from '../../../src/core/directives/decorators';
-import {Pipe} from '../../../src/core/pipes/decorators'
-import {noop} from '../../../src/facade/lang';
-import {_areAllDirectiveInjectionsAtTail} from '../../../src/core/di/provider';
-import {getInjectableName} from '../../../src/core/di/provider';
-import {OpaqueToken} from '../../../src/core/di/opaque_token';
-import {_extractToken} from '../../../src/core/di/provider';
-import {_dependenciesFor} from '../../../src/core/di/provider';
-import {Host} from '../../../src/core/di/decorators';
-import {isFunction} from '../../../src/facade/lang';
-import {ParamMetaInst} from '../../../src/core/di/provider';
-import {globalKeyRegistry} from '../../../src/core/di/key';
+import { expect } from 'chai';
+import {
+  provide,
+  _areAllDirectiveInjectionsAtTail,
+  getInjectableName,
+  _extractToken,
+  _dependenciesFor,
+  ParamMetaInst
+} from '../../../src/core/di/provider';
+import { Inject, Injectable, Host } from '../../../src/core/di/decorators';
+import { InjectMetadata, OptionalMetadata, HostMetadata } from '../../../src/core/di/metadata';
+import { Component, Directive } from '../../../src/core/directives/decorators';
+import { Pipe } from '../../../src/core/pipes/decorators';
+import { noop, isFunction, getFuncName } from '../../../src/facade/lang';
+import { OpaqueToken } from '../../../src/core/di/opaque_token';
+import { globalKeyRegistry } from '../../../src/core/di/key';
 
 describe( `di/provider`, ()=> {
 
@@ -121,7 +121,7 @@ describe( `di/provider`, ()=> {
         expect( isFunction( filterFactory ) ).to.deep.equal( true );
 
         expect( FooDirective.$inject ).to.deep.equal( [ 'myService#1' ] );
-        //expect( filterFactory().controller ).to.equal( FooDirective );
+        expect( getFuncName(filterFactory().controller) ).to.equal( '__controller' );
 
       } );
 
@@ -146,11 +146,11 @@ describe( `di/provider`, ()=> {
         const actual = provide( FooComponent );
         const [ngContainerName, filterFactory] = actual;
 
-        expect( ngContainerName ).to.deep.equal( 'myFoo' );
-        expect( isFunction( filterFactory ) ).to.deep.equal( true );
-
         expect( FooComponent.$inject ).to.deep.equal( [ 'myService#1', '$element' ] );
-        expect( filterFactory().controller ).to.equal( FooComponent );
+
+        expect( ngContainerName ).to.equal( 'myFoo' );
+        expect( isFunction( filterFactory ) ).to.equal( true );
+        expect( getFuncName( filterFactory().controller ) ).to.equal( '__controller' );
 
       } );
 
@@ -408,7 +408,7 @@ describe( `di/provider`, ()=> {
         expect( ()=>_dependenciesFor( Foo ) ).to.throw();
 
       } );
-      it( `should throw if directive injections are not all at tail`, ()=> {
+      it( `should allow directive injections in arbitrary argument position`, ()=> {
 
         class Foo {
           constructor(
@@ -419,11 +419,11 @@ describe( `di/provider`, ()=> {
           ) {}
         }
 
-        expect( ()=>_dependenciesFor( Foo ) ).to.throw();
+        expect( ()=>_dependenciesFor( Foo ) ).to.not.throw();
 
       } );
 
-      it( `should return array of string annotations from non Directive injections only, for Angular 1 $inject`, ()=> {
+      it( `should return array of string annotations with Directive injections included as locals, for Angular 1 $inject`, ()=> {
 
         const OhMy = new OpaqueToken( 'oh_My' );
 
@@ -447,7 +447,7 @@ describe( `di/provider`, ()=> {
         }
 
         const actual = _dependenciesFor( Foo );
-        const expected = [ '$log', 'svcYo#1', 'oh_My' ];
+        const expected = [ '$log', 'svcYo#1', 'oh_My', 'ngModel', 'myMyDrr' ];
 
         expect( actual ).to.deep.equal( expected );
 

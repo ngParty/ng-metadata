@@ -123,6 +123,20 @@ export function linkFnMocks( scope, element, attrs ) {
 
 }
 
+
+function __injectionArgs(fn, locals, serviceName){
+  var args = [],
+    $inject = fn.$inject;
+
+  for ( var i = 0, length = $inject.length; i < length; i++ ) {
+    var key = $inject[ i ];
+    if ( typeof key !== 'string' ) {
+      throw new Error( `itkn, Incorrect injection token! Expected service name as string, got ${key}', ` );
+    }
+    args.push( locals[ key ] );
+  }
+  return args;
+}
 /**
  * @internal
  * @returns {any}
@@ -131,6 +145,33 @@ export function getNg1InjectorMock(): ng.auto.IInjectorService {
   return {
     instantiate( classFactory ){
       return new classFactory();
+    },
+    invoke(fn: Function, context?: any, locals?: any){
+
+      let serviceName;
+      if (typeof locals === 'string') {
+        serviceName = locals;
+        locals = null;
+      }
+
+      var args = __injectionArgs(fn, locals, serviceName);
+      if (isArray(fn)) {
+        fn = fn[fn.length - 1];
+      }
+
+      // if (!isClass(fn)) {
+        // http://jsperf.com/angularjs-invoke-apply-vs-switch
+        // #5388
+
+        return fn.apply(context, args);
+      // } else {
+      //   args.unshift(null);
+      //   return new (Function.prototype.bind.apply(fn, args))();
+      // }
+
+      // const argArray = StringMapWrapper.values( locals );
+      // func.apply(context,argArray);
+
     }
   } as ng.auto.IInjectorService;
 }
