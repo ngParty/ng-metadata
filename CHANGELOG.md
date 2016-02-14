@@ -1,3 +1,48 @@
+<a name="1.0.0"></a>
+# [1.0.0](https://github.com/ngParty/ng-metadata/compare/1.0.0-rc.2...v1.0.0) (2016-02-14)
+
+
+### Features
+
+* **core/directives/provider:** instantiate custom controller via angular 1 machinery and allow local DI via loc ([268266d](https://github.com/ngParty/ng-metadata/commit/268266d)), closes [#43](https://github.com/ngParty/ng-metadata/issues/43)
+
+
+### BREAKING CHANGES
+
+* core/directives/provider: Simplified directive injection by removing the need to use 3 decorators
+
+Previously if you wanted to achieve `require:['myCmp','ngModel']` you had to use 3 decorators:
+
+```typescript
+@Component({selector:'my-cmp',template:`Hey there`})
+class MyCmp{
+  constructor(@Inject('ngModel') @Host() @Self() private ngModel){}
+}
+```
+
+from now on you have to use 3 decorators only if you wanna make it optional,
+otherwise it will throw error:
+
+```typescript
+// OK
+@Component({selector:'my-cmp',template:`Hey there`})
+class MyCmp{
+  constructor(@Inject('ngModel') @Self() private ngModel){}
+}
+```
+
+for optional `require:['myCmp','?ngModel']`:
+
+```typescript
+// OK
+@Component({selector:'my-cmp',template:`Hey there`})
+class MyCmp{
+  constructor(@Inject('ngModel') @Self() @Optional() private ngModel){}
+}
+```
+
+
+
 <a name="1.0.0-rc.2"></a>
 # [1.0.0-rc.2](https://github.com/ngParty/ng-metadata/compare/1.0.0-rc.1...v1.0.0-rc.2) (2016-02-07)
 
