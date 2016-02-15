@@ -13,11 +13,90 @@
 who want to gradually update **existing** ng1 codebase to **Typescript** using Angular 2 conventions and styles that 
 runs today on Angular 1.4+.
 
+**plain old Angular 1.x with ES5:**
+
+```js
+// bootstrap.js
+angular.element(document).ready(function(){
+  angular.bootstrap(document,['hero']);
+});
+
+// hero.js
+angular.module('hero',[]);
+
+// hero.component.js
+angular.module('hero')
+  .directive('hero',heroCmp);
+
+function heroCmp(){
+  return {
+    scope: {},
+    bindToController: {
+      name: '=',
+      onCall: '&'
+    },
+    controller: HeroController,
+    controllerAs: '$ctrl',
+    link: function(scope,element,attrs,ctrls){
+      ctrls.init();
+    },
+    transclude: true,
+    templateUrl: 'hero.html'
+  };
+}
+
+HeroController.$inject = ['log'];
+function HeroController($log){}
+```
+
+**Angular 1.x with ngMetadata and Typescript:**
+
+```typescript
+// bootstrap.ts
+import {bootstrap} from 'ng-metadata/platform';
+import {HeroModule} from './hero';
+
+bootstrap(HeroModule);
+
+// hero.ts
+import * as angular from 'angular';
+import {provide} from 'ng-metadata/core';
+import {HeroComponent} from './hero.component';
+
+export const HeroModule = angular.module('hero',[])
+  .directive(...provide(HeroComponent));
+  
+// hero.component.ts
+import {Component,Inject,Input,Output} from 'ng-metadata/core';
+
+@Component({
+  selector: 'hero-cmp',
+  templateUrl: 'hero.html',
+  legacy:{ transclude: true }
+})
+export class HeroComponent{
+
+  @Input() name: string;
+  @Output() onCall: Function;
+
+  constructor(@Inject('$log') private $log: ng.ILogService){}
+  
+  ngOnInit(){ /* your init logic */ }
+  
+}
+```
+
+with `ngMetadata`, no magic strings, no link function and what not and no more strange angular 1 api syntax.
+ 
+> Write your apps in Angular 2 style today and be more productive! 
+> There are no abstractions, just pure Angular 1.x and power of Decorators.
+> Treat yourself well and use that power! :)
+
 **TL;DR**
 
 It leads you, to to write **clean and component driven** style code without complicated DDO definition API.
 
-Behind the scenes it uses ES7 decorators extended by Typescript( which adds to method parameter decorators etc...)
+Behind the scenes it uses ES7 decorators extended by Typescript( which adds method parameter decorators etc...)
 > parameter deorators are now at stage-0 in TC39, so probably it will be soon available in **Babel** so you can use 
 all this goodness with ES6 if you prefer pure JS
 
@@ -47,11 +126,12 @@ That's it! Now just start importing from `ng-metadata/core`,`ng-metadata/platfor
 
 There is already an existing project, which gives us Angular 2 like syntax for Angular 1, [ng-forward](https://github.com/ngUpgraders/ng-forward)
 
-With all do respect, `ng-forward` is going the wrong path because:
-- it tries to mirror angular 2 with lots of under hood abstractions which is just not feasible 
-because major differences 
-- tries to do a lot unnecessary work ( support ES5/ES6  like angular 2 does )
-- doesn't provides angular 2 like DI within constructor because `babel` just won't support parameter decorators
+While I respect all the hard work of the `ng-forward` team, there were things that I didn't like about their solution. 
+Lemme list just few:
+- it tries to mirror angular 2 with lots of under the hood abstractions which is just not feasible 
+because there are major differences, how things work in ng1 an ng2 
+- it tries to do a lot unnecessary work ( support ES5/ES6  like angular 2 does )
+- doesn't provides angular 2 like DI via constructor parameters because `babel` just won't support parameter decorators
 - forces you to rewrite templates, so you can't be just 100% sure that your code will work as before
 - presents totally different unit testing story like you have been used to for ng1 
 
