@@ -42,7 +42,7 @@
     "systemjs-builder": "0.14.11",
     "typescript": "1.7.3",
     "typings": "0.3.0",
-    "validate-commit-msg": "1.0.0"
+    "validate-commit-msg": "2.0.0"
   },
   "dependencies": {},
   "czConfig": {
@@ -50,7 +50,12 @@
   },
   "config": {
     "ghooks": {
-      "pre-commit": "tsc && npm test"
+      "pre-commit": "tsc && npm test",
+      "commit-msg": "validate-commit-msg"
+    },
+    "validate-commit-msg": {
+      "warnOnFail": true,
+      "maxSubjectLength": 120
     }
   }
 }
