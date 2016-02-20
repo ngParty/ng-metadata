@@ -1571,14 +1571,17 @@ name if JS engine doesn't implements ES6 name property
 
 > **module:** `ng-metadata/core`
 
-Implement this interface to execute custom initialization logic after your directive's
-data-bound properties have been initialized ann after all the controllers on an element have been constructed and had their bindings initialized.
+Implement this interface to execute custom initialization logic after your directive's data-bound properties have been initialized.
 
-`ngOnInit` is called right after the directive's data-bound properties have been checked for the
-first time, and before any of its children have been checked. 
-It is invoked only once when the directive is instantiated. 
+`ngOnInit` method:
 
-In angular 1 terms, this method is invoked from `preLink` 
+- will be called on each controller(directive or component class) after all the controllers on 
+an element have been constructed and had their bindings initialized 
+(and before the pre & post linking functions for the directives on this element). 
+This is a good place to put initialization code for your controller(component/directive)
+- is only invoked once when the directive is instantiated 
+
+> In angular 1 terms, it does the same as $onInit , which was added to angular 1.5:
 
 _Example:_
 
