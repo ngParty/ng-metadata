@@ -24,7 +24,8 @@ import {
   _setHostBindings,
   _getHostListenerCbParams,
   _setHostListeners,
-  _createDirectiveBindings
+  _createDirectiveBindings,
+  NgmDirective
 } from '../../../src/core/directives/directive_provider';
 
 describe( `directives/directive_provider`, ()=> {
@@ -73,7 +74,7 @@ describe( `directives/directive_provider`, ()=> {
     }
 
     const [directiveName,directiveFactory] = directiveProvider.createFromType( MyClicker );
-    const ddo: ng.IDirective = directiveFactory();
+    const ddo: NgmDirective = directiveFactory();
 
     expect( directiveName ).to.equal( 'myClicker' );
     expect( isFunction( directiveFactory ) ).to.equal( true );
@@ -82,6 +83,7 @@ describe( `directives/directive_provider`, ()=> {
       require: [ 'myClicker' ],
       controller: ddo.controller,
       link: (ddo.link as ng.IDirectivePrePost),
+      _ngOnInitBound: ddo._ngOnInitBound
     } );
 
     const howShouldLinkFnLookLike = function postLink( scope, element, attrs: ng.IAttributes, controller ) {
@@ -194,7 +196,7 @@ describe( `directives/directive_provider`, ()=> {
     }
 
     const [directiveName,directiveFactory] = directiveProvider.createFromType( JediMasterCmp );
-    const ddo: ng.IDirective = directiveFactory();
+    const ddo: NgmDirective = directiveFactory();
     expect( directiveName ).to.equal( 'jediMaster' );
 
     expect( isFunction( directiveFactory ) ).to.equal( true );
@@ -211,7 +213,8 @@ describe( `directives/directive_provider`, ()=> {
       controllerAs: '$ctrl',
       link: (ddo.link as ng.IDirectivePrePost),
       template: `<div>Click me to attack!</div>`,
-      transclude: false
+      transclude: false,
+      _ngOnInitBound: ddo._ngOnInitBound
     } );
 
     const howShoulsLinkLookLike = {
@@ -282,14 +285,15 @@ describe( `directives/directive_provider`, ()=> {
       }
 
       const [directiveName,directiveFactory] = directiveProvider.createFromType( MyValidator );
-      const ddo: ng.IDirective = directiveFactory();
+      const ddo: NgmDirective = directiveFactory();
 
       expect( directiveName ).to.equal( 'validator' );
       expect( isFunction( directiveFactory ) ).to.equal( true );
       expect( directiveFactory() ).to.deep.equal( {
         require: [ 'validator','^ngModel' ],
         controller: ddo.controller,
-        link: ddo.link as ng.IDirectiveLinkFn
+        link: ddo.link as ng.IDirectiveLinkFn,
+        _ngOnInitBound: ddo._ngOnInitBound
       } );
 
     } );
@@ -309,14 +313,15 @@ describe( `directives/directive_provider`, ()=> {
       }
 
       const [directiveName,directiveFactory] = directiveProvider.createFromType( MyValidator );
-      const ddo: ng.IDirective = directiveFactory();
+      const ddo: NgmDirective = directiveFactory();
 
       expect( directiveName ).to.equal( 'validator' );
       expect( isFunction( directiveFactory ) ).to.equal( true );
       expect( directiveFactory() ).to.deep.equal( {
         require: [ 'validator','^ngModel','^myCssMutator' ],
         controller: ddo.controller,
-        link: ddo.link as ng.IDirectiveLinkFn
+        link: ddo.link as ng.IDirectiveLinkFn,
+        _ngOnInitBound: ddo._ngOnInitBound
       } );
 
     } );
@@ -339,7 +344,7 @@ describe( `directives/directive_provider`, ()=> {
         }
 
         const [,directiveFactory] = directiveProvider.createFromType( WithCompileDirective );
-        const ddo: ng.IDirective = directiveFactory();
+        const ddo: NgmDirective = directiveFactory();
 
         expect( isFunction(ddo.compile) ).to.equal(true);
 
@@ -347,7 +352,8 @@ describe( `directives/directive_provider`, ()=> {
           require: [ 'withCompile' ],
           controller: ddo.controller,
           compile: ddo.compile,
-          link: ddo.link as ng.IDirectiveLinkFn
+          link: ddo.link as ng.IDirectiveLinkFn,
+          _ngOnInitBound: ddo._ngOnInitBound
         } );
 
         expect( spyFromCompile.called ).to.equal( false );
@@ -375,7 +381,7 @@ describe( `directives/directive_provider`, ()=> {
 
         const [,directiveFactory] = directiveProvider.createFromType( WithCompileDirective );
         const ddo: ng.IDirective = directiveFactory();
-        const ddoLinkSpy = sinon.spy( ddo, 'link' );
+        const ddoLinkSpy = sinon.spy( ddo.link, 'post' );
 
         expect( spyFromCompile.called ).to.equal( false );
         expect( ddoLinkSpy.called ).to.equal( false );
@@ -408,7 +414,7 @@ describe( `directives/directive_provider`, ()=> {
         }
 
         const [,directiveFactory] = directiveProvider.createFromType( WithLink );
-        const ddo: ng.IDirective = directiveFactory();
+        const ddo: NgmDirective = directiveFactory();
 
         expect( isFunction( ddo.link ) ).to.equal( true );
         expect( ddo.link ).to.equal( WithLink.link );
@@ -416,7 +422,8 @@ describe( `directives/directive_provider`, ()=> {
         expect( ddo ).to.deep.equal( {
           require: [ 'withCompile' ],
           controller: ddo.controller,
-          link: WithLink.link as ng.IDirectiveLinkFn
+          link: WithLink.link as ng.IDirectiveLinkFn,
+          _ngOnInitBound: ddo._ngOnInitBound
         } );
 
         expect( spyFromLink.called ).to.equal( false );
@@ -464,7 +471,7 @@ describe( `directives/directive_provider`, ()=> {
 
       const directiveProviderArr = directiveProvider.createFromType( MyDirective );
       const ddo = directiveProviderArr[ 1 ]();
-      const link = ddo.link as ng.IDirectiveLinkFn;
+      const link = (ddo.link as ng.IDirectivePrePost).post as ng.IDirectiveLinkFn;
 
       expect( isFunction( link ) ).to.equal( true );
       expect( spy.called ).to.equal( false );
@@ -492,7 +499,7 @@ describe( `directives/directive_provider`, ()=> {
 
       const directiveProviderArr = directiveProvider.createFromType( MyDirective );
       const ddo = directiveProviderArr[ 1 ]();
-      const link = ddo.link as ng.IDirectiveLinkFn;
+      const link = (ddo.link as ng.IDirectivePrePost).post as ng.IDirectiveLinkFn;
 
       expect( isFunction( link ) ).to.equal( true );
       expect( spy.called ).to.equal( false );
@@ -516,7 +523,7 @@ describe( `directives/directive_provider`, ()=> {
 
       const directiveProviderArr = directiveProvider.createFromType( MyComponent );
       const ddo = directiveProviderArr[ 1 ]();
-      const link = ddo.link as ng.IDirectiveLinkFn;
+      const link = (ddo.link as ng.IDirectivePrePost).post as ng.IDirectiveLinkFn;
 
       expect( isFunction( link ) ).to.equal( true );
       expect( spy.called ).to.equal( false );
@@ -528,45 +535,57 @@ describe( `directives/directive_provider`, ()=> {
 
     } );
 
-    it( `should call all hooks if they are implemented from postLink expect ngOnInit which is called form Ctrl`, ()=> {
+    it( `should call all hooks if they are implemented from postLink expect ngOnInit which is called form preLink`, ()=> {
 
       @Directive({selector:'[myDir]'})
       class MyDirective{
+        constructor(){}
         ngOnInit(){}
         ngAfterContentInit(){}
         ngOnDestroy(){}
       }
 
       const ctrl = [ new MyDirective() ];
+      // mock _ngOnInitBound
+      const _ngOnInitBound = function () {ctrl[ 0 ].ngOnInit()};
       const spyInit = sinon.spy( ctrl[0],'ngOnInit' );
       const spyAfterContentInit = sinon.spy( ctrl[0],'ngAfterContentInit' );
       const spyDestroy = sinon.spy( ctrl[0],'ngOnDestroy' );
 
       const directiveProviderArr = directiveProvider.createFromType( MyDirective );
       const ddo = directiveProviderArr[ 1 ]();
-      const link: ng.IDirectiveLinkFn = ddo.link as ng.IDirectiveLinkFn;
+      sinon.stub( ddo.link, 'pre', ()=>_ngOnInitBound() );
 
-      expect( isFunction( link ) ).to.equal( true );
+      const { pre:preLink, post:postLink } = ddo.link as ng.IDirectivePrePost;
+
+      expect( isFunction( preLink ) ).to.equal( true );
+      expect( isFunction( postLink ) ).to.equal( true );
 
       expect( spyInit.called ).to.equal( false );
       expect( spyAfterContentInit.called ).to.equal( false );
       expect( spyDestroy.called ).to.equal( false );
 
-      link( $scope, $element, $attrs, ctrl, $transclude );
 
-      expect( spyInit.called ).to.equal( false );
+      preLink( $scope, $element, $attrs, ctrl, $transclude );
+
+      expect( spyInit.called ).to.equal( true );
+
+
+      postLink( $scope, $element, $attrs, ctrl, $transclude );
+
       expect( spyAfterContentInit.called ).to.equal( true );
       expect( spyDestroy.called ).to.equal( false );
 
+
       $scope.$emit( '$destroy' );
 
-      expect( spyInit.called ).to.equal( false );
       expect( spyAfterContentInit.called ).to.equal( true );
       expect( spyDestroy.called ).to.equal( true );
 
       spyInit.restore();
       spyAfterContentInit.restore();
       spyDestroy.restore();
+      (ddo.link as any).pre.restore();
 
     } );
 

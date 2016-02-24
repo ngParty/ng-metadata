@@ -5,7 +5,7 @@ import { DirectiveMetadata } from '../metadata_directives';
 import { ListWrapper, StringMapWrapper } from '../../../facade/collections';
 import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces';
 import { QueryMetadata } from '../metadata_di';
-import { DirectiveCtrl } from '../directive_provider';
+import { DirectiveCtrl, NgmDirective } from '../directive_provider';
 
 const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
 
@@ -227,7 +227,8 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   controller: U,
   $injector: ng.auto.IInjectorService,
   locals: any,
-  requireMap: StringMap
+  requireMap: StringMap,
+  _ddo: NgmDirective
 ): T&U {
 
   // Create an instance of the controller without calling its constructor
@@ -235,20 +236,30 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
 
   const { $element } : { $element: ng.IAugmentedJQuery } = locals;
 
-  const $requires = getRequiredControllers( requireMap, $element, controller );
+  const $requires = getEmptyRequiredControllers( requireMap );
 
   // Remember, angular has already set those bindings on the `caller`
   // argument. Now we need to extend them onto our `instance`. It is important
   // to extend after defining the properties. That way we fire the setters.
   StringMapWrapper.assign( instance, caller );
 
-  // console.log( locals );
   // Finally, invoke the constructor using the injection array and the captured locals
   $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
 
-  if ( isFunction( instance.ngOnInit ) ) {
-    instance.ngOnInit();
-  }
+  _ddo._ngOnInitBound = function _ngOnInitBound(){
+    
+    // invoke again only if there are any directive requires
+    // #perf
+    if ( StringMapWrapper.size( requireMap ) ) {
+      const $requires = getRequiredControllers( requireMap, $element, controller );
+      $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
+    }
+
+    if ( isFunction( instance.ngOnInit ) ) {
+      instance.ngOnInit()
+    }
+
+  };
 
   /*if ( isFunction( instance.ngOnDestroy ) ) {
     $scope.$on( '$destroy', instance.ngOnDestroy.bind( instance ) );
@@ -261,6 +272,24 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   // Return the controller instance
   return instance;
 
+}
+
+function injectionArgs(fn, locals, serviceName, injects) {
+  var args = [],
+    // $inject = createInjector.$$annotate(fn, strictDi, serviceName);
+    $inject = injects;
+
+  for (var i = 0, length = $inject.length; i < length; i++) {
+    var key = $inject[i];
+    if (typeof key !== 'string') {
+      throw new Error(`itkn, Incorrect injection token! Expected service name as string, got ${key}`);
+    }
+/*    args.push( locals && locals.hasOwnProperty( key )
+      ? locals[ key ]
+      : getService( key, serviceName ) );*/
+    args.push( locals[ key ] );
+  }
+  return args;
 }
 
 export function getControllerOnElement( $element: ng.IAugmentedJQuery, ctrlName: string ) {
@@ -323,4 +352,14 @@ export function getRequiredControllers(
   }
 
   return value || null;
+}
+
+
+export function getEmptyRequiredControllers( requireMap: {[key:string]:string} ): {[key:string]:void} {
+
+  return StringMapWrapper.keys( requireMap ).reduce( ( acc, keyName: string )=>{
+    acc[ keyName ] = undefined;
+    return acc;
+  }, {} );
+
 }

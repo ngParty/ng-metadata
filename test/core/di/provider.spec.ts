@@ -121,7 +121,7 @@ describe( `di/provider`, ()=> {
         expect( isFunction( filterFactory ) ).to.deep.equal( true );
 
         expect( FooDirective.$inject ).to.deep.equal( [ 'myService#1' ] );
-        expect( getFuncName(filterFactory().controller) ).to.equal( '__controller' );
+        expect( getFuncName(filterFactory().controller) ).to.equal( '_controller' );
 
       } );
 
@@ -150,7 +150,7 @@ describe( `di/provider`, ()=> {
 
         expect( ngContainerName ).to.equal( 'myFoo' );
         expect( isFunction( filterFactory ) ).to.equal( true );
-        expect( getFuncName( filterFactory().controller ) ).to.equal( '__controller' );
+        expect( getFuncName( filterFactory().controller ) ).to.equal( '_controller' );
 
       } );
 

@@ -1,6 +1,5 @@
 import { DirectiveResolver } from '../linker/directive_resolver';
 import {
-  Type,
   assign,
   isPresent,
   isFunction,
@@ -56,6 +55,9 @@ export interface DirectiveCtrl extends
   __readViewChildrenOrderScheduled?: boolean
   __readContentChildrenOrderScheduled?: boolean
 }
+export interface NgmDirective extends ng.IDirective {
+  _ngOnInitBound?():void;
+}
 
 /**
  * @internal
@@ -108,23 +110,27 @@ export class DirectiveProvider {
     const lfHooks = resolveImplementedLifeCycleHooks(type);
     const {inputs,attrs,outputs,host,queries,legacy} = metadata;
 
+    const _ddo = {
+      controller: _controller,
+      link: {
+        pre: function () { _ddo._ngOnInitBound() },
+        post: this._createLink( type, metadata, lfHooks )
+      },
+      // @TODO this will be removed after @Query handling is moved to directiveControllerFactory
+      require: this._createRequires( requireMap, directiveName ),
+      _ngOnInitBound: noop
+    } as NgmDirective;
+
     // Component controllers must be created from a factory. Checkout out
     // util/directive-controller.js for more information about what's going on here
-    __controller.$inject = ['$scope', '$element', '$attrs', '$transclude', '$injector'];
-    function __controller($scope: any, $element: any, $attrs: any, $transclude: any, $injector: any): any{
+    _controller.$inject = ['$scope', '$element', '$attrs', '$transclude', '$injector'];
+    function _controller($scope: any, $element: any, $attrs: any, $transclude: any, $injector: any): any{
 
       const locals = { $scope, $element, $attrs, $transclude };
 
-      return directiveControllerFactory(this, type, $injector, locals, requireMap);
+      return directiveControllerFactory(this, type, $injector, locals, requireMap, _ddo);
 
     }
-
-    const _ddo = {
-      controller: __controller,
-      link: this._createLink( type, metadata, lfHooks ),
-      // @TODO this will be removed after @Query handling is moved to directiveControllerFactory
-      require: this._createRequires( requireMap, directiveName )
-    } as ng.IDirective;
 
     // specific DDO augmentation for @Component
     if ( metadata instanceof ComponentMetadata ) {

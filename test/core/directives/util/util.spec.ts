@@ -16,11 +16,12 @@ import {
   _resolveChildrenFactory,
   _getParentCheckNotifiers,
   getRequiredControllers,
-  directiveControllerFactory
+  directiveControllerFactory,
+  getEmptyRequiredControllers
 } from '../../../../src/core/directives/util/util';
 import { ElementFactory, getNg1InjectorMock, $Attrs, $Scope } from '../../../../src/testing/utils';
 import { global, noop, isFunction } from '../../../../src/facade/lang';
-import { DirectiveCtrl } from '../../../../src/core/directives/directive_provider';
+import { DirectiveCtrl, NgmDirective } from '../../../../src/core/directives/directive_provider';
 import { Inject } from '../../../../src/core/di/decorators';
 import { forwardRef } from '../../../../src/core/di/forward_ref';
 
@@ -325,24 +326,26 @@ describe( `directives/util`, ()=> {
         ngOnInit(){}
       }
       const requireMap = {} as StringMap;
+      const _ddo: NgmDirective = {};
 
       const actual = directiveControllerFactory(
         caller as any,
         Controller,
         $injector,
         locals,
-        requireMap
+        requireMap,
+        _ddo
       );
 
-      // console.log( actual );
       expect( Object.getPrototypeOf( actual ).constructor ).to.equal( Controller );
       expect( isFunction( actual.ngOnInit ) ).to.equal( true );
       expect( actual.someInput ).to.equal( 123 );
       expect( actual.someOutput ).to.equal( onChange );
 
-
     } );
-    it( `should instantiate controller and assign required directives and other locals properly`, ()=> {
+
+    it( `should instantiate controller and assign required directives as undefined with proper other locals(services) during ctrl instantiation`,
+      ()=> {
 
       jqParentStub.returns($element);
       jqDataStub.withArgs('$ngModelController').returns(new NgModel());
@@ -359,24 +362,25 @@ describe( `directives/util`, ()=> {
         ngModel:'?ngModel',
         form:'^^form'
       } as StringMap;
+      const _ddo: NgmDirective = {};
 
       locals.mySvc = mySvc;
-
 
       const actual = directiveControllerFactory(
         caller as any,
         Controller,
         $injector,
         locals,
-        requireMap
+        requireMap,
+        _ddo
       );
 
-      expect( actual.ngModel ).to.deep.equal( new NgModel() );
-      expect( actual.form ).to.deep.equal( new Form() );
+      expect( actual.ngModel ).to.deep.equal( undefined );
+      expect( actual.form ).to.deep.equal( undefined );
       expect( actual.mySvc ).to.equal( mySvc );
 
     } );
-    it( `should call ngOnInit after controller instantiation if defined`, ()=> {
+    it( `should create _ngOnInitBound on ddo which will be called from preLink during controller instantiation`, ()=> {
 
       const caller = {};
       class Controller{
@@ -385,6 +389,7 @@ describe( `directives/util`, ()=> {
         ngOnInit(){}
       }
       const requireMap = {} as StringMap;
+      const _ddo: NgmDirective = {};
 
       const spy = sinon.spy( Controller.prototype, 'ngOnInit' );
 
@@ -395,10 +400,94 @@ describe( `directives/util`, ()=> {
         Controller,
         $injector,
         locals,
-        requireMap
+        requireMap,
+        _ddo
       );
 
-      expect( spy.called ).to.equal( true );
+      expect( spy.called ).to.equal( false );
+
+      expect( isFunction( _ddo._ngOnInitBound ) ).to.equal( true );
+
+    } );
+
+    it( `should initialize required directives from withing _ngOnInitBound function and call ngOnInit if defined`,
+      ()=> {
+
+        jqParentStub.returns($element);
+        jqDataStub.withArgs('$ngModelController').returns(new NgModel());
+        jqInheritedDataStub.withArgs('$formController').returns(new Form());
+        const mySvc = { hello(){} };
+
+        class Controller{
+          static $inject = ['ngModel','form','mySvc'];
+          constructor(private ngModel,private form, private mySvc){}
+          ngOnInit(){}
+        }
+        const caller = {};
+        const requireMap = {
+          ngModel:'?ngModel',
+          form:'^^form'
+        } as StringMap;
+        const _ddo: NgmDirective = {};
+
+        locals.mySvc = mySvc;
+
+        const spy = sinon.spy( Controller.prototype, 'ngOnInit' );
+
+        const actual = directiveControllerFactory(
+          caller as any,
+          Controller,
+          $injector,
+          locals,
+          requireMap,
+          _ddo
+        );
+
+        expect( spy.called ).to.equal( false );
+        expect( actual.ngModel ).to.deep.equal( undefined );
+        expect( actual.form ).to.deep.equal( undefined );
+        expect( actual.mySvc ).to.equal( mySvc );
+
+        _ddo._ngOnInitBound();
+
+        expect( spy.called ).to.equal( true );
+        expect( actual.ngModel ).to.deep.equal( new NgModel() );
+        expect( actual.form ).to.deep.equal( new Form() );
+        expect( actual.mySvc ).to.equal( mySvc );
+
+      } );
+
+    it( `should not call $injector.invoke again from _ngOnInitBound if no directives are required`, ()=> {
+
+      const mySvc = { hello(){} };
+
+      class Controller{
+        static $inject = ['mySvc'];
+        constructor(private mySvc){}
+        ngOnInit(){}
+      }
+      const caller = {};
+      const requireMap: StringMap = {};
+      const _ddo: NgmDirective = {};
+
+      locals.mySvc = mySvc;
+
+      const spy = sinon.spy( $injector, 'invoke' );
+
+      const actual = directiveControllerFactory(
+        caller as any,
+        Controller,
+        $injector,
+        locals,
+        requireMap,
+        _ddo
+      );
+
+      expect( spy.calledOnce ).to.equal( true );
+
+      _ddo._ngOnInitBound();
+
+      expect( spy.calledOnce ).to.equal( true );
 
     } );
 
@@ -429,6 +518,28 @@ describe( `directives/util`, ()=> {
       sinon.stub( $element, 'controller' ).withArgs( 'noneCtrl' ).returns( null );
 
       expect( getControllerOnElement( $element, 'noneCtrl' ) ).to.equal( null )
+
+    } );
+
+  } );
+
+  describe( `#getEmptyRequiredControllers`, ()=> {
+
+    it( `should return original map with undefined values`, ()=> {
+
+      const requireMap = {
+        ngModel:'ngModel',
+        form:'^^form',
+        myValidator:'?myValidator'
+      } as StringMap;
+      const actual = getEmptyRequiredControllers(requireMap);
+      const expected = {
+        ngModel:undefined,
+        form:undefined,
+        myValidator:undefined
+      };
+
+      expect( actual ).to.deep.equal( expected );
 
     } );
 
