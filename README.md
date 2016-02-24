@@ -37,8 +37,8 @@ function heroCmp(){
     },
     controller: HeroController,
     controllerAs: '$ctrl',
-    link: function(scope,element,attrs,ctrls){
-      ctrls.init();
+    link: function(scope,element,attrs,ctrl){
+      ctrl.init();
     },
     transclude: true,
     templateUrl: 'hero.html'
@@ -46,7 +46,9 @@ function heroCmp(){
 }
 
 HeroController.$inject = ['log'];
-function HeroController($log){}
+function HeroController($log){
+  this.init = function(){ /* your init logic */ };
+}
 ```
 
 **Angular 1.x with ngMetadata and Typescript:**
