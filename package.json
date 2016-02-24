@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/ngParty/ng-metadata#readme",
   "devDependencies": {
-    "angular": "1.4.8",
+    "angular": "1.4.9",
     "chai": "3.4.1",
     "commitizen": "2.4.6",
     "conventional-changelog": "0.5.3",
@@ -40,8 +40,8 @@
     "sinon": "1.17.2",
     "systemjs": "0.19.6",
     "systemjs-builder": "0.14.11",
-    "typescript": "1.7.3",
-    "typings": "0.3.0",
+    "typescript": "1.7.5",
+    "typings": "0.6.8",
     "validate-commit-msg": "2.0.0"
   },
   "dependencies": {},
