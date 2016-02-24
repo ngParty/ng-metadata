@@ -1576,12 +1576,16 @@ Implement this interface to execute custom initialization logic after your direc
 `ngOnInit` method:
 
 - will be called on each controller(directive or component class) after all the controllers on 
-an element have been constructed and had their bindings initialized 
-(and before the pre & post linking functions for the directives on this element). 
-This is a good place to put initialization code for your controller(component/directive)
-- is only invoked once when the directive is instantiated 
+an element have been constructed and had their bindings initialized  
+This is a preferred place to put initialization code for your controller(component/directive)
+- is only invoked once when the directive is instantiated
+ 
+*NOTE:*
+> Don't put initialization logic to `constructor` because if you inject locals(directives,components) they are not 
+defined until `ngOnInit` is triggered
 
-> In angular 1 terms, it does the same as $onInit , which was added to angular 1.5:
+> In angular 1 terms, it is called from preLink
+> In next major version (ngMetadata 2.0) it will use $onInit under the hood, which was introduced in angular 1.5
 
 _Example:_
 
