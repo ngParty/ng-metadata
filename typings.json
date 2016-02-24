@@ -1,15 +1,15 @@
 {
   "name": "ng-metadata",
-  "main": "ng-metadata.d.ts",
   "dependencies": {},
-  "devDependencies": {
-  },
+  "devDependencies": {},
   "ambientDependencies": {
-    "node": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/node/node.d.ts",
-    "chai": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/chai/chai.d.ts",
-    "mocha": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/mocha/mocha.d.ts",
-    "sinon": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/sinon/sinon.d.ts",
-    "angular": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/angularjs/angular.d.ts",
-    "jquery": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/jquery/jquery.d.ts"
+    "node": "github:DefinitelyTyped/DefinitelyTyped/node/node.d.ts#20e1eb9616922d382d918cc5a21870a9dbe255f5"
+  },
+  "ambientDevDependencies": {
+    "angular": "github:DefinitelyTyped/DefinitelyTyped/angularjs/angular.d.ts#1c4a34873c9e70cce86edd0e61c559e43dfa5f75",
+    "jquery": "github:DefinitelyTyped/DefinitelyTyped/jquery/jquery.d.ts#470954c4f427e0805a2d633636a7c6aa7170def8",
+    "chai": "github:DefinitelyTyped/DefinitelyTyped/chai/chai.d.ts#1914a00b3c740348dae407ee0d2be89b0b58ad7f",
+    "mocha": "github:DefinitelyTyped/DefinitelyTyped/mocha/mocha.d.ts#d6dd320291705694ba8e1a79497a908e9f5e6617",
+    "sinon": "github:DefinitelyTyped/DefinitelyTyped/sinon/sinon.d.ts#6e7d83167d86d857817bd492786f8304f5c4a0e4"
   }
 }
