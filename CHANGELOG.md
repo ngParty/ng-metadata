@@ -1,3 +1,14 @@
+<a name="1.1.0"></a>
+# [1.1.0](https://github.com/ngParty/ng-metadata/compare/1.0.0...v1.1.0) (2016-02-24)
+
+
+### Features
+
+* **core/directives/provider:** assign required controllers in preLink instead of controller ([9e662f7](https://github.com/ngParty/ng-metadata/commit/9e662f7)), closes [#50](https://github.com/ngParty/ng-metadata/issues/50)
+* **playground:** add more complex examples to test proper local DI within directives ([dfe6a70](https://github.com/ngParty/ng-metadata/commit/dfe6a70))
+
+
+
 <a name="1.0.0"></a>
 # [1.0.0](https://github.com/ngParty/ng-metadata/compare/1.0.0-rc.2...v1.0.0) (2016-02-14)
 
