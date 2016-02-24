@@ -47,7 +47,7 @@
 
   <form name="diForm">
 
-    <input type="text" ng-model="$ctrl.modelMock" name="modelMock" my-validator>
+    <input type="text" ng-model="$ctrl.modelMock" name="modelMock" my-validator my-foo>
 
     <p ng-if="diForm.modelMock.$error.myValidator" style="color:red">whops error! diForm.modelMock.$errors</p>
 
