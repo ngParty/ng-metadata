@@ -1,3 +1,13 @@
+<a name="1.1.1"></a>
+## [1.1.1](https://github.com/ngParty/ng-metadata/compare/1.1.0...v1.1.1) (2016-02-29)
+
+
+### Bug Fixes
+
+* **core/directive_provider:** fix evaluation expression for @Output called on @Directive ([5e35bde](https://github.com/ngParty/ng-metadata/commit/5e35bde))
+
+
+
 <a name="1.1.0"></a>
 # [1.1.0](https://github.com/ngParty/ng-metadata/compare/1.0.0...v1.1.0) (2016-02-24)
 
