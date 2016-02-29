@@ -744,7 +744,7 @@ export function _createDirectiveBindings(
   } );
   // setup @Outputs
   StringMapWrapper.forEach( _extractBindings( outputs ), ( alias: string, propName: string )=> {
-    ctrl[ propName ] = ()=> scope.$eval( alias || propName );
+    ctrl[ propName ] = ()=> scope.$evalAsync( attributes[ alias || propName ] );
   } );
   // setup @Attrs
   StringMapWrapper.forEach( _extractBindings( attrs ), ( alias: string, propName: string )=> {

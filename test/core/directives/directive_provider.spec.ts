@@ -1063,7 +1063,7 @@ describe( `directives/directive_provider`, ()=> {
 
         } );
 
-        it( `should set to property function which evaluates experssion for @Output`, ()=> {
+        it( `should set to property function which evaluates expression for @Output`, ()=> {
 
           const metadata = {
             outputs: [
@@ -1077,8 +1077,8 @@ describe( `directives/directive_provider`, ()=> {
           expect( watchers.length ).to.equal( 0 );
           expect( observers.length ).to.equal( 0 );
           expect( Object.keys( ctrl ) ).to.deep.equal( [ 'onFoo', 'onOne' ] );
-          expect( ctrl.onFoo() ).to.equal( 'onFoo evaluated' );
-          expect( ctrl.onOne() ).to.equal( 'onOneAlias evaluated' );
+          expect( ctrl.onFoo() ).to.equal( ' evaluated' );
+          expect( ctrl.onOne() ).to.equal( ' evaluated' );
 
         } );
 

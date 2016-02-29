@@ -189,13 +189,15 @@ export class $Scope {
   }
 
   $eval( expression ) {
-    const toEval = expression;
+    const toEval = expression || '';
     const done = 'evaluated';
     return eval( 'toEval + " " + done' );
   }
   $evalAsync(expression){
     if(isFunction(expression)){
-      expression()
+      return eval("expression()")
+    }else{
+      return this.$eval(expression);
     }
   }
 
