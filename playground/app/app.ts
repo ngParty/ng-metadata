@@ -14,6 +14,7 @@ import { TodoStore } from './stores/todoStore.service';
 import { ElementReadyDirective } from './directives/element-ready.directive';
 import { MyValidatorDirective } from './directives/my-validator.directive';
 import { MyFooDirective } from './directives/my-foo.directive';
+import { MyFormBridgeDirective } from './directives/my-form-bridge.directive';
 
 export const AppModule = angular.module( 'app', [TabsModule] )
 
@@ -25,5 +26,6 @@ export const AppModule = angular.module( 'app', [TabsModule] )
   .directive( ...provide( ElementReadyDirective ) )
   .directive( ...provide( MyValidatorDirective ) )
   .directive( ...provide( MyFooDirective ) )
+  .directive( ...provide( MyFormBridgeDirective ) )
 
   ;

@@ -25,7 +25,8 @@
 
 <button
   class="mdl-button mdl-js-button mdl-button--accent"
-  ng-click="$ctrl.showQueryExample=!$ctrl.showQueryExample">{{ $ctrl.showQueryExample ? 'hide' : 'show'}} <code>@Query</code> decorators example
+  ng-click="$ctrl.showQueryExample=!$ctrl.showQueryExample">
+  {{ $ctrl.showQueryExample ? 'hide' : 'show'}} <code>@Query</code> decorators example
 </button>
 <div ng-if="$ctrl.showQueryExample">
   <h3>check your console logs mate!</h3>
@@ -41,7 +42,8 @@
 
 <button
   class="mdl-button mdl-js-button mdl-button--accent"
-  ng-click="$ctrl.showDirectiveDiExample=!$ctrl.showDirectiveDiExample">{{ $ctrl.showDirectiveDiExample ? 'hide' : 'show'}} <code>@Inject</code> directive
+  ng-click="$ctrl.showDirectiveDiExample=!$ctrl.showDirectiveDiExample">
+  {{ $ctrl.showDirectiveDiExample ? 'hide' : 'show'}} <code>@Inject</code> directive
 </button>
 <div ng-if="$ctrl.showDirectiveDiExample">
 
@@ -50,6 +52,25 @@
     <input type="text" ng-model="$ctrl.modelMock" name="modelMock" my-validator my-foo>
 
     <p ng-if="diForm.modelMock.$error.myValidator" style="color:red">whops error! diForm.modelMock.$errors</p>
+
+  </form>
+
+</div>
+
+<button
+  class="mdl-button mdl-js-button mdl-button--accent"
+  ng-click="$ctrl.showSameLocalDiExample=!$ctrl.showSameLocalDiExample">
+  {{ $ctrl.showSameLocalDiExample ? 'hide' : 'show'}} <code>multi equal @Inject</code> directive
+</button>
+<div ng-if="$ctrl.showSameLocalDiExample">
+
+  <form name="diParentForm">
+    Inside ParentForm
+    <div ng-form="diChildForm" my-form-bridge>
+      Inside childForm
+    </div>
+
+    <button>submit or so</button>
 
   </form>
 
