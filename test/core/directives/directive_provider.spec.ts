@@ -1024,12 +1024,14 @@ describe( `directives/directive_provider`, ()=> {
           const [[firstExp,firstList],[secondExp,secondList]] = $scope.$$watchers;
 
           expect(firstExp).to.equal(undefined);
-          expect( ctrl.foo ).to.equal( undefined );
+          expect( ctrl.foo ).to.equal( ' evaluated' );
+
           firstList( 'hello' );
           expect( ctrl.foo ).to.equal( 'hello' );
 
           expect(secondExp).to.equal(undefined);
-          expect( ctrl.one ).to.equal( undefined );
+          expect( ctrl.one ).to.equal( ' evaluated' );
+
           secondList( 'hello one' );
           expect( ctrl.one ).to.equal( 'hello one' );
 
@@ -1043,6 +1045,11 @@ describe( `directives/directive_provider`, ()=> {
               'one: oneAlias'
             ]
           } as DirectiveMetadata;
+
+
+          $attrs.foo = 'hello first';
+          $attrs.oneAlias = 'hello one';
+
           const bindingDisposables = _createDirectiveBindings( $scope, $attrs, ctrl, metadata );
           const {watchers,observers} = bindingDisposables;
 
@@ -1052,14 +1059,16 @@ describe( `directives/directive_provider`, ()=> {
           const [[firstExp,firstList],[secondExp,secondList]] = $attrs.$$observers;
 
           expect(firstExp).to.equal('foo');
-          expect( ctrl.foo ).to.equal( undefined );
+          expect( ctrl.foo ).to.equal( 'hello first' );
+
           firstList( 'hello' );
           expect( ctrl.foo ).to.equal( 'hello' );
 
           expect(secondExp).to.equal('oneAlias');
-          expect( ctrl.one ).to.equal( undefined );
-          secondList( 'hello one' );
           expect( ctrl.one ).to.equal( 'hello one' );
+
+          secondList( 'hello one after digest' );
+          expect( ctrl.one ).to.equal( 'hello one after digest' );
 
         } );
 

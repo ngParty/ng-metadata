@@ -733,6 +733,11 @@ export function _createDirectiveBindings(
 
   // setup @Inputs
   StringMapWrapper.forEach( _extractBindings( inputs ), ( alias: string, propName: string )=> {
+
+    // set those values as component bindToController does
+    ctrl[ propName ] = scope.$evalAsync( attributes[ alias || propName ] );
+
+    // register watchers for further changes
     _internalWatchers.push(
       scope.$watch(
         attributes[ alias || propName ],
@@ -741,13 +746,26 @@ export function _createDirectiveBindings(
         }
       )
     )
+
   } );
+
   // setup @Outputs
   StringMapWrapper.forEach( _extractBindings( outputs ), ( alias: string, propName: string )=> {
+
+    // set those values as component bindToController does
     ctrl[ propName ] = ()=> scope.$evalAsync( attributes[ alias || propName ] );
+
   } );
+
   // setup @Attrs
   StringMapWrapper.forEach( _extractBindings( attrs ), ( alias: string, propName: string )=> {
+
+    // set those values as component bindToController does
+    ctrl[ propName ] = attributes[ alias || propName ];
+
+    // register watchers for further changes
+    // The observer function will be invoked once during the next $digest following compilation.
+    // The observer is then invoked whenever the interpolated value changes.
     _internalObservers.push(
       attributes.$observe(
         alias || propName,
@@ -756,6 +774,7 @@ export function _createDirectiveBindings(
         }
       )
     )
+
   } );
 
   return {
