@@ -1,3 +1,11 @@
+<a name="1.1.2"></a>
+## [1.1.2](https://github.com/ngParty/ng-metadata/compare/1.1.2...v1.1.2) (2016-03-02)
+
+### Bug Fixes
+
+* **core/directive_provider:** fix initial @Input/@Attr binding assign for @Directive ([193834](https://github.com/ngParty/ng-metadata/commit/193834))
+
+
 <a name="1.1.1"></a>
 ## [1.1.1](https://github.com/ngParty/ng-metadata/compare/1.1.0...v1.1.1) (2016-02-29)
 
