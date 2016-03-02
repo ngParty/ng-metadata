@@ -1,3 +1,17 @@
+<a name="1.1.3"></a>
+## [1.1.3](https://github.com/ngParty/ng-metadata/compare/1.1.2...v1.1.3) (2016-03-02)
+
+
+### Bug Fixes
+
+* **core/directive_provider:** fix same directive type injection with different accessors ([7776400](https://github.com/ngParty/ng-metadata/commit/7776400)), closes [#52](https://github.com/ngParty/ng-metadata/issues/52)
+
+### Features
+
+* **playground:** add example for injecting same type of local directives with separate accessors ([01a91d7](https://github.com/ngParty/ng-metadata/commit/01a91d7))
+
+
+
 <a name="1.1.2"></a>
 ## [1.1.2](https://github.com/ngParty/ng-metadata/compare/1.1.2...v1.1.2) (2016-03-02)
 
