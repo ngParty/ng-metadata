@@ -17,7 +17,8 @@ import {
   _getParentCheckNotifiers,
   getRequiredControllers,
   directiveControllerFactory,
-  getEmptyRequiredControllers
+  getEmptyRequiredControllers,
+  createNewInjectablesToMatchLocalDi
 } from '../../../../src/core/directives/util/util';
 import { ElementFactory, getNg1InjectorMock, $Attrs, $Scope } from '../../../../src/testing/utils';
 import { global, noop, isFunction } from '../../../../src/facade/lang';
@@ -359,8 +360,8 @@ describe( `directives/util`, ()=> {
       }
       const caller = {};
       const requireMap = {
-        ngModel:'?ngModel',
-        form:'^^form'
+        'ngModel#1':'?ngModel',
+        'form#2':'^^form'
       } as StringMap;
       const _ddo: NgmDirective = {};
 
@@ -425,8 +426,8 @@ describe( `directives/util`, ()=> {
         }
         const caller = {};
         const requireMap = {
-          ngModel:'?ngModel',
-          form:'^^form'
+          'ngModel#1':'?ngModel',
+          'form#3':'^^form'
         } as StringMap;
         const _ddo: NgmDirective = {};
 
@@ -488,6 +489,48 @@ describe( `directives/util`, ()=> {
       _ddo._ngOnInitBound();
 
       expect( spy.calledOnce ).to.equal( true );
+
+    } );
+
+  } );
+
+  describe( `#createNewInjectablesToMatchLocalDi`, () => {
+
+    it( `should return new injectables array even if no changes`, () => {
+
+      const injectables = [ 'one', 'twoSvc', 'three' ];
+      const requireMap = {} as StringMap;
+      const actual = createNewInjectablesToMatchLocalDi( injectables, requireMap );
+
+      expect( actual ).to.deep.equal( injectables );
+      expect( actual ).to.not.equal( injectables );
+
+    } );
+    
+    it( `should correctly map injectables to hashed requires`, () => {
+
+      const injectables = [ 'one', 'twoSvc', 'three' ];
+      const requireMap = {
+        'one#1': 'one',
+        'three#3': '^three'
+      } as StringMap;
+      const actual = createNewInjectablesToMatchLocalDi( injectables, requireMap );
+      const expected = [ 'one#1', 'twoSvc', 'three#3' ];
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
+    it( `should correctly map injectables to hashed requires when there are multiple same local injectables`, () => {
+
+      const injectables = [ 'one', 'twoSvc','one', 'three' ];
+      const requireMap = {
+        'one#1': 'one',
+        'one#3': '^^one',
+        'three#4': 'three',
+      } as StringMap;
+      const actual = createNewInjectablesToMatchLocalDi( injectables, requireMap );
+      const expected = [ 'one#1', 'twoSvc','one#3', 'three#4' ];
+      expect( actual ).to.deep.equal( expected );
 
     } );
 

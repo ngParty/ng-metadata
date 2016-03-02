@@ -245,9 +245,9 @@ describe( `linker/directive_resolver`, ()=> {
       const resolver = new DirectiveResolver();
       const actual = resolver.getRequiredDirectivesMap(Foo);
       const expected = {
-        clicker: '^clicker',
-        api: '?^api',
-        ngModel: 'ngModel'
+        'clicker#2': '^clicker',
+        'api#3': '?^api',
+        'ngModel#4': 'ngModel'
       };
 
       expect(actual).to.deep.equal(expected);
@@ -281,9 +281,9 @@ describe( `linker/directive_resolver`, ()=> {
       const resolver = new DirectiveResolver();
       const actual = resolver.getRequiredDirectivesMap(Foo);
       const expected = {
-        clicker: '^clicker',
-        api: '?^api',
-        ngModel: 'ngModel'
+        'clicker#2': '^clicker',
+        'api#3': '?^api',
+        'ngModel#4': 'ngModel'
       };
 
       expect(actual).to.deep.equal(expected);

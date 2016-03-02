@@ -6,6 +6,7 @@ import { ListWrapper, StringMapWrapper } from '../../../facade/collections';
 import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces';
 import { QueryMetadata } from '../metadata_di';
 import { DirectiveCtrl, NgmDirective } from '../directive_provider';
+import { StringWrapper } from '../../../facade/primitives';
 
 const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
 
@@ -236,6 +237,15 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
 
   const { $element } : { $element: ng.IAugmentedJQuery } = locals;
 
+  if ( StringMapWrapper.size( requireMap ) ) {
+
+    // change injectables to proper inject directives
+    // we wanna do this only if we inject som locals/directives
+    controller.$inject = createNewInjectablesToMatchLocalDi( controller.$inject, requireMap );
+
+  }
+
+
   const $requires = getEmptyRequiredControllers( requireMap );
 
   // Remember, angular has already set those bindings on the `caller`
@@ -247,7 +257,7 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
 
   _ddo._ngOnInitBound = function _ngOnInitBound(){
-    
+
     // invoke again only if there are any directive requires
     // #perf
     if ( StringMapWrapper.size( requireMap ) ) {
@@ -361,5 +371,29 @@ export function getEmptyRequiredControllers( requireMap: {[key:string]:string} )
     acc[ keyName ] = undefined;
     return acc;
   }, {} );
+
+}
+
+export function createNewInjectablesToMatchLocalDi(
+  originalInjectables: string[],
+  requireMap: {[key:string]:string}
+): string[] {
+
+  const requireKeys = StringMapWrapper.keys( requireMap );
+
+  return originalInjectables.slice()
+    .map( injectable => {
+      const [replaceInjName] = requireKeys
+        .filter( keyName => StringWrapper.startsWith( keyName, injectable ) );
+
+      // if found remove that key so we won't assign the same
+      if(replaceInjName){
+        const idx = requireKeys.indexOf(replaceInjName);
+        requireKeys.splice(idx,1);
+      }
+
+      return replaceInjName || injectable;
+
+    } );
 
 }

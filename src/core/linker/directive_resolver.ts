@@ -35,7 +35,7 @@ function _isDirectiveMetadata( type: any ): boolean {
  * @returns {{[directiveName]:string}}
  * @private
  */
-function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[] ): StringMap {
+function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[], idx: number ): StringMap {
 
   // if there is just @Inject return
   if ( paramsMeta.length < 2 ) {
@@ -69,13 +69,21 @@ function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[] ): String
   const optionalType = isOptional ? '?' : '';
 
   const requireExpressionPrefix = `${ optionalType }${ locateType }`;
-  const directiveName = isType( resolveForwardRef( injectInst.token ) )
-    ? getInjectableName( resolveForwardRef( injectInst.token ) )
-    : injectInst.token;
+  const directiveName = _getDirectiveName( injectInst.token );
 
+  // we need to generate unique names because if we require same directive controllers,
+  // with different locale decorators it would merge to one which is wrong
   return {
-    [directiveName]: `${ requireExpressionPrefix }${ directiveName }`
+    [`${directiveName}#${idx}`]: `${ requireExpressionPrefix }${ directiveName }`
   };
+
+  function _getDirectiveName( token: any ): string {
+
+    return isType( resolveForwardRef( token ) )
+      ? getInjectableName( resolveForwardRef( token ) )
+      : token;
+
+  }
 
   function _getLocateTypeSymbol(): string {
 
@@ -138,9 +146,9 @@ export class DirectiveResolver {
     if ( isPresent( paramMetadata ) ) {
 
       return paramMetadata
-        .reduce( ( acc, paramMetaArr )=> {
+        .reduce( ( acc, paramMetaArr, idx )=> {
 
-          const requireExp = _transformInjectedDirectivesMeta( paramMetaArr );
+          const requireExp = _transformInjectedDirectivesMeta( paramMetaArr, idx );
           if ( isPresent( requireExp ) ) {
             assign( acc, requireExp );
           }
