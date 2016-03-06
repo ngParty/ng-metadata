@@ -15,6 +15,7 @@ import { ElementReadyDirective } from './directives/element-ready.directive';
 import { MyValidatorDirective } from './directives/my-validator.directive';
 import { MyFooDirective } from './directives/my-foo.directive';
 import { MyFormBridgeDirective } from './directives/my-form-bridge.directive';
+import { MyDirectiveTesterDirective } from './directives/my-directive-tester.directive';
 
 export const AppModule = angular.module( 'app', [TabsModule] )
 
@@ -27,5 +28,6 @@ export const AppModule = angular.module( 'app', [TabsModule] )
   .directive( ...provide( MyValidatorDirective ) )
   .directive( ...provide( MyFooDirective ) )
   .directive( ...provide( MyFormBridgeDirective ) )
+  .directive( ...provide( MyDirectiveTesterDirective ) )
 
   ;

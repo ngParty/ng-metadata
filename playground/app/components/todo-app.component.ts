@@ -16,13 +16,13 @@ export class TodoAppCmp{
 
     this.todos = this.todoStore.todos;
   }
-  
+
   ngAfterViewInit(){
     console.info('viewINit');
-    
+
   }
   ngAfterContentInit(){
-    
+
     console.info('contentINit');
   }
 
@@ -70,6 +70,22 @@ export class TodoAppCmp{
     const newId = this.items[this.items.length-1]+Date.now();
     this.items.push(newId);
   }
+
+
+  directive = {
+    example: {
+      interpolated: 'Ng Meta yo!',
+      binding: { name: 'Moo', age: 123 },
+      cb: (from) => {
+        console.log(`callback baby! from ${from}`);
+      }
+    },
+    changeValues: () => {
+      this.directive.example.cb = (from) => { console.log(`callback from ${from}, but changed!!!`) };
+      this.directive.example.interpolated = 'changed yo!';
+      this.directive.example.binding = { foo: 'bar' } as any;
+    }
+  };
 
 
 
