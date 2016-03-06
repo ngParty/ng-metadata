@@ -1,3 +1,13 @@
+<a name="1.1.4"></a>
+## [1.1.4](https://github.com/ngParty/ng-metadata/compare/1.1.3...v1.1.4) (2016-03-06)
+
+
+### Bug Fixes
+
+* **core/directives/directive_provider:** create manually directive bindings via ng1 bindToController machinery for attrib ([73b539e](https://github.com/ngParty/ng-metadata/commit/73b539e)), closes [#51](https://github.com/ngParty/ng-metadata/issues/51)
+
+
+
 <a name="1.1.3"></a>
 ## [1.1.3](https://github.com/ngParty/ng-metadata/compare/1.1.2...v1.1.3) (2016-03-02)
 
