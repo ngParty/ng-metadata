@@ -67,6 +67,9 @@ export function isString( obj: any ): obj is String {
 export function isFunction( obj: any ): boolean {
   return typeof obj === "function";
 }
+export function isBoolean( obj: any ): boolean {
+  return typeof obj === "boolean";
+}
 
 export function isArray( obj: any ): boolean {
   return Array.isArray( obj );

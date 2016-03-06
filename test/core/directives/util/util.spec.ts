@@ -18,13 +18,15 @@ import {
   getRequiredControllers,
   directiveControllerFactory,
   getEmptyRequiredControllers,
-  createNewInjectablesToMatchLocalDi
+  createNewInjectablesToMatchLocalDi,
+  isAttrDirective
 } from '../../../../src/core/directives/util/util';
 import { ElementFactory, getNg1InjectorMock, $Attrs, $Scope } from '../../../../src/testing/utils';
 import { global, noop, isFunction } from '../../../../src/facade/lang';
 import { DirectiveCtrl, NgmDirective } from '../../../../src/core/directives/directive_provider';
 import { Inject } from '../../../../src/core/di/decorators';
 import { forwardRef } from '../../../../src/core/di/forward_ref';
+import { DirectiveMetadata, ComponentMetadata } from '../../../../src/core/directives/metadata_directives';
 
 describe( `directives/util`, ()=> {
 
@@ -288,6 +290,7 @@ describe( `directives/util`, ()=> {
     let jqParentStub;
     let jqDataStub;
     let jqInheritedDataStub;
+    let metadata;
 
     class NgModel{}
     class Form{}
@@ -298,6 +301,12 @@ describe( `directives/util`, ()=> {
       $scope = new $Scope();
       $attrs = new $Attrs();
       locals = {$scope,$element,$attrs,$transclude};
+      metadata = new DirectiveMetadata( {
+        selector: '[my-dir]',
+        inputs: [ 'bindingOne' ],
+        outputs: [ 'cbOne' ],
+        attrs: [ 'attrOne' ]
+      } );
       $injector = getNg1InjectorMock();
       jqParentStub = sinon.stub($element,'parent');
       jqDataStub = sinon.stub($element,'data');
@@ -335,7 +344,8 @@ describe( `directives/util`, ()=> {
         $injector,
         locals,
         requireMap,
-        _ddo
+        _ddo,
+        metadata
       );
 
       expect( Object.getPrototypeOf( actual ).constructor ).to.equal( Controller );
@@ -373,7 +383,8 @@ describe( `directives/util`, ()=> {
         $injector,
         locals,
         requireMap,
-        _ddo
+        _ddo,
+        metadata
       );
 
       expect( actual.ngModel ).to.deep.equal( undefined );
@@ -402,7 +413,8 @@ describe( `directives/util`, ()=> {
         $injector,
         locals,
         requireMap,
-        _ddo
+        _ddo,
+        metadata
       );
 
       expect( spy.called ).to.equal( false );
@@ -441,7 +453,8 @@ describe( `directives/util`, ()=> {
           $injector,
           locals,
           requireMap,
-          _ddo
+          _ddo,
+          metadata
         );
 
         expect( spy.called ).to.equal( false );
@@ -481,7 +494,8 @@ describe( `directives/util`, ()=> {
         $injector,
         locals,
         requireMap,
-        _ddo
+        _ddo,
+        metadata
       );
 
       expect( spy.calledOnce ).to.equal( true );
@@ -506,7 +520,7 @@ describe( `directives/util`, ()=> {
       expect( actual ).to.not.equal( injectables );
 
     } );
-    
+
     it( `should correctly map injectables to hashed requires`, () => {
 
       const injectables = [ 'one', 'twoSvc', 'three' ];
@@ -746,6 +760,27 @@ describe( `directives/util`, ()=> {
       expect( spyParentChildrenChanged.calledTwice ).to.equal( true );
 
     } );
+
+  } );
+
+  describe( `$_isAttrDirective`, () => {
+
+    const cmp = new ComponentMetadata({
+      selector:'cmp',
+      template:`hello`
+    });
+
+    const directive = new DirectiveMetadata({
+      selector:'[attr-dir]'
+    });
+
+    it( `should return true only for Directive`, () => {
+
+      expect( isAttrDirective( directive ) ).to.equal(true);
+      expect( isAttrDirective( cmp ) ).to.not.equal(true);
+
+    } );
+
 
   } );
 

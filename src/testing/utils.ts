@@ -172,8 +172,46 @@ export function getNg1InjectorMock(): ng.auto.IInjectorService {
       // const argArray = StringMapWrapper.values( locals );
       // func.apply(context,argArray);
 
+    },
+    get( token: string ){
+      switch ( token ) {
+        case '$parse':
+          return new $Parse();
+        case '$interpolate':
+          return new $Interpolate();
+        default:
+          return {};
+      }
     }
   } as ng.auto.IInjectorService;
+}
+
+export class $Parse{
+  constructor(){
+    return (expression)=>{
+      (parseGet as any).literal = false;
+      function parseGet(context){
+        if(isFunction(expression)){
+          return eval("expression()")
+        }else{
+          const toEval = expression || '';
+          const done = 'evaluated';
+          return eval( 'toEval + " " + done' );
+        }
+      }
+      return parseGet;
+
+    }
+  }
+}
+export class $Interpolate{
+  constructor(){
+    return (expression)=>{
+      return (context)=>{
+        return eval('expression');
+      }
+    }
+  }
 }
 
 /**
@@ -237,6 +275,7 @@ export class $Scope {
  * @internal
  */
 export class $Attrs {
+  constructor(private attrs?){}
   $$observers = [];
 
   $observe( attrName, observeListener ) {

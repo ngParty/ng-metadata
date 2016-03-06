@@ -1,11 +1,11 @@
 import { getInjectableName } from '../../di/provider';
 import { isString, isType, getFuncName, global, noop, isArray, isJsObject, isFunction } from '../../../facade/lang';
 import { reflector } from '../../reflection/reflection';
-import { DirectiveMetadata } from '../metadata_directives';
+import { DirectiveMetadata, ComponentMetadata } from '../metadata_directives';
 import { ListWrapper, StringMapWrapper } from '../../../facade/collections';
 import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces';
 import { QueryMetadata } from '../metadata_di';
-import { DirectiveCtrl, NgmDirective } from '../directive_provider';
+import { DirectiveCtrl, NgmDirective, _createDirectiveBindings, _setupDestroyHandler } from '../directive_provider';
 import { StringWrapper } from '../../../facade/primitives';
 
 const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
@@ -229,22 +229,22 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   $injector: ng.auto.IInjectorService,
   locals: any,
   requireMap: StringMap,
-  _ddo: NgmDirective
+  _ddo: NgmDirective,
+  metadata: DirectiveMetadata | ComponentMetadata
 ): T&U {
 
-  // Create an instance of the controller without calling its constructor
-  const instance = Object.create(controller.prototype);
+  const { $scope, $element, $attrs } : { $scope:ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes } = locals;
 
-  const { $element } : { $element: ng.IAugmentedJQuery } = locals;
+  // Create an instance of the controller without calling its constructor
+  const instance = Object.create( controller.prototype );
 
   if ( StringMapWrapper.size( requireMap ) ) {
 
     // change injectables to proper inject directives
-    // we wanna do this only if we inject som locals/directives
+    // we wanna do this only if we inject some locals/directives
     controller.$inject = createNewInjectablesToMatchLocalDi( controller.$inject, requireMap );
 
   }
-
 
   const $requires = getEmptyRequiredControllers( requireMap );
 
@@ -253,8 +253,34 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   // to extend after defining the properties. That way we fire the setters.
   StringMapWrapper.assign( instance, caller );
 
+  // setup @Input/@Output/@Attrs for @Directive
+  if ( isAttrDirective( metadata ) ) {
+
+    const $services = {
+      $parse: $injector.get<ng.IParseService>('$parse'),
+      $interpolate: $injector.get<ng.IInterpolateService>('$interpolate')
+    };
+
+    const _disposables = _createDirectiveBindings( $scope, $attrs, instance, metadata, $services );
+    const { watchers, observers } = _disposables;
+
+    _setupDestroyHandler( $scope, $element, instance, false, watchers, observers );
+
+  }
+
   // Finally, invoke the constructor using the injection array and the captured locals
   $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
+
+  /*if ( isFunction( instance.ngOnDestroy ) ) {
+    $scope.$on( '$destroy', instance.ngOnDestroy.bind( instance ) );
+  }*/
+
+  /*if (typeof instance.ngAfterViewInit === 'function') {
+    ddo.ngAfterViewInitBound = instance.ngAfterViewInit.bind(instance);
+  }*/
+
+
+
 
   _ddo._ngOnInitBound = function _ngOnInitBound(){
 
@@ -270,14 +296,6 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
     }
 
   };
-
-  /*if ( isFunction( instance.ngOnDestroy ) ) {
-    $scope.$on( '$destroy', instance.ngOnDestroy.bind( instance ) );
-  }*/
-
-  /*if (typeof instance.ngAfterViewInit === 'function') {
-    ddo.ngAfterViewInitBound = instance.ngAfterViewInit.bind(instance);
-  }*/
 
   // Return the controller instance
   return instance;
@@ -396,4 +414,9 @@ export function createNewInjectablesToMatchLocalDi(
 
     } );
 
+}
+
+
+export function isAttrDirective( metadata ): boolean {
+  return metadata instanceof DirectiveMetadata && !(metadata instanceof ComponentMetadata);
 }
