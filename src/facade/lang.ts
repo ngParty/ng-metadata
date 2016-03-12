@@ -1,3 +1,24 @@
+export interface BrowserNodeGlobal {
+  Object: typeof Object,
+  Array: typeof Array,
+  //Map: typeof Map,
+  //Set: typeof Set,
+  Date: typeof Date,
+  RegExp: typeof RegExp,
+  JSON: typeof JSON,
+  Math: typeof Math,
+  angular: angular.IAngularStatic,
+  //assert(condition: any): void,
+  Reflect: any,
+  //zone: Zone,
+  //getAngularTestability: Function,
+  //getAllAngularTestabilities: Function,
+  setTimeout: Function,
+  clearTimeout: Function,
+  setInterval: Function,
+  clearInterval: Function
+}
+
 var globalScope: BrowserNodeGlobal;
 
 if ( typeof window === 'undefined' ) {
@@ -5,26 +26,6 @@ if ( typeof window === 'undefined' ) {
 } else {
   globalScope = window as any;
 }
-
-
-/** Used to match property names within property paths. */
-const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\n\\]|\\.)*?\1)\]/;
-const reIsPlainProp = /^\w*$/;
-const rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\n\\]|\\.)*?)\2)\]/g;
-
-/** Used to match backslashes in property paths. */
-const reEscapeChar = /\\(\\)?/g;
-
-/** Used to detect unsigned integer values. */
-const reIsUint = /^\d+$/;
-
-/**
- * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
- * of an array-like value.
- */
-const MAX_SAFE_INTEGER = 9007199254740991;
-
-
 
 // Need to declare a new variable for global here since TypeScript
 // exports the original value of the symbol.
@@ -47,6 +48,27 @@ export interface Type extends Function {}
  */
 export interface ConcreteType extends Type { new (...args): any; }
 
+
+// ===============
+// implementations
+// ===============
+
+/** Used to match property names within property paths. */
+const reIsDeepProp = /\.|\[(?:[^[\]]*|(["'])(?:(?!\1)[^\n\\]|\\.)*?\1)\]/;
+const reIsPlainProp = /^\w*$/;
+const rePropName = /[^.[\]]+|\[(?:(-?\d+(?:\.\d+)?)|(["'])((?:(?!\2)[^\n\\]|\\.)*?)\2)\]/g;
+
+/** Used to match backslashes in property paths. */
+const reEscapeChar = /\\(\\)?/g;
+
+/** Used to detect unsigned integer values. */
+const reIsUint = /^\d+$/;
+
+/**
+ * Used as the [maximum length](http://ecma-international.org/ecma-262/6.0/#sec-number.max_safe_integer)
+ * of an array-like value.
+ */
+const MAX_SAFE_INTEGER = 9007199254740991;
 
 export function CONST(): ClassDecorator & PropertyDecorator {
   return ( target ) => target;
