@@ -1,3 +1,20 @@
+<a name="1.1.5"></a>
+## [1.1.5](https://github.com/ngParty/ng-metadata/compare/1.1.4...v1.1.5) (2016-03-12)
+
+
+### Bug Fixes
+
+* **globals.d.ts:** move BrowserNodeGlobals to facade/lang so we don't need to force consumer to use ([bef75dc](https://github.com/ngParty/ng-metadata/commit/bef75dc)), closes [#40](https://github.com/ngParty/ng-metadata/issues/40)
+
+
+### BREAKING CHANGES
+
+* globals.d.ts:
+- before you could use require because we shipped node ambient typings, from know on you have to install
+your own node typings via `typings install node -SA`
+
+
+
 <a name="1.1.4"></a>
 ## [1.1.4](https://github.com/ngParty/ng-metadata/compare/1.1.3...v1.1.4) (2016-03-06)
 
