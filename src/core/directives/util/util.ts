@@ -420,3 +420,92 @@ export function createNewInjectablesToMatchLocalDi(
 export function isAttrDirective( metadata ): boolean {
   return metadata instanceof DirectiveMetadata && !(metadata instanceof ComponentMetadata);
 }
+
+
+/**
+ * returns angular 1 bindToController Map
+ * ```js
+ * { property: '=', onEvent: '&', attrVal: '@', oneWay: '<' }
+ * ```
+ * @returns {StringMap}
+ * @internal
+ * @private
+ */
+export function _extractBindings(
+  {
+    inputs=[],
+    outputs=[],
+    attrs=[]
+  }: {
+    inputs?: string[],
+    outputs?: string[],
+    attrs?: string[]
+  }={}
+): StringMap {
+
+  const parsedBindings = _parseIsolateBindings( { inputs, outputs, attrs } );
+
+  return StringMapWrapper
+    .values( parsedBindings )
+    .reduce( ( acc, bindingMap: ParsedBindingsMap ) => {
+
+      StringMapWrapper.forEach( bindingMap, ( config: ParsedBindingValue, name: string ) => {
+        const optionalSymbol = config.optional
+          ? '?'
+          : '';
+        acc[ name ] = `${ config.mode }${ optionalSymbol }${ config.alias }`;
+      } );
+
+      return acc;
+    }, {} as StringMap );
+
+}
+
+export type ParsedBindingValue = { mode: string, alias: string, optional: boolean}
+export type ParsedBindingsMap = {[name:string]:ParsedBindingValue};
+export type ParsedBindings = {
+  inputs: ParsedBindingsMap,
+  outputs: ParsedBindingsMap,
+  attrs: ParsedBindingsMap,
+  [key: string]: ParsedBindingsMap
+};
+
+
+/**
+ * parses input/output/attrs string arrays from metadata fro further processing
+ * @param inputs
+ * @param outputs
+ * @param attrs
+ * @returns {{inputs: ParsedBindingsMap, outputs: ParsedBindingsMap, attrs: ParsedBindingsMap}}
+ * @private
+ */
+export function _parseIsolateBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindings{
+
+  const INPUT_MODE_REGEX = /^(<|=)?(\??)(\w*)$/;
+  const SPLIT_BY = ':';
+
+  return {
+    inputs: _parse( inputs, '=' ),
+    outputs: _parse( outputs, '&' ),
+    attrs: _parse( attrs, '@' )
+  };
+
+  function _parse( bindingArr: string[], defaultMode: string ): ParsedBindingsMap {
+
+    return bindingArr.reduce( ( acc, binding: string )=> {
+
+      const [name,modeConfigAndAlias=''] = binding.split( SPLIT_BY ).map( part=>part.trim() );
+
+      const [, mode=defaultMode, optional='', alias=''] = modeConfigAndAlias.match( INPUT_MODE_REGEX ) || [];
+
+      acc[ name ] = {
+        mode,
+        alias,
+        optional: optional === '?'
+      };
+
+      return acc;
+
+    }, {} as StringMap );
+  }
+}

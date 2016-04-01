@@ -32,7 +32,14 @@ import {
   ContentChildMetadata,
   ContentChildrenMetadata
 } from './metadata_di';
-import { _resolveChildrenFactory, _getParentCheckNotifiers, directiveControllerFactory } from './util/util';
+import {
+  _resolveChildrenFactory,
+  _getParentCheckNotifiers,
+  directiveControllerFactory,
+  _extractBindings,
+  _parseIsolateBindings,
+  ParsedBindingValue
+} from './util/util';
 
 export type HostBindingsProcessed = {
   classes: StringMap,
@@ -211,16 +218,7 @@ export class DirectiveProvider {
     outputs: string[] = []
   ): StringMap {
 
-    const inputsBindings = _extractBindings( inputs, '=' );
-    const attrsBindings = _extractBindings( attrs, '@' );
-    const outputsBindings = _extractBindings( outputs, '&' );
-
-    return assign(
-      {},
-      inputsBindings,
-      attrsBindings,
-      outputsBindings
-    );
+    return _extractBindings( { inputs, outputs, attrs } );
 
   }
 
@@ -709,7 +707,7 @@ export function _getHostListenerCbParams( event: any, eventParams: string[] ): a
 }
 
 /**
- *
+ * Create Bindings manually for both Directive/Component
  * @param scope
  * @param attributes
  * @param ctrl
@@ -733,13 +731,16 @@ export function _createDirectiveBindings(
     BOOLEAN_ATTR[value.toLocaleLowerCase()] = value;
   });*/
 
-  const {inputs=[],outputs=[],attrs=[]} = metadata;
+  const { inputs=[], outputs=[], attrs=[] } = metadata;
+  const parsedBindings = _parseIsolateBindings( { inputs, outputs, attrs } );
   const _internalWatchers = [];
   const _internalObservers = [];
 
-  // setup @Inputs
-  StringMapWrapper.forEach( _extractBindings( inputs ), ( alias: string, propName: string )=> {
 
+  // setup @Inputs
+  StringMapWrapper.forEach( parsedBindings.inputs, ( config: ParsedBindingValue, propName: string ) => {
+
+    const { alias, optional, mode } = config;
     const attrName = alias || propName;
 
     if (!Object.hasOwnProperty.call(attributes, attrName)) {
@@ -761,8 +762,9 @@ export function _createDirectiveBindings(
   } );
 
   // setup @Outputs
-  StringMapWrapper.forEach( _extractBindings( outputs ), ( alias: string, propName: string )=> {
+  StringMapWrapper.forEach( parsedBindings.outputs , ( config: ParsedBindingValue, propName: string )=> {
 
+    const { alias, optional, mode } = config;
     const attrName = alias || propName;
 
     // Don't assign Object.prototype method to scope
@@ -780,8 +782,9 @@ export function _createDirectiveBindings(
   } );
 
   // setup @Attrs
-  StringMapWrapper.forEach( _extractBindings( attrs ), ( alias: string, propName: string )=> {
+  StringMapWrapper.forEach( parsedBindings.attrs, ( config: ParsedBindingValue, propName: string )=> {
 
+    const { alias, optional, mode } = config;
     const attrName = alias || propName;
     let lastValue;
 
@@ -818,28 +821,6 @@ export function _createDirectiveBindings(
     watchers: _internalWatchers,
     observers: _internalObservers
   };
-
-}
-
-/**
- *
- * @param bindings
- * @param typeSymbol
- * @param SPLIT_BY
- * @returns {StringMap}
- * @internal
- * @private
- */
-export function _extractBindings( bindings: string[], typeSymbol: string = '', SPLIT_BY = ':' ): StringMap {
-
-  return bindings.reduce( ( acc, binding: string )=> {
-
-    const [name,alias=''] = binding.split( SPLIT_BY ).map( part=>part.trim() );
-    acc[ name ] = `${ typeSymbol }${ alias }`;
-
-    return acc;
-
-  }, {} as StringMap );
 
 }
 

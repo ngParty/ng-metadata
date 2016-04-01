@@ -625,7 +625,11 @@ describe( `directives/directive_provider`, ()=> {
 
       it( `should create bindings from inputs,attrs,outputs`, ()=> {
 
-        const inputs = [ 'one', 'two: twoAlias', 'oneOpt: ?oneOpt' ];
+        const inputs = [
+          'one', 'two: twoAlias',
+          'oneOpt: ?oneOpt',
+          'oneWay: <', 'oneWayAlias: <oneWayAlas'
+        ];
         const attrs = [ 'color', 'brood: broodAlias' ];
         const outputs = [ 'onFoo', 'onMoo: onMooAlias' ];
 
@@ -637,9 +641,11 @@ describe( `directives/directive_provider`, ()=> {
           color: '@',
           brood: '@broodAlias',
           onFoo: '&',
-          onMoo: '&onMooAlias'
+          onMoo: '&onMooAlias',
+          oneWay: '<',
+          oneWayAlias: '<oneWayAlas'
         };
-
+  
         expect( actual ).to.deep.equal( expected );
 
       } );
