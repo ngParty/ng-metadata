@@ -165,15 +165,11 @@ export class StringMapWrapper {
     }
   }
 
-  static values<K, V>( map: {[key: string]: V} ): V[] {
-
-    const values = [];
-    StringMapWrapper.forEach( map, ( value )=> {
-      values.push( value );
-    } );
-
-    return values;
-
+  static values<T>( map: {[key: string]: T} ): T[] {
+    return Object.keys( map ).reduce( ( r, a ) => {
+      r.push( map[ a ] );
+      return r;
+    }, [] );
   }
 
   static merge<V>( m1: {[key: string]: V}, m2: {[key: string]: V} ): {[key: string]: V} {
