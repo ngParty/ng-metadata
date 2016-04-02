@@ -4,6 +4,9 @@ declare type ProvideSpreadType = string|Type;
 
 // @TODO add angular1 module overrides for proper ...provide handling
 declare module angular {
+  interface IParseService{
+    ( exp: string, interceptorFn?: Function, expensiveChecks? ): ng.ICompiledExpression
+  }
   interface IModule {
     value(...args: ProvideSpreadType[]): IModule;
     constant(...args: ProvideSpreadType[]): IModule;
