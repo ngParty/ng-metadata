@@ -6,9 +6,7 @@ import {
   noop,
   resolveDirectiveNameFromSelector,
   stringify,
-  isJsObject,
-  isString,
-  isBoolean
+  isJsObject
 } from '../../facade/lang';
 import { StringWrapper } from '../../facade/primitives';
 import { StringMapWrapper } from '../../facade/collections';
@@ -36,9 +34,7 @@ import {
   _resolveChildrenFactory,
   _getParentCheckNotifiers,
   directiveControllerFactory,
-  _extractBindings,
-  _parseIsolateBindings,
-  ParsedBindingValue
+  _extractBindings
 } from './util/util';
 
 export type HostBindingsProcessed = {
@@ -146,7 +142,7 @@ export class DirectiveProvider {
 
       const componentSpecificDDO = {
         scope: {},
-        bindToController: this._createComponentBindings( inputs, attrs, outputs ),
+        bindToController: {},
         controllerAs: DirectiveProvider._controllerAs,
         transclude: DirectiveProvider._transclude
       } as ng.IDirective;
@@ -204,7 +200,8 @@ export class DirectiveProvider {
   }
 
   /**
-   *
+   * NOTE: this is not used anymore
+   * we are creating bindings manually
    * @param inputs
    * @param attrs
    * @param outputs
@@ -704,124 +701,6 @@ export function _getHostListenerCbParams( event: any, eventParams: string[] ): a
     },
     []
   );
-}
-
-/**
- * Create Bindings manually for both Directive/Component
- * @param scope
- * @param attributes
- * @param ctrl
- * @param metadata
- * @returns {{watchers: Array, observers: Array}}
- * @internal
- * @private
- */
-export function _createDirectiveBindings(
-  scope: ng.IScope,
-  attributes: ng.IAttributes,
-  ctrl: any,
-  metadata: DirectiveMetadata,
-  {$interpolate,$parse}:{$interpolate?:ng.IInterpolateService,$parse?:ng.IParseService}
-): {watchers:Function[], observers:Function[]} {
-
-/*  let BOOLEAN_ATTR = {};
-  'multiple,selected,checked,disabled,readOnly,required,open'
-    .split(',')
-    .forEach(function(value) {
-    BOOLEAN_ATTR[value.toLocaleLowerCase()] = value;
-  });*/
-
-  const { inputs=[], outputs=[], attrs=[] } = metadata;
-  const parsedBindings = _parseIsolateBindings( { inputs, outputs, attrs } );
-  const _internalWatchers = [];
-  const _internalObservers = [];
-
-
-  // setup @Inputs
-  StringMapWrapper.forEach( parsedBindings.inputs, ( config: ParsedBindingValue, propName: string ) => {
-
-    const { alias, optional, mode } = config;
-    const attrName = alias || propName;
-
-    if (!Object.hasOwnProperty.call(attributes, attrName)) {
-      // if (optional) return;
-      attributes[attrName] = void 0;
-    }
-    if (/*optional && */!attributes[attrName]) return;
-
-    const parentGet = $parse(attributes[attrName]);
-
-    ctrl[propName] = parentGet(scope);
-
-    _internalWatchers.push(
-      scope.$watch( parentGet, function parentValueWatchAction( newParentValue ) {
-        ctrl[ propName ] = newParentValue;
-      }, parentGet.literal )
-    );
-
-  } );
-
-  // setup @Outputs
-  StringMapWrapper.forEach( parsedBindings.outputs , ( config: ParsedBindingValue, propName: string )=> {
-
-    const { alias, optional, mode } = config;
-    const attrName = alias || propName;
-
-    // Don't assign Object.prototype method to scope
-    const parentGet: Function = attributes.hasOwnProperty( attrName )
-      ? $parse( attributes[ attrName ] )
-      : noop;
-
-    // Don't assign noop to ctrl if expression is not valid
-    if (parentGet === noop /*&& optional*/) return;
-
-    ctrl[propName] = function(locals) {
-      return parentGet(scope, locals);
-    };
-
-  } );
-
-  // setup @Attrs
-  StringMapWrapper.forEach( parsedBindings.attrs, ( config: ParsedBindingValue, propName: string )=> {
-
-    const { alias, optional, mode } = config;
-    const attrName = alias || propName;
-    let lastValue;
-
-    if (/*!optional && */!Object.hasOwnProperty.call(attributes, attrName)) {
-      ctrl[propName] = attrs[attrName] = void 0;
-    }
-
-    // register watchers for further changes
-    // The observer function will be invoked once during the next $digest following compilation.
-    // The observer is then invoked whenever the interpolated value changes.
-    _internalObservers.push(
-      attributes.$observe( attrName, function ( value ) {
-        if ( isString( value ) ) {
-          ctrl[ propName ] = value;
-        }
-      } )
-    );
-
-    // attributes.$$observers[attrName].$$scope = scope;
-    lastValue = attributes[attrName];
-    if (isString(lastValue)) {
-      // If the attribute has been provided then we trigger an interpolation to ensure
-      // the value is there for use in the link fn
-      ctrl[propName] = $interpolate(lastValue)(scope);
-    } else if (isBoolean(lastValue)) {
-      // If the attributes is one of the BOOLEAN_ATTR then Angular will have converted
-      // the value to boolean rather than a string, so we special case this situation
-      ctrl[propName] = lastValue;
-    }
-
-  } );
-
-  return {
-    watchers: _internalWatchers,
-    observers: _internalObservers
-  };
-
 }
 
 

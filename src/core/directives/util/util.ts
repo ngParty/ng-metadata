@@ -1,14 +1,32 @@
 import { getInjectableName } from '../../di/provider';
-import { isString, isType, getFuncName, global, noop, isArray, isJsObject, isFunction } from '../../../facade/lang';
+import {
+  isString,
+  isType,
+  getFuncName,
+  global,
+  noop,
+  isArray,
+  isJsObject,
+  isFunction,
+  isBoolean
+} from '../../../facade/lang';
 import { reflector } from '../../reflection/reflection';
 import { DirectiveMetadata, ComponentMetadata } from '../metadata_directives';
 import { ListWrapper, StringMapWrapper } from '../../../facade/collections';
 import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces';
 import { QueryMetadata } from '../metadata_di';
-import { DirectiveCtrl, NgmDirective, _createDirectiveBindings, _setupDestroyHandler } from '../directive_provider';
+import { DirectiveCtrl, NgmDirective, _setupDestroyHandler } from '../directive_provider';
 import { StringWrapper } from '../../../facade/primitives';
 
 const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
+
+const BINDING_MODE = Object.freeze( {
+  oneWay: '<',
+  twoWay: '=',
+  output: '&',
+  attr: '@',
+  optional: '?'
+} );
 
 /**
  * resolving DOM instances by provided @ContentChild(ren)/@ViewChild(ren)
@@ -227,46 +245,55 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   caller: T,
   controller: U,
   $injector: ng.auto.IInjectorService,
-  locals: any,
+  locals: {
+    $scope: ng.IScope,
+    $element: ng.IAugmentedJQuery,
+    $attrs: ng.IAttributes,
+    $transclude: ng.ITranscludeFunction
+  },
   requireMap: StringMap,
   _ddo: NgmDirective,
   metadata: DirectiveMetadata | ComponentMetadata
-): T&U {
+): T & U {
 
-  const { $scope, $element, $attrs } : { $scope:ng.IScope, $element: ng.IAugmentedJQuery, $attrs: ng.IAttributes } = locals;
+  const _services = {
+    $parse: $injector.get<ng.IParseService>( '$parse' ),
+    $interpolate: $injector.get<ng.IInterpolateService>( '$interpolate' )
+  };
+  const { $scope, $element, $attrs } = locals;
 
   // Create an instance of the controller without calling its constructor
   const instance = Object.create( controller.prototype );
 
+  // NOTE: this is not needed because we are creating bindings manually because of
+  // angular behaviour https://github.com/ngParty/ng-metadata/issues/53
+  // ===================================================================
+  // Remember, angular has already set those bindings on the `caller`
+  // argument. Now we need to extend them onto our `instance`. It is important
+  // to extend after defining the properties. That way we fire the setters.
+  //
+  // StringMapWrapper.assign( instance, caller );
+
+  // setup @Input/@Output/@Attrs for @Component/@Directive
+  const _disposables = _createDirectiveBindings(
+    !isAttrDirective( metadata ),
+    $scope,
+    $attrs,
+    instance,
+    metadata,
+    _services
+  );
+  _setupDestroyHandler( $scope, $element, instance, false, _disposables.watchers, _disposables.observers );
+
+  // change injectables to proper inject directives
+  // we wanna do this only if we inject some locals/directives
   if ( StringMapWrapper.size( requireMap ) ) {
 
-    // change injectables to proper inject directives
-    // we wanna do this only if we inject some locals/directives
     controller.$inject = createNewInjectablesToMatchLocalDi( controller.$inject, requireMap );
 
   }
 
   const $requires = getEmptyRequiredControllers( requireMap );
-
-  // Remember, angular has already set those bindings on the `caller`
-  // argument. Now we need to extend them onto our `instance`. It is important
-  // to extend after defining the properties. That way we fire the setters.
-  StringMapWrapper.assign( instance, caller );
-
-  // setup @Input/@Output/@Attrs for @Directive
-  if ( isAttrDirective( metadata ) ) {
-
-    const $services = {
-      $parse: $injector.get<ng.IParseService>('$parse'),
-      $interpolate: $injector.get<ng.IInterpolateService>('$interpolate')
-    };
-
-    const _disposables = _createDirectiveBindings( $scope, $attrs, instance, metadata, $services );
-    const { watchers, observers } = _disposables;
-
-    _setupDestroyHandler( $scope, $element, instance, false, watchers, observers );
-
-  }
 
   // Finally, invoke the constructor using the injection array and the captured locals
   $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
@@ -443,7 +470,7 @@ export function _extractBindings(
   }={}
 ): StringMap {
 
-  const parsedBindings = _parseIsolateBindings( { inputs, outputs, attrs } );
+  const parsedBindings = _parseBindings( { inputs, outputs, attrs } );
 
   return StringMapWrapper
     .values( parsedBindings )
@@ -479,18 +506,18 @@ export type ParsedBindings = {
  * @returns {{inputs: ParsedBindingsMap, outputs: ParsedBindingsMap, attrs: ParsedBindingsMap}}
  * @private
  */
-export function _parseIsolateBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindings{
+export function _parseBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindings{
 
   const INPUT_MODE_REGEX = /^(<|=)?(\??)(\w*)$/;
   const SPLIT_BY = ':';
 
   return {
-    inputs: _parse( inputs, '=' ),
-    outputs: _parse( outputs, '&' ),
-    attrs: _parse( attrs, '@' )
+    inputs: _parseByMode( inputs, BINDING_MODE.twoWay ),
+    outputs: _parseByMode( outputs, BINDING_MODE.output ),
+    attrs: _parseByMode( attrs, BINDING_MODE.attr )
   };
 
-  function _parse( bindingArr: string[], defaultMode: string ): ParsedBindingsMap {
+  function _parseByMode( bindingArr: string[], defaultMode: string ): ParsedBindingsMap {
 
     return bindingArr.reduce( ( acc, binding: string )=> {
 
@@ -501,11 +528,212 @@ export function _parseIsolateBindings({ inputs=[], outputs=[], attrs=[] }): Pars
       acc[ name ] = {
         mode,
         alias,
-        optional: optional === '?'
+        optional: optional === BINDING_MODE.optional
       };
 
       return acc;
 
     }, {} as StringMap );
   }
+}
+
+
+/**
+ * Create Bindings manually for both Directive/Component
+ * @param hasIsolateScope
+ * @param _scope
+ * @param attributes
+ * @param ctrl
+ * @param metadata
+ * @param {{$interpolate,$parse}}
+ * @returns {{watchers: Array, observers: Array}}
+ * @internal
+ * @private
+ */
+export function _createDirectiveBindings(
+  hasIsolateScope: boolean,
+  _scope: ng.IScope,
+  attributes: ng.IAttributes,
+  ctrl: any,
+  metadata: DirectiveMetadata,
+  {$interpolate,$parse}:{$interpolate?:ng.IInterpolateService,$parse?:ng.IParseService}
+): {watchers:Function[], observers:Function[]} {
+
+
+  /*  let BOOLEAN_ATTR = {};
+   'multiple,selected,checked,disabled,readOnly,required,open'
+   .split(',')
+   .forEach(function(value) {
+   BOOLEAN_ATTR[value.toLocaleLowerCase()] = value;
+   });*/
+
+  const scope = hasIsolateScope
+    ? _scope.$parent
+    : _scope;
+  const { inputs=[], outputs=[], attrs=[] } = metadata;
+  const parsedBindings = _parseBindings( { inputs, outputs, attrs } );
+  const _internalWatchers = [];
+  const _internalObservers = [];
+
+  // setup @Inputs '<' or '='
+  // by default '='
+  StringMapWrapper.forEach( parsedBindings.inputs, ( config: ParsedBindingValue, propName: string ) => {
+
+    const { alias, optional, mode } = config;
+    const attrName = alias || propName;
+    const hasTwoWayBinding = hasIsolateScope && mode === BINDING_MODE.twoWay;
+
+    const removeWatch = hasTwoWayBinding
+      ? _createTwoWayBinding( propName, attrName, optional )
+      : _createOneWayBinding( propName, attrName, optional );
+    _internalWatchers.push( removeWatch );
+
+  } );
+
+  // setup @Outputs
+  StringMapWrapper.forEach( parsedBindings.outputs, ( config: ParsedBindingValue, propName: string ) => {
+
+    const { alias, optional, mode } = config;
+    const attrName = alias || propName;
+
+    _createOutputBinding( propName, attrName, optional );
+
+  } );
+
+  // setup @Attrs
+  StringMapWrapper.forEach( parsedBindings.attrs, ( config: ParsedBindingValue, propName: string ) => {
+
+    const { alias, optional, mode } = config;
+    const attrName = alias || propName;
+
+    const removeObserver = _createAttrBinding( attrName, propName, optional );
+    _internalObservers.push( removeObserver );
+
+  } );
+
+  function _createOneWayBinding( propName: string, attrName: string, optional: boolean ): Function {
+
+    if ( !Object.hasOwnProperty.call( attributes, attrName ) ) {
+      if ( optional ) return;
+      attributes[ attrName ] = void 0;
+    }
+    if ( optional && !attributes[ attrName ] ) return;
+
+    const parentGet = $parse( attributes[ attrName ] );
+
+    ctrl[ propName ] = parentGet( scope );
+
+    return scope.$watch( parentGet, function parentValueWatchAction( newParentValue ) {
+      ctrl[ propName ] = newParentValue;
+    }, parentGet.literal );
+
+  }
+  function _createTwoWayBinding( propName: string, attrName: string, optional: boolean ): Function {
+
+    let lastValue;
+
+    if ( !Object.hasOwnProperty.call( attributes, attrName ) ) {
+      if ( optional ) return;
+      attributes[ attrName ] = void 0;
+    }
+    if ( optional && !attributes[ attrName ] ) return;
+
+    let compare;
+    const parentGet = $parse( attributes[ attrName ] );
+    if (parentGet.literal) {
+      compare = global.angular.equals;
+    } else {
+      compare = function simpleCompare(a, b) { return a === b || (a !== a && b !== b); };
+    }
+    const parentSet = parentGet.assign || function() {
+        // reset the change, or we will throw this exception on every $digest
+        lastValue = ctrl[propName] = parentGet(scope);
+        throw new Error(
+          `nonassign,
+          Expression '${attributes[ attrName ]}' in attribute '${attrName}' used with directive '{2}' is non-assignable!`
+        );
+      };
+    lastValue = ctrl[propName] = parentGet(scope);
+    const parentValueWatch = function parentValueWatch(parentValue) {
+      if (!compare(parentValue, ctrl[propName])) {
+        // we are out of sync and need to copy
+        if (!compare(parentValue, lastValue)) {
+          // parent changed and it has precedence
+          ctrl[propName] = parentValue;
+        } else {
+          // if the parent can be assigned then do so
+          parentSet(scope, parentValue = ctrl[propName]);
+        }
+      }
+      return lastValue = parentValue;
+    };
+    (parentValueWatch as any).$stateful = true;
+    // NOTE: we don't support collection watch, it's not good for performance
+    // if (definition.collection) {
+    //   removeWatch = scope.$watchCollection(attributes[attrName], parentValueWatch);
+    // } else {
+    //   removeWatch = scope.$watch($parse(attributes[attrName], parentValueWatch), null, parentGet.literal);
+    // }
+    // removeWatchCollection.push(removeWatch);
+    return scope.$watch(
+      $parse( attributes[ attrName ], parentValueWatch ),
+      null,
+      parentGet.literal
+    );
+
+  }
+  function _createOutputBinding( propName: string, attrName: string, optional: boolean ): void {
+
+    // Don't assign Object.prototype method to scope
+    const parentGet: Function = attributes.hasOwnProperty( attrName )
+      ? $parse( attributes[ attrName ] )
+      : noop;
+
+    // Don't assign noop to ctrl if expression is not valid
+    if (parentGet === noop && optional) return;
+
+    ctrl[propName] = function(locals) {
+      return parentGet(scope, locals);
+    };
+
+  }
+  function _createAttrBinding( attrName: string, propName: string, optional: boolean ): Function {
+
+    let lastValue;
+
+    if ( !optional && !Object.hasOwnProperty.call( attributes, attrName ) ) {
+      ctrl[ propName ] = attributes[ attrName ] = void 0;
+    }
+
+    // register watchers for further changes
+    // The observer function will be invoked once during the next $digest following compilation.
+    // The observer is then invoked whenever the interpolated value changes.
+
+    const _disposeObserver = attributes.$observe( attrName, function ( value ) {
+      if ( isString( value ) ) {
+        ctrl[ propName ] = value;
+      }
+    } );
+
+    (attributes as any).$$observers[ attrName ].$$scope = scope;
+    lastValue = attributes[ attrName ];
+    if ( isString( lastValue ) ) {
+      // If the attribute has been provided then we trigger an interpolation to ensure
+      // the value is there for use in the link fn
+      ctrl[ propName ] = $interpolate( lastValue )( scope );
+    } else if ( isBoolean( lastValue ) ) {
+      // If the attributes is one of the BOOLEAN_ATTR then Angular will have converted
+      // the value to boolean rather than a string, so we special case this situation
+      ctrl[ propName ] = lastValue;
+    }
+
+    return _disposeObserver;
+
+  }
+
+  return {
+    watchers: _internalWatchers,
+    observers: _internalObservers
+  };
+
 }

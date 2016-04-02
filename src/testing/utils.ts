@@ -279,7 +279,14 @@ export class $Attrs {
   $$observers = [];
 
   $observe( attrName, observeListener ) {
-    this.$$observers.push( [ attrName, observeListener ] );
+
+    if ( !isArray( this.$$observers[ attrName ] ) ) {
+      this.$$observers[ attrName ] = [];
+      this.$$observers[ attrName ].$$scope = null;
+      this.$$observers[ attrName ].$$element = null;
+    }
+    this.$$observers[ attrName ].push( observeListener );
+
     return function disposable() {}
   }
 }

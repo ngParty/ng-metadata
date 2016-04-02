@@ -17,17 +17,14 @@ import {
   HostBinding
 } from '../../../src/core/directives/decorators';
 import { Inject, Host } from '../../../src/core/di/decorators';
-import { DirectiveMetadata } from '../../../src/core/directives/metadata_directives';
-import { $Scope, $Attrs, ElementFactory, $Interpolate, $Parse } from '../../../src/testing/utils';
+import { $Scope, $Attrs, ElementFactory } from '../../../src/testing/utils';
 import {
   directiveProvider,
   _setHostBindings,
   _getHostListenerCbParams,
   _setHostListeners,
-  _createDirectiveBindings,
   NgmDirective
 } from '../../../src/core/directives/directive_provider';
-import { StringMapWrapper } from '../../../src/facade/collections';
 
 describe( `directives/directive_provider`, ()=> {
 
@@ -205,9 +202,9 @@ describe( `directives/directive_provider`, ()=> {
     expect( ddo ).to.deep.equal( {
       scope: {},
       bindToController: {
-        enableColor: '=',
-        defaultColor: '@',
-        onLightsaberAttack: '&'
+        // enableColor: '=',
+        // defaultColor: '@',
+        // onLightsaberAttack: '&'
       },
       require: [ 'jediMaster' ],
       controller: ddo.controller,
@@ -645,7 +642,7 @@ describe( `directives/directive_provider`, ()=> {
           oneWay: '<',
           oneWayAlias: '<oneWayAlas'
         };
-  
+
         expect( actual ).to.deep.equal( expected );
 
       } );
@@ -979,135 +976,6 @@ describe( `directives/directive_provider`, ()=> {
           ];
 
           expect( actual ).to.deep.equal( expected );
-
-        } );
-
-      } );
-
-      describe( `#_createDirectiveBindings`, ()=> {
-
-        const sandbox = sinon.sandbox.create();
-        let $element;
-        let $scope;
-        let $attrs;
-        let ctrl;
-        let services;
-        let event = {
-          target: {
-            position: 123,
-            x: 111,
-            y: 3333
-          },
-          preventDefault: sandbox.spy()
-        };
-
-        beforeEach( ()=> {
-          $element = ElementFactory();
-          $scope = new $Scope();
-          $attrs = new $Attrs();
-          services = {
-            $interpolate: new $Interpolate(),
-            $parse: new $Parse()
-          };
-          ctrl = {};
-        } );
-
-        afterEach( ()=> {
-
-          event.preventDefault.reset();
-          sandbox.restore();
-
-        } );
-
-        it( `should create array of scope.$watch disposable callbacks for @Input`, ()=> {
-
-          const metadata = {
-            inputs: [
-              'foo',
-              'one: oneAlias'
-            ]
-          } as DirectiveMetadata;
-          StringMapWrapper.assign( $attrs, {
-            foo: '$ctrl.parentFoo',
-            oneAlias: '$ctrl.parentOne'
-          } );
-          const bindingDisposables = _createDirectiveBindings( $scope, $attrs, ctrl, metadata, services );
-          const {watchers,observers} = bindingDisposables;
-
-          expect( watchers.length ).to.equal( 2 );
-          expect( observers.length ).to.equal( 0 );
-
-          const [[firstExp,firstListener],[secondExp,secondListener]] = $scope.$$watchers;
-
-          expect(isFunction(firstExp)).to.equal(true);
-          expect( ctrl.foo ).to.equal( '$ctrl.parentFoo evaluated' );
-
-          firstListener( 'hello' );
-          expect( ctrl.foo ).to.equal( 'hello' );
-
-          expect(isFunction(secondExp)).to.equal(true);
-          expect( ctrl.one ).to.equal( '$ctrl.parentOne evaluated' );
-
-          secondListener( 'hello one' );
-          expect( ctrl.one ).to.equal( 'hello one' );
-
-        } );
-
-        it( `should create array of attrs.$observe disposable callbacks for @Attr`, ()=> {
-
-          const metadata = {
-            attrs: [
-              'foo',
-              'one: oneAlias'
-            ]
-          } as DirectiveMetadata;
-
-
-          $attrs.foo = 'hello first';
-          $attrs.oneAlias = 'hello one';
-
-          const bindingDisposables = _createDirectiveBindings( $scope, $attrs, ctrl, metadata, services );
-          const {watchers,observers} = bindingDisposables;
-
-          expect( watchers.length ).to.equal( 0 );
-          expect( observers.length ).to.equal( 2 );
-
-          const [[firstExp,firstListener],[secondExp,secondListener]] = $attrs.$$observers;
-
-          expect(firstExp).to.equal('foo');
-          expect( ctrl.foo ).to.equal( 'hello first' );
-
-          firstListener( 'hello' );
-          expect( ctrl.foo ).to.equal( 'hello' );
-
-          expect(secondExp).to.equal('oneAlias');
-          expect( ctrl.one ).to.equal( 'hello one' );
-
-          secondListener( 'hello one after digest' );
-          expect( ctrl.one ).to.equal( 'hello one after digest' );
-
-        } );
-
-        it( `should set to property function which evaluates expression for @Output`, ()=> {
-
-          const metadata = {
-            outputs: [
-              'onFoo',
-              'onOne: onOneAlias'
-            ]
-          } as DirectiveMetadata;
-          StringMapWrapper.assign( $attrs, {
-            onFoo: '$ctrl.parentFoo()',
-            onOneAlias: '$ctrl.parentOne()'
-          } );
-          const bindingDisposables = _createDirectiveBindings( $scope, $attrs, ctrl, metadata, services );
-          const {watchers,observers} = bindingDisposables;
-
-          expect( watchers.length ).to.equal( 0 );
-          expect( observers.length ).to.equal( 0 );
-          expect( Object.keys( ctrl ) ).to.deep.equal( [ 'onFoo', 'onOne' ] );
-          expect( ctrl.onFoo() ).to.equal( '$ctrl.parentFoo() evaluated' );
-          expect( ctrl.onOne() ).to.equal( '$ctrl.parentOne() evaluated' );
 
         } );
 
