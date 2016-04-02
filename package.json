@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/ngParty/ng-metadata#readme",
   "devDependencies": {
-    "angular": "1.4.9",
+    "angular": "1.4.10",
     "chai": "3.4.1",
     "commitizen": "2.4.6",
     "conventional-changelog": "0.5.3",
@@ -43,6 +43,9 @@
     "typescript": "1.8.7",
     "typings": "0.6.8",
     "validate-commit-msg": "2.0.0"
+  },
+  "peerDependencies": {
+    "angular": ">=1.4.x"
   },
   "dependencies": {},
   "czConfig": {
