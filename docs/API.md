@@ -699,7 +699,8 @@ Note:
 
 An alternative and more declarative way to using the `inputs` property on `@Component`/`@Directive`.
 
-Binds to controller via `=` binding or gets expression on directive via `$scope.$watch`
+Binds to Component via two way binding `=` by default or via one way binding on Directive by default.
+If you wanna use one way binding on Component use `@Input('<') yourProperty`
 
 *Example:*
 
@@ -709,18 +710,19 @@ import { Component, Input } from 'ng-metadata/core';
 @Component({ ... })
 class MenuDropdown {
   @Input() options;
+  @Input('<') oneWay;
   @Input('aliasMe') value;
 }
 ```
 ```html
-<menu-dropdown options="ctrl.options" alias-me="ctrl.foo"></menu-dropdown>
+<menu-dropdown one-way="ctrl.someValue" options="ctrl.options" alias-me="ctrl.foo"></menu-dropdown>
 ```
 
 ###### Parameters
 
-| Parameter     | Type     | Description                               |
-| ------------- | ---------|------------------------------------------ |
-| **exposedName**  | `string` | If provided, then it will be the name of the input when setting on the html element. |
+| Parameter        | Type     | Description                               |
+| ---------------- | ---------|------------------------------------------ |
+| **exposedName**  | `string` | If provided, then it will be the name of the input when setting on the html element. It supports oneWay binding via `<' sign + followed by optional alias |
 
 
 ## @Output
