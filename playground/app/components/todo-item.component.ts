@@ -10,16 +10,9 @@ import { TodoModel } from '../stores/todoStore.service';
 })
 export class TodoItemCmp{
 
-  @Input('todo') _todo: TodoModel;
-  @Input() idx: number;
+  @Input('<') todo: TodoModel;
+  @Input('<') idx: number;
   @Output() onDone: ( todo: {todo:TodoModel} )=>void;
-
-  todo: TodoModel;
-
-  constructor(){
-
-    this.todo = angular.copy( this._todo );
-  }
 
   ngOnInit(){}
 

@@ -87,6 +87,19 @@ export class TodoAppCmp{
     }
   };
 
+  cmpTester = {
+    model: {name:'matt murdock'},
+    interpolate: 'one batch, two batch',
+    cb: ()=>console.log( 'bang!' ),
+    changeValues: ($event: ng.IAngularEvent)=>{
+      $event.stopPropagation();
+      this.cmpTester.model = {name:'electra'};
+      this.cmpTester.interpolate = 'hells kitchen is here';
+    }
+  };
+
+  twoWay='hello';
+
 
 
 }

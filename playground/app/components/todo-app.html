@@ -84,12 +84,36 @@
 </button>
 <div ng-if="$ctrl.showDirectivePropDecoratorsExample">
 
- <div my-directive-tester pure-string="hello!" interpolated="{{ $ctrl.directive.example.interpolated }}"
-  binding="$ctrl.directive.example.binding"
-  some-cb="$ctrl.directive.example.cb(from)"
- >
- Hello content
- <button ng-click="$ctrl.directive.changeValues()">Change values</button>
- </div>
+  <div
+    my-directive-tester
+    pure-string="hello!"
+    interpolated="{{ $ctrl.directive.example.interpolated }}"
+    binding="$ctrl.directive.example.binding"
+    some-cb="$ctrl.directive.example.cb(from)"
+  >
+    Hello content
+    <button ng-click="$ctrl.directive.changeValues()">Change values</button>
+  </div>
 
+</div>
+
+
+<button
+  class="mdl-button mdl-js-button mdl-button--accent"
+  ng-click="$ctrl.showTesterCmp=!$ctrl.showTesterCmp">
+  {{ $ctrl.showTesterCmp ? 'hide' : 'show'}} <code>@Component</code> Tester example
+</button>
+<div ng-show="$ctrl.showTesterCmp"> Two way:
+  <code>{{ $ctrl.twoWay }}</code>
+</div>
+<div ng-if="$ctrl.showTesterCmp">
+  <my-tester
+    my-tester-attr
+    two-way="$ctrl.twoWay"
+    in-one="$ctrl.cmpTester.model"
+    attr-one="{{ $ctrl.cmpTester.interpolate }}"
+    out-one="$ctrl.cmpTester.cb()"
+  >
+    <button ng-click="$ctrl.cmpTester.changeValues($event)">Change values bindings</button>
+  </my-tester>
 </div>

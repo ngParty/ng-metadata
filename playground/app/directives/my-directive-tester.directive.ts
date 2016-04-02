@@ -13,7 +13,7 @@
  * @param {}
  */
 
-import { Directive, Attr, Input, Output } from 'ng-metadata/core';
+import { Directive, Attr, Input, Output, Inject } from 'ng-metadata/core';
 
 @Directive( {
   selector: '[my-directive-tester]',
@@ -27,7 +27,7 @@ export class MyDirectiveTesterDirective {
 
   @Output() someCb: Function;
 
-  constructor(){
+  constructor(@Inject('$attrs') private $attrs){
     console.log('constructor', JSON.stringify(this,null,2));
     this.someCb({ from: 'constructor' });
   }
