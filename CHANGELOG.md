@@ -1,3 +1,14 @@
+<a name="1.2.0"></a>
+# [1.2.0](https://github.com/ngParty/ng-metadata/compare/1.1.5...v1.2.0) (2016-04-02)
+
+
+### Features
+
+* **core/directives:** support one way binding for components by using @Input('<') ([5f1dd82](https://github.com/ngParty/ng-metadata/commit/5f1dd82)), closes [#54](https://github.com/ngParty/ng-metadata/issues/54)
+* **playground:** add more examples with new features, like one way binding etc ([f07360c](https://github.com/ngParty/ng-metadata/commit/f07360c))
+
+
+
 <a name="1.1.5"></a>
 ## [1.1.5](https://github.com/ngParty/ng-metadata/compare/1.1.4...v1.1.5) (2016-03-12)
 
