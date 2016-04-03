@@ -19,7 +19,8 @@ import {
   OnInit,
   OnDestroy,
   OnChildrenChanged,
-  ChildrenChangeHook
+  ChildrenChangeHook,
+  OnChanges
 } from '../linker/directive_lifecycle_interfaces';
 import { DirectiveMetadata, ComponentMetadata, LegacyDirectiveDefinition } from './metadata_directives';
 import {
@@ -55,6 +56,7 @@ export interface DirectiveCtrl extends
   AfterViewChecked,
   OnInit,
   OnDestroy,
+  OnChanges,
   OnChildrenChanged {
   __readChildrenOrderScheduled?: boolean
   __readViewChildrenOrderScheduled?: boolean

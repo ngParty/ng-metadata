@@ -4,5 +4,6 @@ export {
   AfterContentChecked,
   AfterViewChecked,
   OnDestroy,
-  OnInit
+  OnInit,
+  OnChanges
 } from './linker/directive_lifecycle_interfaces';

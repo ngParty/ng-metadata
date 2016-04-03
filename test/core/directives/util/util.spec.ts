@@ -816,7 +816,8 @@ describe( `directives/util`, ()=> {
       $attrs = new $Attrs();
       services = {
         $interpolate: new $Interpolate(),
-        $parse: new $Parse()
+        $parse: new $Parse(),
+        $rootScope: new $Scope()
       };
       ctrl = {};
     } );
@@ -841,7 +842,7 @@ describe( `directives/util`, ()=> {
         oneAlias: '$ctrl.parentOne'
       } );
       const bindingDisposables = _createDirectiveBindings( false, $scope, $attrs, ctrl, metadata, services );
-      const {watchers,observers} = bindingDisposables;
+      const {watchers,observers} = bindingDisposables._watchers;
 
       expect( watchers.length ).to.equal( 2 );
       expect( observers.length ).to.equal( 0 );
@@ -876,7 +877,7 @@ describe( `directives/util`, ()=> {
       $attrs.oneAlias = 'hello one';
 
       const bindingDisposables = _createDirectiveBindings(false, $scope, $attrs, ctrl, metadata, services );
-      const {watchers,observers} = bindingDisposables;
+      const {watchers,observers} = bindingDisposables._watchers;
 
       expect( watchers.length ).to.equal( 0 );
       expect( observers.length ).to.equal( 2 );
@@ -912,7 +913,7 @@ describe( `directives/util`, ()=> {
         onOneAlias: '$ctrl.parentOne()'
       } );
       const bindingDisposables = _createDirectiveBindings( false, $scope, $attrs, ctrl, metadata, services );
-      const {watchers,observers} = bindingDisposables;
+      const {watchers,observers} = bindingDisposables._watchers;
 
       expect( watchers.length ).to.equal( 0 );
       expect( observers.length ).to.equal( 0 );

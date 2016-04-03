@@ -15,8 +15,10 @@ import { DirectiveMetadata, ComponentMetadata } from '../metadata_directives';
 import { ListWrapper, StringMapWrapper } from '../../../facade/collections';
 import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces';
 import { QueryMetadata } from '../metadata_di';
-import { DirectiveCtrl, NgmDirective, _setupDestroyHandler } from '../directive_provider';
+import { DirectiveCtrl, NgmDirective } from '../directive_provider';
 import { StringWrapper } from '../../../facade/primitives';
+import { ChangeDetectionUtil } from '../../change_detection/change_detection_util';
+import { changesQueueService } from '../../change_detection/changes_queue';
 
 const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
 
@@ -258,7 +260,8 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
 
   const _services = {
     $parse: $injector.get<ng.IParseService>( '$parse' ),
-    $interpolate: $injector.get<ng.IInterpolateService>( '$interpolate' )
+    $interpolate: $injector.get<ng.IInterpolateService>( '$interpolate' ),
+    $rootScope: $injector.get<ng.IRootScopeService>( '$rootScope' )
   };
   const { $scope, $element, $attrs } = locals;
 
@@ -275,7 +278,7 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   // StringMapWrapper.assign( instance, caller );
 
   // setup @Input/@Output/@Attrs for @Component/@Directive
-  const _disposables = _createDirectiveBindings(
+  const { removeWatches, initialChanges } = _createDirectiveBindings(
     !isAttrDirective( metadata ),
     $scope,
     $attrs,
@@ -283,7 +286,7 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
     metadata,
     _services
   );
-  _setupDestroyHandler( $scope, $element, instance, false, _disposables.watchers, _disposables.observers );
+  $scope.$on( '$destroy', ()=> removeWatches );
 
   // change injectables to proper inject directives
   // we wanna do this only if we inject some locals/directives
@@ -306,8 +309,9 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
     ddo.ngAfterViewInitBound = instance.ngAfterViewInit.bind(instance);
   }*/
 
-
-
+  if ( isFunction( instance.ngOnChanges ) ) {
+    instance.ngOnChanges( initialChanges );
+  }
 
   _ddo._ngOnInitBound = function _ngOnInitBound(){
 
@@ -545,7 +549,7 @@ export function _parseBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindi
  * @param attributes
  * @param ctrl
  * @param metadata
- * @param {{$interpolate,$parse}}
+ * @param {{$interpolate,$parse,$rootScope}}
  * @returns {{watchers: Array, observers: Array}}
  * @internal
  * @private
@@ -556,9 +560,16 @@ export function _createDirectiveBindings(
   attributes: ng.IAttributes,
   ctrl: any,
   metadata: DirectiveMetadata,
-  {$interpolate,$parse}:{$interpolate?:ng.IInterpolateService,$parse?:ng.IParseService}
-): {watchers:Function[], observers:Function[]} {
-
+  { $interpolate, $parse, $rootScope }: {
+    $interpolate?: ng.IInterpolateService,
+    $parse?: ng.IParseService,
+    $rootScope?: ng.IRootScopeService
+  }
+): {
+  initialChanges: {[key:string]:any},
+  removeWatches: Function,
+  _watchers: {watchers: Function[], observers: Function[]}
+} {
 
   /*  let BOOLEAN_ATTR = {};
    'multiple,selected,checked,disabled,readOnly,required,open'
@@ -574,6 +585,14 @@ export function _createDirectiveBindings(
   const parsedBindings = _parseBindings( { inputs, outputs, attrs } );
   const _internalWatchers = [];
   const _internalObservers = [];
+
+  // onChanges tmp vars
+  const initialChanges = {};
+  let changes;
+
+  // this will create flush queue internally only once
+  // we need to call this here because we need $rootScope service
+  changesQueueService.buildFlushOnChanges( $rootScope );
 
   // setup @Inputs '<' or '='
   // by default '='
@@ -622,8 +641,11 @@ export function _createDirectiveBindings(
     const parentGet = $parse( attributes[ attrName ] );
 
     ctrl[ propName ] = parentGet( scope );
+    initialChanges[ propName ] = ChangeDetectionUtil.simpleChange( ChangeDetectionUtil.uninitialized, ctrl[ propName ] );
 
     return scope.$watch( parentGet, function parentValueWatchAction( newParentValue ) {
+      const oldValue = ctrl[ propName ];
+      recordChanges( propName, newParentValue, oldValue );
       ctrl[ propName ] = newParentValue;
     }, parentGet.literal );
 
@@ -711,6 +733,8 @@ export function _createDirectiveBindings(
 
     const _disposeObserver = attributes.$observe( attrName, function ( value ) {
       if ( isString( value ) ) {
+        const oldValue = ctrl[ propName ];
+        recordChanges( propName, value, oldValue );
         ctrl[ propName ] = value;
       }
     } );
@@ -727,13 +751,49 @@ export function _createDirectiveBindings(
       ctrl[ propName ] = lastValue;
     }
 
+    initialChanges[ propName ] = ChangeDetectionUtil.simpleChange( ChangeDetectionUtil.uninitialized, ctrl[ propName ] );
     return _disposeObserver;
 
   }
 
+  function recordChanges<T>( key: string, currentValue: T, previousValue: T ): void {
+    if (isFunction(ctrl.ngOnChanges) && currentValue !== previousValue) {
+      // If we have not already scheduled the top level onChangesQueue handler then do so now
+      if (!changesQueueService.onChangesQueue) {
+        (scope as any).$$postDigest(changesQueueService.flushOnChangesQueue);
+        changesQueueService.onChangesQueue = [];
+      }
+      // If we have not already queued a trigger of onChanges for this controller then do so now
+      if (!changes) {
+        changes = {};
+        changesQueueService.onChangesQueue.push(triggerOnChangesHook);
+      }
+      // If the has been a change on this property already then we need to reuse the previous value
+      if (changes[key]) {
+        previousValue = changes[key].previousValue;
+      }
+      // Store this change
+      changes[key] = ChangeDetectionUtil.simpleChange(previousValue, currentValue);
+    }
+  }
+
+  function triggerOnChangesHook(): void {
+    ctrl.ngOnChanges( changes );
+    // Now clear the changes so that we schedule onChanges when more changes arrive
+    changes = undefined;
+  }
+
+  function removeWatches(): void {
+    const removeWatchCollection = [ ..._internalWatchers, ..._internalObservers ];
+    for ( var i = 0, ii = removeWatchCollection.length; i < ii; ++i ) {
+      removeWatchCollection[ i ]();
+    }
+  }
+
   return {
-    watchers: _internalWatchers,
-    observers: _internalObservers
+    initialChanges,
+    removeWatches,
+    _watchers: { watchers: _internalWatchers, observers: _internalObservers }
   };
 
 }

@@ -1,3 +1,4 @@
+import './core/change_detection/changes_queue.spec';
 import './core/di/decorators.spec';
 import './core/di/provider.spec';
 import './core/di/key.spec';

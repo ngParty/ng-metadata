@@ -1,6 +1,8 @@
+import { SimpleChange } from '../change_detection/change_detection_util';
 export enum LifecycleHooks {
   OnInit,
   OnDestroy,
+  OnChanges,
   AfterContentInit,
   AfterContentChecked,
   AfterViewInit,
@@ -14,6 +16,7 @@ export enum LifecycleHooks {
 export var LIFECYCLE_HOOKS_VALUES = [
   LifecycleHooks.OnInit,
   LifecycleHooks.OnDestroy,
+  LifecycleHooks.OnChanges,
   LifecycleHooks.AfterContentInit,
   LifecycleHooks.AfterContentChecked,
   LifecycleHooks.AfterViewInit,
@@ -28,6 +31,7 @@ export enum ChildrenChangeHook{
 
 /**
  * Lifecycle hooks are guaranteed to be called in the following order:
+ * - `OnChanges` (if any bindings have changed),
  * - `OnInit` (after the first check only),
  * - `AfterContentInit`,
  * - `AfterContentChecked`,
@@ -35,6 +39,46 @@ export enum ChildrenChangeHook{
  * - `AfterViewChecked`,
  * - `OnDestroy` (at the very end before destruction)
  */
+
+/**
+ * Implement this interface to get notified when any data-bound property of your directive changes.
+ *
+ * `ngOnChanges` is called right after the data-bound properties have been checked and before view
+ * and content children are checked if at least one of them has changed.
+ *
+ * The `changes` parameter contains an entry for each of the changed data-bound property. The key is
+ * the property name and the value is an instance of {@link SimpleChange}.
+ *
+ * ### Example ([live example](http://plnkr.co/edit/AHrB6opLqHDBPkt4KpdT?p=preview)):
+ *
+ * ```typescript
+ * @Component({
+ *   selector: 'my-cmp',
+ *   template: `<p>myProp = {{myProp}}</p>`
+ * })
+ * class MyComponent implements OnChanges {
+ *   @Input() myProp: any;
+ *
+ *   ngOnChanges(changes: {[propName: string]: SimpleChange}) {
+ *     console.log('ngOnChanges - myProp = ' + changes['myProp'].currentValue);
+ *   }
+ * }
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: `
+ *     <button (click)="value = value + 1">Change MyComponent</button>
+ *     <my-cmp [my-prop]="value"></my-cmp>`,
+ *   directives: [MyComponent]
+ * })
+ * export class App {
+ *   value = 0;
+ * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
+ * ```
+ */
+export interface OnChanges { ngOnChanges(changes: {[key: string]: SimpleChange}); }
 
 /**
  * Implement this interface to execute custom initialization logic after your directive's

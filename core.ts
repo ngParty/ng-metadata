@@ -14,3 +14,4 @@ export {
 } from './src/core/directives';
 export { Pipe, PipeTransform } from './src/core/pipes';
 export * from './src/core/linker';
+export * from './src/core/change_detection'
