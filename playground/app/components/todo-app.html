@@ -103,12 +103,20 @@
   ng-click="$ctrl.showTesterCmp=!$ctrl.showTesterCmp">
   {{ $ctrl.showTesterCmp ? 'hide' : 'show'}} <code>@Component</code> Tester example
 </button>
-<div ng-show="$ctrl.showTesterCmp"> Two way:
-  <code>{{ $ctrl.twoWay }}</code>
-</div>
+<fieldset ng-show="$ctrl.showTesterCmp">
+  <div>
+    <label>TWO WAY</label>
+    <input type="text" ng-model="$ctrl.twoWay">
+  </div>
+  <div>
+    <label>ONE WAY</label>
+    <input type="text" ng-model="$ctrl.oneWay">
+  </div>
+</fieldset>
 <div ng-if="$ctrl.showTesterCmp">
   <my-tester
     my-tester-attr
+    one-way="$ctrl.oneWay"
     two-way="$ctrl.twoWay"
     in-one="$ctrl.cmpTester.model"
     attr-one="{{ $ctrl.cmpTester.interpolate }}"

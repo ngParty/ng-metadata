@@ -40,3 +40,9 @@ tabs ng-transclude{
   background-color: coral;
   padding: .4rem;
 }
+my-tester{
+  display: block;
+  margin:.5rem;
+  padding: 1rem;
+  box-shadow: 1px 1px 1rem #ccc;
+}

@@ -12,16 +12,23 @@ import { Component, Input, Output, Attr } from 'ng-metadata/core';
   <button ng-click="$ctrl.outOne();$event.stopPropagation();">exec outOne</button>
   <hr>
   <ng-transclude></ng-transclude>
-  <div>
-    <input type="text" ng-model="$ctrl.twoWay">
-    <code>{{ $ctrl.twoWay }}</code>
-  </div>
+  <fieldset>
+    <div>
+      <label>TWO WAY</label>
+      <input type="text" ng-model="$ctrl.twoWay">
+    </div>
+    <div>
+      <label>ONE WAY</label>
+      <input type="text" ng-model="$ctrl.oneWay">
+    </div>
+  </fieldset>
   `,
   legacy:{transclude:true}
 })
 export class TesterComponent{
+  @Input('<') oneWay;
   @Input() twoWay;
-  @Input() inOne = { name:'Martin' };
+  @Input('<') inOne = { name:'Martin' };
   @Output() outOne = ()=>{ console.log( 'boooo' );};
   @Attr() attrOne = 'hello default';
 
@@ -35,6 +42,10 @@ export class TesterComponent{
     console.log( '===Tester CMP, OnInit====' );
     console.log( this.outOne.toString() );
     console.log( angular.toJson(this,true) );
+  }
+
+  ngOnChanges(changes){
+    console.log( 'TesterComponent changes:', changes );
   }
 
 }
