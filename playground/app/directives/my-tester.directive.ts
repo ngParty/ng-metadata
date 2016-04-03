@@ -21,6 +21,10 @@ export class TesterAttrDirective{
     console.log( angular.toJson(this,true) );
   }
 
+  ngOnChanges(changes){
+    console.log('TesterAttrDirective changes', changes);
+  }
+
   @HostListener('click')
   onClick(){
     console.log( 'onClick called!', this );
