@@ -49,6 +49,7 @@ Lifecycle hooks:
 
 `ng-metadata/core`
 - [OnInit](#oninit)
+- [OnChanges](#onchanges)
 - [AfterContentInit](#aftercontentinit)
 - [AfterContentChecked](#aftercontentchecked)
 - [AfterViewInit](#afterviewtinit)
@@ -1597,6 +1598,73 @@ _Example:_
 ###### Members
 
 - `ngOnInit()`
+
+
+## OnChanges
+
+> **module:** `ng-metadata/core`
+
+Implement this interface to get notified when any data-bound property of your directive changes.
+
+Called whenever one-way (`@Input(<)`) or interpolation (`@Attr()`) bindings are updated. 
+The `changes` parameter is a hash whose keys (implements `SimpleChange`) are the names of the bound properties that have changed, 
+and the values are an object of the form `{ currentValue, previousValue, isFirstChange() }`. 
+
+Use this hook to trigger updates within a component such as cloning the bound value to prevent accidental mutation of the outer value.
+
+`ngOnChanges` is called right after the data-bound properties have been checked and before view
+and content children are checked if at least one of them has changed.
+
+> NOTE: it works with both @Component and @Directive like angular 2 does, angular 1.5 does support onChanges only on component, 
+so you are safe with ngMetadata ;)
+
+_Example:_
+
+```typescript
+import { bootstrap } from 'ng-metadata/platform';
+import { Component, Input, Attr, OnChanges, SimpleChange, provide } from 'ng-metadata/core';
+
+@Component({
+  selector: 'my-cmp',
+  template: `
+    <p>myProp = {{$ctrl.myProp}}</p>
+    <p>myAttr = {{$ctrl.myAttr}}</p>
+  `
+})
+class MyComponent implements OnChanges {
+  @Attr() myAttr: string;
+  @Input('<') myProp: any;
+
+  ngOnChanges(changes: {[propName: string]: SimpleChange}) {
+    console.log('ngOnChanges - myProp = ' + changes['myProp'].currentValue);
+    console.log('ngOnChanges - myAttr = ' + changes['myAttr'].currentValue);
+  }
+}
+
+@Component({
+  selector: 'app',
+  template: `
+   <button ng-click="value = value + 1">Change MyComponent</button>
+   <button ng-click="str = str + 'world'">Change MyComponent attr</button>
+   <my-cmp my-prop="value" my-attr="{{str}}"></my-cmp>
+  `,
+  directives: [MyComponent]
+})
+export class App {
+  value = 0;
+  str = 'hello';
+}
+
+const AppModule = angular.module('myApp',[])
+.directive(...provide(MyComponent))
+.directive(...provide(App));
+
+bootstrap(AppModule);
+```
+
+###### Members
+
+- `ngOnChanges(changes: {[propName: string]: SimpleChange})`
 
 
 ## AfterViewInit
