@@ -5,15 +5,13 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "experimentalDecorators": true,
-    "declaration": true
+    "declaration": true,
+    "pretty": true
   },
-  "files": [
-    "manual_typings/globals.d.ts",
-    "typings/browser.d.ts",
-    "common.ts",
-    "core.ts",
-    "testing.ts",
-    "platform.ts",
-    "test/index.ts"
+  "exclude": [
+    "typings/main",
+    "typings/main.d.ts",
+    "playground",
+    "node_modules"
   ]
 }
