@@ -1,3 +1,14 @@
+<a name="1.3.0"></a>
+# [1.3.0](https://github.com/ngParty/ng-metadata/compare/1.2.0...v1.3.0) (2016-04-03)
+
+
+### Features
+
+* **core/change_detection:** implement ngOnChanges life cycle hook ([7a19876](https://github.com/ngParty/ng-metadata/commit/7a19876)), closes [#48](https://github.com/ngParty/ng-metadata/issues/48)
+* **playground:** add OnChanges examples ([bfdfe0c](https://github.com/ngParty/ng-metadata/commit/bfdfe0c))
+
+
+
 <a name="1.2.0"></a>
 # [1.2.0](https://github.com/ngParty/ng-metadata/compare/1.1.5...v1.2.0) (2016-04-02)
 
