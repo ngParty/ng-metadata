@@ -7,7 +7,7 @@ export class TesterAttrDirective{
   @Input() inOne = { name:'Martin from directive' };
   @Output() outOne = ()=>{ console.log( 'mooo from directive' ) };
   // @Output() outOne: Function;
-  @Attr() attrOne = 'hello default from directive';
+  @Input('@') attrOne = 'hello default from directive';
 
   constructor(){
     console.log( '===Tester DIR, ctor====' );

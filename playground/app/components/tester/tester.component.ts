@@ -1,4 +1,4 @@
-import { Component, Input, Output, Attr } from 'ng-metadata/core';
+import { Component, Input, Output } from 'ng-metadata/core';
 
 @Component({
   selector:'my-tester',
@@ -26,11 +26,11 @@ import { Component, Input, Output, Attr } from 'ng-metadata/core';
   legacy:{transclude:true}
 })
 export class TesterComponent{
-  @Input('<') oneWay;
   @Input() twoWay;
+  @Input('<') oneWay;
   @Input('<') inOne = { name:'Martin' };
-  @Output() outOne = ()=>{ console.log( 'boooo' );};
-  @Attr() attrOne = 'hello default';
+  @Input('@') attrOne = 'hello default';
+  @Output() outOne = ()=>{ console.log( 'boooo' ) };
 
   constructor(){
     console.log( '===Tester CMP ctor====' );
