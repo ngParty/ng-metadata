@@ -1,2 +1,3 @@
-//import {} from './src/common/directives';
 //import {} from './src/common/services';
+
+export * from './src/common/directives';
