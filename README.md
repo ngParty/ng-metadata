@@ -23,6 +23,16 @@ angular.element(document).ready(function(){
 // hero.js
 angular.module('hero',[]);
 
+// hero.service.js
+angular.module('hero')
+  .service('heroSvc', HeroService);
+ 
+HeroService.$inject = ['$http']; 
+function HeroService($http){ this.$http = $http; }
+HeroService.prototype.fetchAll = function(){
+  return this.$http.get('/api/heroes');
+}
+
 // hero.component.js
 angular.module('hero')
   .directive('hero',heroCmp);
@@ -44,8 +54,8 @@ function heroCmp(){
   };
 }
 
-HeroController.$inject = ['log'];
-function HeroController($log){
+HeroController.$inject = ['log','heroSvc'];
+function HeroController($log, heroSvc){
   this.init = function(){ /* your init logic */ };
 }
 ```
@@ -63,12 +73,26 @@ bootstrap(HeroModule);
 import * as angular from 'angular';
 import {provide} from 'ng-metadata/core';
 import {HeroComponent} from './hero.component';
+import {HeroService} from './hero.service';
 
 export const HeroModule = angular.module('hero',[])
-  .directive(...provide(HeroComponent));
+  .directive(...provide(HeroComponent))
+  .service(...provide(HeroService));
+  
+// hero.service.ts
+import {Injectable, Inject} from 'ng-metadata/core';   
+
+@Injectable()
+export class HeroService{
+  constructor(@Inject('$http') private $http: ng.IHttpService){}
+  fetchAll(){
+      return this.$http.get('/api/heroes');
+  }
+}
   
 // hero.component.ts
 import {Component,Inject,Input,Output} from 'ng-metadata/core';
+import {HeroService} from './hero.service';
 
 @Component({
   selector: 'hero-cmp',
@@ -80,14 +104,20 @@ export class HeroComponent{
   @Input() name: string;
   @Output() onCall: Function;
 
-  constructor(@Inject('$log') private $log: ng.ILogService){}
+  constructor(
+    // we need to inject via @Inject because angular 1 doesn't give us proper types
+    @Inject('$log') private $log: ng.ILogService,
+    // here we are injecting by Type which is possible thanks to reflect-metadata and Typescript and because our service
+    // is defined as a class
+    private heroSvc: HeroService
+  ){}
   
   ngOnInit(){ /* your init logic */ }
   
 }
 ```
 
-with `ngMetadata`, no magic strings, no link function and what not and no more strange angular 1 api syntax.
+with `ngMetadata`, magic strings for DI are gone, no link function, no $scope, no $element and what not and no more strange angular 1 api syntax.
  
 > Write your apps in Angular 2 style today and be more productive! 
 > There are no abstractions, just pure Angular 1.x and power of Decorators.
@@ -98,7 +128,7 @@ with `ngMetadata`, no magic strings, no link function and what not and no more s
 It leads you, to to write **clean and component driven** style code without complicated DDO definition API.
 
 Behind the scenes it uses ES7 decorators extended by Typescript( which adds method parameter decorators etc...)
-> parameter deorators are now at stage-0 in TC39, so probably it will be soon available in **Babel** so you can use 
+> parameter decorators are now at stage-0 in TC39, so probably it will be soon available in **Babel** so you can use 
 all this goodness with ES6 if you prefer pure JS
 
 ![ng-metadata logo](assets/logo/ngMetadata.png)
@@ -112,16 +142,50 @@ You have to allow nodeJS module resolution style in your `tsconfig.json`
 ```json
 {
   "compilerOptions": {
+    "module": "commonjs", // you can use arbitrary module compilation type, depends on your module bundler, we prefer commonjs with webpack
+    "target": "es5",
     "moduleResolution": "node",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   }
 }
 ```
 
-That's it! Now just start importing from `ng-metadata/core`,`ng-metadata/platform` or `ng-metadata/testing`
+You need to install peer dependencies as well. you need obviously `angularjs` :) and `reflect-metadata` so we have
+nice DI via Type injections provided by Typescript type annotations
 
-> It is also recommended to install angular 1 type definitions, so you get Angular 1 API type checking,
- via [typings](https://github.com/typings/typings) or [tsd](https://github.com/Definitelytyped/tsd)
+install peer dependencies by running:
+
+`npm i --save angular reflect-metadata`
+
+It is also recommended to install angular 1 type definitions, so you get Angular 1 API type checking, via [typings](https://github.com/typings/typings)
+
+We install typings type definition manager:
+
+`npm i --save-dev typings`
+
+Let's also add run scripts for the the typings tool to package.json:
+
+```json
+{
+  "scripts": {
+    "typings": "typings"
+  }
+}
+```
+
+We can now use Typings to install the type definitions for Angular 1
+
+- `npm run typings install jquery -- --save --ambient` // we need this to have proper typing support for angular jqLite
+- `npm run typings install angular -- --save --ambient`
+- `npm run typings install angular-mocks -- --save --ambient` // typings support for unit tests
+
+That's it! You are good to go! Now just start importing from 4 various modules:
+- [`ng-metadata/core`](docs/API.md#component),
+- [`ng-metadata/platform`](docs/API.md#bootstrap),
+- [`ng-metadata/common`](docs/API.md#ngmodel),
+- [`ng-metadata/testing`](docs/API.md#renderfactory)
+
 
 ## Why
 
