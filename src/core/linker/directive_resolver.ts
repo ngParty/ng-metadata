@@ -19,6 +19,7 @@ import {
 import { InjectMetadata, HostMetadata, SelfMetadata, SkipSelfMetadata, OptionalMetadata } from '../di/metadata';
 import { ParamMetaInst, PropMetaInst, getInjectableName } from '../di/provider';
 import { resolveForwardRef } from '../di/forward_ref';
+import { getErrorMsg } from '../../facade/exceptions';
 
 function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;
@@ -27,25 +28,45 @@ function _isDirectiveMetadata( type: any ): boolean {
 /**
  * return required string map for provided local DI
  * ```typescript
- * // for constructor(@Inject('ngModel') @Self() @Optional() ngModel){}
+ * // for
+ * constructor(@Inject('ngModel') @Self() @Optional() ngModel){}
  * // it returns:
  * { ngModel: '?ngModel' }
+ *
+ * // when MyComponent is
+ * @Component({ selector: 'myCoolCmp', template:`hello`})
+ * class MyComponent{}
+ * // for
+ * constructor(@Host() @Optional() myCmp: MyComponent){}
+ * // it returns:
+ * { myCmp: '^myCoolCmp' }
  * ```
  * @param paramsMeta
+ * @param idx
+ * @param typeOrFunc
  * @returns {{[directiveName]:string}}
  * @private
  */
-function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[], idx: number ): StringMap {
+function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[], idx: number, typeOrFunc: Type ): StringMap {
 
-  // if there is just @Inject return
-  if ( paramsMeta.length < 2 ) {
-    return;
-  }
+  if ( !_isInjectableParamsDirective( paramsMeta ) ) { return }
 
+  // @TODO unite this with _extractToken from provider.ts
   const injectInst = ListWrapper.find( paramsMeta, param=>param instanceof InjectMetadata ) as InjectMetadata;
+  const injectType = ListWrapper.find( paramsMeta, isType ) as Type;
+  const { token=undefined } = injectInst || { token: injectType };
+  // we need to decrement param count if user uses both @Inject() and :MyType
+  const paramsMetaLength = (injectInst && injectType)
+    ? paramsMeta.length - 1
+    : paramsMeta.length;
 
-  if ( !injectInst.token ) {
-    throw new Error( `no Directive instance name provided within @Inject()` );
+  if ( !token ) {
+    throw new Error(
+      getErrorMsg(
+        typeOrFunc,
+        `no Directive instance name provided within @Inject() or :DirectiveClass annotation missing`
+      )
+    );
   }
 
   const isHost = ListWrapper.findIndex( paramsMeta, param=>param instanceof HostMetadata ) !== -1;
@@ -53,23 +74,36 @@ function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[], idx: num
   const isSelf = ListWrapper.findIndex( paramsMeta, param=>param instanceof SelfMetadata ) !== -1;
   const isSkipSelf = ListWrapper.findIndex( paramsMeta, param=>param instanceof SkipSelfMetadata ) !== -1;
 
-  if ( isOptional && paramsMeta.length !== 3 ) {
-    throw new Error( `
-    you cannot use @Optional() without related decorator for injecting Directives. use one of @Host|@Self()|@SkipSelf() + @Optional()`
+  if ( isOptional && paramsMetaLength !== 3 ) {
+    throw new Error(
+      getErrorMsg(
+        typeOrFunc,
+        `you cannot use @Optional() without related decorator for injecting Directives. use one of @Host|@Self()|@SkipSelf() + @Optional()`
+      )
     );
   }
   if ( isSelf && isSkipSelf ) {
-    throw new Error( `you cannot provide both @Self() and @SkipSelf() with @Inject(${injectInst.token}) for Directive Injection` );
+    throw new Error(
+      getErrorMsg(
+        typeOrFunc,
+        `you cannot provide both @Self() and @SkipSelf() with @Inject(${getFuncName( token )}) for Directive Injection`
+      )
+    );
   }
   if( (isHost && isSelf) || (isHost && isSkipSelf)){
-    throw new Error( `you cannot provide both @Host(),@SkipSelf() or @Host(),@Self() with @Inject(${getFuncName(injectInst.token)}) for Directive Injections` );
+    throw new Error(
+      getErrorMsg(
+        typeOrFunc,
+        `you cannot provide both @Host(),@SkipSelf() or @Host(),@Self() with @Inject(${getFuncName( token )}) for Directive Injections`
+      )
+    );
   }
 
   const locateType = _getLocateTypeSymbol();
   const optionalType = isOptional ? '?' : '';
 
   const requireExpressionPrefix = `${ optionalType }${ locateType }`;
-  const directiveName = _getDirectiveName( injectInst.token );
+  const directiveName = _getDirectiveName( token );
 
   // we need to generate unique names because if we require same directive controllers,
   // with different locale decorators it would merge to one which is wrong
@@ -96,6 +130,25 @@ function _transformInjectedDirectivesMeta( paramsMeta: ParamMetaInst[], idx: num
     if ( isSkipSelf ) {
       return '^^';
     }
+
+  }
+
+  // exit if user uses both @Inject() and :Type for DI because this is not directive injection
+  function _isInjectableParamsDirective( paramsMeta: ParamMetaInst[] ): boolean {
+
+    // if there is just @Inject or Type from design:paramtypes return
+    if ( paramsMeta.length < 2 ) {
+      return false;
+    }
+
+    if ( paramsMeta.length === 2 ) {
+      const injectableParamCount = paramsMeta.filter( inj => inj instanceof InjectMetadata || isType( inj ) ).length;
+      if ( injectableParamCount === 2 ) {
+        return false;
+      }
+    }
+
+    return true;
 
   }
 
@@ -148,7 +201,7 @@ export class DirectiveResolver {
       return paramMetadata
         .reduce( ( acc, paramMetaArr, idx )=> {
 
-          const requireExp = _transformInjectedDirectivesMeta( paramMetaArr, idx );
+          const requireExp = _transformInjectedDirectivesMeta( paramMetaArr, idx, type );
           if ( isPresent( requireExp ) ) {
             assign( acc, requireExp );
           }

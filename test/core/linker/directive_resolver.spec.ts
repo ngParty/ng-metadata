@@ -15,6 +15,8 @@ import {
 } from '../../../src/core/directives/decorators';
 import { DirectiveResolver } from '../../../src/core/linker/directive_resolver';
 import { Inject, Host, Self, Optional, SkipSelf } from '../../../src/core/di/decorators';
+import { NgForm } from '../../../src/common/directives/ng_form';
+import { NgModel } from '../../../src/common/directives/ng_model';
 
 
 describe( `linker/directive_resolver`, ()=> {
@@ -237,7 +239,8 @@ describe( `linker/directive_resolver`, ()=> {
           @Inject( '$attrs' ) private $attrs,
           @Inject('clicker') @Host() private clicker,
           @Inject('api') @Host() @Optional() private api,
-          @Inject('ngModel') @Self() private ngModel
+          @Inject('ngModel') @Self() private ngModel,
+          @Host() private form: NgForm
         ) {}
 
       }
@@ -247,7 +250,8 @@ describe( `linker/directive_resolver`, ()=> {
       const expected = {
         'clicker#2': '^clicker',
         'api#3': '?^api',
-        'ngModel#4': 'ngModel'
+        'ngModel#4': 'ngModel',
+        'form#5':'^form'
       };
 
       expect(actual).to.deep.equal(expected);
@@ -259,9 +263,6 @@ describe( `linker/directive_resolver`, ()=> {
       @Directive({selector:'[clicker]'})
       class MyClickerDirective{}
 
-      @Directive({selector:'[ng-model]'})
-      class NgModelDirective{}
-
       @Directive({selector:'[api]'})
       class ApiDirective{}
 
@@ -272,8 +273,8 @@ describe( `linker/directive_resolver`, ()=> {
           @Inject( '$log' ) private $log,
           @Inject( '$attrs' ) private $attrs,
           @Inject(MyClickerDirective) @Host() private clicker,
-          @Inject(ApiDirective) @Host() @Optional() private api,
-          @Inject(NgModelDirective) @Self() private ngModel
+          @Host() @Optional() private api: ApiDirective,
+          @Self() private ngModel: NgModel
         ) {}
 
       }

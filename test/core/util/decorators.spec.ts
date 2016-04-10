@@ -13,10 +13,11 @@ describe( `util/decorators`, ()=> {
     expect( isFunction( ClsDecorator ) ).to.equal( true );
 
     @ClsDecorator()
-    class Test {
-    }
+    class Test {}
 
-    expect( Object.keys( Test ).length ).to.equal( 1 );
+    const annotations = Reflect.getOwnMetadata( 'annotations', Test );
+
+    expect( annotations.length ).to.equal( 1 );
 
   } );
 
@@ -31,7 +32,10 @@ describe( `util/decorators`, ()=> {
     class Test {
       @PropDecorator() foo: any;
     }
-    expect( Object.keys( Test ).length ).to.equal( 1 );
+
+    const propMetadata = Reflect.getOwnMetadata( 'propMetadata', Test );
+
+    expect( Object.keys( propMetadata ).length ).to.equal( 1 );
 
   } );
 
@@ -45,7 +49,9 @@ describe( `util/decorators`, ()=> {
     class Test {
       constructor( @ParamDecorator() moo: any ) {}
     }
-    expect( Object.keys( Test ).length ).to.equal( 1 );
+
+    const parameters = Reflect.getOwnMetadata( 'parameters', Test );
+    expect( parameters.length ).to.equal( 1 );
 
   } );
 
@@ -65,14 +71,21 @@ describe( `util/decorators`, ()=> {
     class Test {
       constructor( @ParamDecorator() moo: any ) {}
     }
-    expect( Object.keys( Test ).length ).to.equal( 1 );
+
+    const parameters = Reflect.getOwnMetadata( 'parameters', Test );
+    expect( parameters.length ).to.equal( 1 );
     expect( wasOverrideCalled ).to.equal( false );
 
+
+    // callback overrides works only in constructor
+    // ====
     class TestOnMethod {
       foo( @ParamDecorator() moo: any ) {}
     }
+
+    const noParameters = Reflect.getOwnMetadata( 'parameters', TestOnMethod );
     // if override it doesn't create metadata on class
-    expect( Object.keys( TestOnMethod ).length ).to.equal( 0 );
+    expect( noParameters ).to.equal( undefined );
     expect( wasOverrideCalled ).to.equal( true );
 
   } );

@@ -24,6 +24,7 @@ import { pipeProvider } from '../pipes/pipe_provider';
 import { directiveProvider } from '../directives/directive_provider';
 import { ListWrapper } from '../../facade/collections';
 import { resolveForwardRef } from './forward_ref';
+import { getErrorMsg } from '../../facade/exceptions';
 
 
 export type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
@@ -161,13 +162,14 @@ export function _dependenciesFor(typeOrFunc: Type): string[] {
 
   if ( isBlank( params ) ) return [];
 
-  if ( params.some( isBlank ) ) {
+  if ( params.some( ( param ) => isBlank( param ) || ListWrapper.isEmpty( param ) ) ) {
 
-    throw new Error( `
-      ${ stringify( typeOrFunc ) } :
-      -------------------------------------------------
-      you cannot have holes in constructor DI injection
-      ` );
+    throw new Error(
+      getErrorMsg(
+        typeOrFunc,
+        `you cannot have holes in constructor DI injection`
+      )
+    );
 
   }
 
@@ -184,16 +186,19 @@ export function _dependenciesFor(typeOrFunc: Type): string[] {
  */
 export function _extractToken( metadata: ParamMetaInst[] ): string {
 
-  const [injectMetadata] = metadata
-    .filter( paramMetadata=>paramMetadata instanceof InjectMetadata ) as InjectMetadata[];
+  // this is token obtained via design:paramtypes via Reflect.metadata
+  const [paramMetadata] = metadata.filter( isType );
+  // this is token obtained from @Inject() usage  for DI
+  const [injectMetadata] = metadata.filter( isInjectMetadata ) as InjectMetadata[];
 
-  if(isBlank(injectMetadata)){
+  if(isBlank(injectMetadata) && isBlank(paramMetadata)){
     return;
   }
 
-  const {token} = injectMetadata;
+  const { token=undefined } = injectMetadata || {};
+  const injectable = resolveForwardRef( token ) || paramMetadata;
 
-  return getInjectableName( resolveForwardRef( token ) );
+  return getInjectableName( injectable );
 
 }
 
@@ -239,6 +244,7 @@ export function getInjectableName(injectable: ProviderType): string{
   // class SomeService(){}
   //
   // @Inject(SomeService) someSvc
+  // someSvc: SomeService
   if ( isType( injectable ) ) {
 
     // only the first class annotations is injectable
@@ -317,4 +323,7 @@ function isService(annotation: InjectableMetadata): boolean{
 }
 function isPipe(annotation: PipeMetadata): boolean{
   return isString(annotation.name) && annotation instanceof PipeMetadata;
+}
+function isInjectMetadata( injectMeta: any ): injectMeta is InjectMetadata {
+  return injectMeta instanceof InjectMetadata;
 }

@@ -5,6 +5,7 @@
     "noImplicitAny": false,
     "sourceMap": true,
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "declaration": true,
     "pretty": true
   },

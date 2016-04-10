@@ -68,11 +68,11 @@ export function makeDecorator(
         annotationInstance.id = globalKeyRegistry.get( cls );
       }
 
-      let annotations = reflector.annotations(cls);
+      let annotations = reflector.ownAnnotations(cls);
 
       annotations = annotations || [];
       annotations.push( annotationInstance );
-      reflector.registerAnnotation(annotations,cls);
+      reflector.registerAnnotations(annotations,cls);
 
       return cls;
 
@@ -122,7 +122,7 @@ export function makeParamDecorator( annotationCls, overrideParamDecorator: Funct
 
       }
 
-      let parameters: any[][] = reflector.parameters(cls);
+      let parameters: any[][] = reflector.rawParameters(cls);
       parameters = parameters || [];
 
       // there might be gaps if some in between parameters do not have annotations.
@@ -168,7 +168,7 @@ export function makePropDecorator( decoratorCls ): any {
 
       return function PropDecorator( target: any, name: string ) {
 
-        let meta = reflector.propMetadata(target.constructor);
+        let meta = reflector.ownPropMetadata(target.constructor);
 
         meta = meta || {};
         meta[ name ] = meta[ name ] || [];

@@ -1,14 +1,11 @@
-import {expect} from 'chai';
-import {makePropDecorator} from '../../../src/core/util/decorators';
-import {Injectable} from '../../../src/core/di/decorators';
-import {Inject} from '../../../src/core/di/decorators';
-import {InjectableMetadata} from '../../../src/core/di/metadata';
-import {Host} from '../../../src/core/di/decorators';
-import {HostMetadata} from '../../../src/core/di/metadata';
-import {assign} from '../../../src/facade/lang';
-import {InjectMetadata} from '../../../src/core/di/metadata';
-import {reflector} from '../../../src/core/reflection/reflection';
-import {globalKeyRegistry} from '../../../src/core/di/key';
+import { expect } from 'chai';
+import { makePropDecorator } from '../../../src/core/util/decorators';
+import { Injectable, Inject, Host, SkipSelf } from '../../../src/core/di/decorators';
+import { InjectableMetadata, SkipSelfMetadata, HostMetadata, InjectMetadata } from '../../../src/core/di/metadata';
+import { assign } from '../../../src/facade/lang';
+import { reflector } from '../../../src/core/reflection/reflection';
+import { globalKeyRegistry } from '../../../src/core/di/key';
+import { NgForm } from '../../../src/common/directives/ng_form';
 
 
 describe( `reflection/reflector`, ()=> {
@@ -61,15 +58,17 @@ describe( `reflection/reflector`, ()=> {
         constructor(
           @Inject('$http') private $http: ng.IHttpService,
           @Inject('$log') private $log: ng.ILogService,
-          @Host() @Inject('ngModel') ngModel: ng.INgModelController
+          @Host() @Inject('ngModel') ngModel: ng.INgModelController,
+          @SkipSelf() @Inject(NgForm) ngForm: NgForm
         ){}
       }
 
-      const actual = reflector.parameters(Test);
+      const actual = reflector.rawParameters(Test);
       const expected = [
         [_createProto(InjectMetadata,{token:'$http'})],
         [_createProto(InjectMetadata,{token:'$log'})],
-        [_createProto(InjectMetadata,{token:'ngModel'}),_createProto(HostMetadata,null)]
+        [_createProto(InjectMetadata,{token:'ngModel'}),_createProto(HostMetadata,null)],
+        [_createProto(InjectMetadata,{token:NgForm}),_createProto(SkipSelfMetadata,null)]
       ];
 
       expect(actual).to.deep.equal(expected);
