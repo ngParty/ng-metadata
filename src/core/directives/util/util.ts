@@ -17,7 +17,7 @@ import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces'
 import { QueryMetadata } from '../metadata_di';
 import { DirectiveCtrl, NgmDirective } from '../directive_provider';
 import { StringWrapper } from '../../../facade/primitives';
-import { ChangeDetectionUtil } from '../../change_detection/change_detection_util';
+import { ChangeDetectionUtil, SimpleChange } from '../../change_detection/change_detection_util';
 import { changesQueueService } from '../../change_detection/changes_queue';
 
 const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
@@ -298,8 +298,16 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
 
   const $requires = getEmptyRequiredControllers( requireMap );
 
+  // $injector.invoke will delete any @Input/@Attr/@Output which were resolved within _createDirectiveBindings
+  // and which have set default values in constructor. We need to store them and reassign after this invoke
+  const initialInstanceBindingValues = getInitialBindings( instance );
+
   // Finally, invoke the constructor using the injection array and the captured locals
   $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
+
+  // reassign back the initial binding values, just in case if we used default values
+  StringMapWrapper.assign( instance, initialInstanceBindingValues );
+
 
   /*if ( isFunction( instance.ngOnDestroy ) ) {
     $scope.$on( '$destroy', instance.ngOnDestroy.bind( instance ) );
@@ -319,7 +327,15 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
     // #perf
     if ( StringMapWrapper.size( requireMap ) ) {
       const $requires = getRequiredControllers( requireMap, $element, controller );
+
+      // $injector.invoke will delete any @Input/@Attr/@Output which were resolved within _createDirectiveBindings
+      // and which have set default values in constructor. We need to store them and reassign after this invoke
+      const initialInstanceBindingValues = getInitialBindings( instance );
+
       $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
+
+      // reassign back the initial binding values, just in case if we used default values
+      StringMapWrapper.assign( instance, initialInstanceBindingValues );
     }
 
     if ( isFunction( instance.ngOnInit ) ) {
@@ -331,6 +347,18 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   // Return the controller instance
   return instance;
 
+}
+
+function getInitialBindings( instance ): {[propName: string]: any} {
+  const initialBindingValues = {};
+  StringMapWrapper.forEach( instance, ( value: any, propName: string ) => {
+
+    if ( instance[ propName ] ) {
+      initialBindingValues[ propName ] = value;
+    }
+
+  } );
+  return initialBindingValues;
 }
 
 function injectionArgs(fn, locals, serviceName, injects) {
@@ -532,7 +560,7 @@ export function _parseBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindi
       acc[ name ] = {
         mode,
         alias,
-        optional: optional === BINDING_MODE.optional
+        optional: optional === BINDING_MODE.optional || true
       };
 
       return acc;
@@ -566,7 +594,7 @@ export function _createDirectiveBindings(
     $rootScope?: ng.IRootScopeService
   }
 ): {
-  initialChanges: {[key:string]:any},
+  initialChanges: {[key: string]: SimpleChange},
   removeWatches: Function,
   _watchers: {watchers: Function[], observers: Function[]}
 } {
@@ -587,7 +615,7 @@ export function _createDirectiveBindings(
   const _internalObservers = [];
 
   // onChanges tmp vars
-  const initialChanges = {};
+  const initialChanges = {} as {[key: string]: SimpleChange};
   let changes;
 
   // this will create flush queue internally only once

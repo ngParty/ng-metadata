@@ -637,15 +637,15 @@ describe( `directives/directive_provider`, ()=> {
 
         const actual = directiveProvider._createComponentBindings( inputs, attrs, outputs );
         const expected = {
-          one: '=',
+          one: '=?',
           oneOpt: '=?oneOpt',
-          two: '=twoAlias',
-          color: '@',
-          brood: '@broodAlias',
-          onFoo: '&',
-          onMoo: '&onMooAlias',
-          oneWay: '<',
-          oneWayAlias: '<oneWayAlas'
+          two: '=?twoAlias',
+          color: '@?',
+          brood: '@?broodAlias',
+          onFoo: '&?',
+          onMoo: '&?onMooAlias',
+          oneWay: '<?',
+          oneWayAlias: '<?oneWayAlas'
         };
 
         expect( actual ).to.deep.equal( expected );
