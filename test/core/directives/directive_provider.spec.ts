@@ -25,6 +25,7 @@ import {
   _setHostListeners,
   NgmDirective
 } from '../../../src/core/directives/directive_provider';
+import { NgModel } from '../../../src/common/directives/ng_model';
 
 describe( `directives/directive_provider`, ()=> {
 
@@ -278,7 +279,7 @@ describe( `directives/directive_provider`, ()=> {
       class MyValidator{
         constructor(
           @Inject('$log') $log: ng.ILogService,
-          @Inject('ngModel') @Host() private ngModel
+          @Host() private ngModel: NgModel
         ){}
       }
 
@@ -301,12 +302,16 @@ describe( `directives/directive_provider`, ()=> {
       @Directive({selector:'[my-css-mutator]'})
       class CssHandler{}
 
+      @Directive({selector:'[my-css-extractor]'})
+      class CssExtractorHandler{}
+
       @Directive({selector:'[validator]'})
       class MyValidator{
         constructor(
           @Inject('$log') $log: ng.ILogService,
           @Inject('ngModel') @Host() private ngModel,
-          @Inject(CssHandler) @Host() private myCssMutator
+          @Inject(CssHandler) @Host() private myCssMutator,
+          @Host() private myCssExtractor: CssExtractorHandler
         ){}
       }
 
@@ -316,7 +321,7 @@ describe( `directives/directive_provider`, ()=> {
       expect( directiveName ).to.equal( 'validator' );
       expect( isFunction( directiveFactory ) ).to.equal( true );
       expect( directiveFactory() ).to.deep.equal( {
-        require: [ 'validator','^ngModel','^myCssMutator' ],
+        require: [ 'validator','^ngModel','^myCssMutator','^myCssExtractor' ],
         controller: ddo.controller,
         link: ddo.link as ng.IDirectiveLinkFn,
         _ngOnInitBound: ddo._ngOnInitBound
@@ -632,15 +637,15 @@ describe( `directives/directive_provider`, ()=> {
 
         const actual = directiveProvider._createComponentBindings( inputs, attrs, outputs );
         const expected = {
-          one: '=',
+          one: '=?',
           oneOpt: '=?oneOpt',
-          two: '=twoAlias',
-          color: '@',
-          brood: '@broodAlias',
-          onFoo: '&',
-          onMoo: '&onMooAlias',
-          oneWay: '<',
-          oneWayAlias: '<oneWayAlas'
+          two: '=?twoAlias',
+          color: '@?',
+          brood: '@?broodAlias',
+          onFoo: '&?',
+          onMoo: '&?onMooAlias',
+          oneWay: '<?',
+          oneWayAlias: '<?oneWayAlas'
         };
 
         expect( actual ).to.deep.equal( expected );

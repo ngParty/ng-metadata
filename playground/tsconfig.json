@@ -4,7 +4,9 @@
     "target": "es5",
     "noImplicitAny": false,
     "sourceMap": true,
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "pretty": true
   },
   "files": [
     "app/main.ts",

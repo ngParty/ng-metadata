@@ -173,6 +173,29 @@ describe( `facade/collections`, ()=> {
 
       } );
 
+      it( `should fill array with provided value`, () => {
+
+        let arr = [ 1, 2, 3 ];
+        ListWrapper.fill( arr, 4 );
+        expect( arr ).to.deep.equal( [ 4, 4, 4 ] );
+        arr = [ 1, 2, 3 ];
+        ListWrapper.fill( arr, 4, 1 );
+        expect( arr ).to.deep.equal( [ 1, 4, 4 ] );
+        arr = [ 1, 2, 3 ];
+        ListWrapper.fill( arr, 4, 1, 2 );
+        expect( arr ).to.deep.equal( [ 1, 4, 3 ] );
+        arr = [ 1, 2, 3 ];
+        ListWrapper.fill( arr, 4, 1, 1 );
+        expect( arr ).to.deep.equal( [ 1, 2, 3 ] );
+        arr = [ 1, 2, 3 ];
+        ListWrapper.fill( arr, 4, -3, -2 );
+        expect( arr ).to.deep.equal( [ 4, 2, 3 ] );
+        arr = [ 1, 2, 3 ];
+        ListWrapper.fill( arr, 4, NaN, NaN );
+        expect( arr ).to.deep.equal( [ 1, 2, 3 ] );
+
+      } );
+
     } );
 
   } );

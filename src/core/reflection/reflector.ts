@@ -1,96 +1,111 @@
-import {Type,isPresent,isFunction} from "../../facade/lang";
-
-// This will be needed when we will used Reflect APIs
-/*const Reflect = global.Reflect;
- if (!(Reflect && Reflect.getMetadata)) {
- throw 'reflect-metadata shim is required when using class decorators';
- }*/
+import { Type } from '../../facade/lang';
+import { ReflectorReader } from './reflector_reader';
+import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
 
 /**
- * @internal
- * @private
- * @type {string}
+ * Reflective information about a symbol, including annotations, interfaces, and other metadata.
  */
-export const CLASS_META_KEY = '__mAnnotations';
-/**
- * @internal
- * @private
- * @type {string}
- */
-export const PARAM_META_KEY = '__mParameters';
-/**
- * @internal
- * @private
- * @type {string}
- */
-export const PROP_META_KEY = '__mPropMetadata';
-
+export class ReflectionInfo {
+  constructor(
+    public annotations?: any[],
+    public parameters?: any[][],
+    public factory?: Function,
+    public interfaces?: any[],
+    public propMetadata?: {[key: string]: any[]
+    }
+  ) {}
+}
 
 /**
  * Provides access to reflection data about symbols. Used internally by Angular
  * to power dependency injection and compilation.
  */
-export class Reflector {
+export class Reflector extends ReflectorReader {
 
-  parameters( typeOrFunc: Type ): any[][] {
-    //return Reflect.getMetadata('parameters', cls);
-    return extractParameter( typeOrFunc ) || [];
+  /** @internal */
+  // _injectableInfo = new Map<any, ReflectionInfo>();
+  /** @internal */
+  // _getters = new Map<string, GetterFn>();
+  /** @internal */
+  // _setters = new Map<string, SetterFn>();
+  /** @internal */
+  // _methods = new Map<string, MethodFn>();
+  /** @internal */
+  // _usedKeys: Set<any>;
+  reflectionCapabilities: PlatformReflectionCapabilities;
+
+  constructor( reflectionCapabilities: PlatformReflectionCapabilities ) {
+    super();
+    // this._usedKeys = null;
+    this.reflectionCapabilities = reflectionCapabilities;
   }
 
-  registerParameters( parameters, type: Type ): void {
-    //Reflect.defineMetadata('parameters', parameters, cls);
-    type[ PARAM_META_KEY ] = parameters;
+  isReflectionEnabled(): boolean { return this.reflectionCapabilities.isReflectionEnabled(); }
+
+
+  parameters( typeOrFunc: /*Type*/ any ): any[][] {
+    // // get cached
+    // if (this._injectableInfo.has(typeOrFunc)) {
+    //   var res = this._getReflectionInfo(typeOrFunc).parameters;
+    //   return isPresent(res) ? res : [];
+    // } else {
+    return this.reflectionCapabilities.parameters( typeOrFunc );
+    // }
   }
 
-  annotations( typeOrFunc: Type ): any[] {
-    //return Reflect.getOwnMetadata('annotations', cls);
-    return extractAnnotation( typeOrFunc ) || [];
+  rawParameters( typeOrFunc: Type ): any[][] {
+    return this.reflectionCapabilities.rawParameters( typeOrFunc );
   }
 
-  registerAnnotation( annotations, type: Type ): void {
-    //Reflect.defineMetadata('annotations', annotations, cls);
-    type[ CLASS_META_KEY ] = annotations;
+  registerParameters( parameters, typeOrFunc: Type ): void {
+    this.reflectionCapabilities.registerParameters( parameters, typeOrFunc );
   }
 
-  propMetadata( typeOrFunc: Type ): {[key: string]: any[]} {
-    //return Reflect.getOwnMetadata('propMetadata', target.constructor);
-    return extractProperty( typeOrFunc ) || {};
+  annotations( typeOrFunc: /*Type*/ any ): any[] {
+    // // get cached
+    // if (this._injectableInfo.has(typeOrFunc)) {
+    //   var res = this._getReflectionInfo(typeOrFunc).annotations;
+    //   return isPresent(res) ? res : [];
+    // } else {
+    return this.reflectionCapabilities.annotations( typeOrFunc );
+    // }
   }
 
-  registerPropMetadata( propMetadata, type: Type ): void {
-    //Reflect.defineMetadata('propMetadata', meta, target);
-    type[ PROP_META_KEY ] = propMetadata;
+  ownAnnotations( typeOrFunc: Type ): any[] {
+    return this.reflectionCapabilities.ownAnnotations( typeOrFunc );
   }
 
-}
-
-
-function extract( metaKey: string ) {
-
-  return function ( cls: any ): any {
-
-    if ( isFunction( cls ) && cls.hasOwnProperty( metaKey ) ) {
-      // it is a decorator, extract annotation
-      return cls[ metaKey ];
-    }
-
+  registerAnnotations( parameters, typeOrFunc: Type ): void {
+    this.reflectionCapabilities.registerAnnotations( parameters, typeOrFunc );
   }
 
-}
+  propMetadata( typeOrFunc: /*Type*/ any ): {[key: string]: any[]} {
+    // // get cached
+    // if (this._injectableInfo.has(typeOrFunc)) {
+    //   var res = this._getReflectionInfo(typeOrFunc).propMetadata;
+    //   return isPresent(res) ? res : {};
+    // } else {
+    return this.reflectionCapabilities.propMetadata( typeOrFunc );
+    // }
+  }
 
-function extractAnnotation( cls: any ): any[] {
+  ownPropMetadata( typeOrFunc: Type ): {[key: string]: any[]} {
+    return this.reflectionCapabilities.ownPropMetadata( typeOrFunc );
+  }
 
-  return extract( CLASS_META_KEY )( cls );
+  registerPropMetadata( parameters, typeOrFunc: Type ): void {
+    this.reflectionCapabilities.registerPropMetadata( parameters, typeOrFunc );
+  }
 
-}
+  /** @internal */
+  _getReflectionInfo( typeOrFunc: any )/*: ReflectionInfo */ {
+    /*if (isPresent(this._usedKeys)) {
+     this._usedKeys.add(typeOrFunc);
+     }
+     return this._injectableInfo.get(typeOrFunc);*/
+  }
 
-function extractParameter( cls: any ): any[][] {
-
-  return extract( PARAM_META_KEY )( cls );
-
-}
-function extractProperty( cls: any ): {[name:string]:any[]} {
-
-  return extract( PROP_META_KEY )( cls );
+  /** @internal */
+  _containsReflectionInfo( typeOrFunc: any ) { /*return this._injectableInfo.has(typeOrFunc);*/ }
 
 }

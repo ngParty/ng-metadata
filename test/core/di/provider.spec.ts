@@ -14,6 +14,8 @@ import { Pipe } from '../../../src/core/pipes/decorators';
 import { noop, isFunction, getFuncName } from '../../../src/facade/lang';
 import { OpaqueToken } from '../../../src/core/di/opaque_token';
 import { globalKeyRegistry } from '../../../src/core/di/key';
+import { NgForm } from '../../../src/common/directives/ng_form';
+import { NgModel } from '../../../src/common/directives/ng_model';
 
 describe( `di/provider`, ()=> {
 
@@ -408,6 +410,7 @@ describe( `di/provider`, ()=> {
         expect( ()=>_dependenciesFor( Foo ) ).to.throw();
 
       } );
+
       it( `should allow directive injections in arbitrary argument position`, ()=> {
 
         class Foo {
@@ -428,26 +431,42 @@ describe( `di/provider`, ()=> {
         const OhMy = new OpaqueToken( 'oh_My' );
 
         @Injectable()
-        class SvcYo {
-        }
+        class SvcYo {}
+
+        @Injectable()
+        class SvcSecondBo {}
 
         @Directive( { selector: '[myMyDrr]' } )
-        class MyFooDirective {
-        }
+        class MyFooDirective {}
+
+        @Directive( { selector: '[mySecondDrr]' } )
+        class MySecondDirective {}
 
         @Injectable()
         class Foo {
           constructor(
             @Inject( '$log' ) $log,
-            @Inject( SvcYo ) someSvc,
-            @Inject( OhMy ) ohMy,
-            @Inject( 'ngModel' ) @Host() ngModel,
-            @Inject( MyFooDirective ) @Host() myDirective
+            @Inject( SvcYo ) someSvc: SvcYo,
+            someSecondSvc: SvcSecondBo,
+            @Inject( OhMy ) ohMy: typeof OhMy,
+            @Inject( 'ngModel' ) @Host() ngModel: NgModel,
+            @Host() ngForm: NgForm,
+            @Inject( MyFooDirective ) @Host() myDirective: MyFooDirective,
+            @Host() mySecond: MySecondDirective
           ) {}
         }
 
         const actual = _dependenciesFor( Foo );
-        const expected = [ '$log', 'svcYo#1', 'oh_My', 'ngModel', 'myMyDrr' ];
+        const expected = [
+          '$log',
+          'svcYo#1',
+          'svcSecondBo#2',
+          'oh_My',
+          'ngModel',
+          'form',
+          'myMyDrr',
+          'mySecondDrr'
+        ];
 
         expect( actual ).to.deep.equal( expected );
 
