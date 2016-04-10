@@ -834,19 +834,22 @@ describe( `directives/util`, ()=> {
       const metadata = {
         inputs: [
           'foo',
-          'one: oneAlias'
+          'one: oneAlias',
+          'interpolate: @'
         ]
       } as DirectiveMetadata;
       StringMapWrapper.assign( $attrs, {
         foo: '$ctrl.parentFoo',
-        oneAlias: '$ctrl.parentOne'
+        oneAlias: '$ctrl.parentOne',
+        interpolate: 'hello string'
       } );
       const bindingDisposables = _createDirectiveBindings( false, $scope, $attrs, ctrl, metadata, services );
       const {watchers,observers} = bindingDisposables._watchers;
 
       expect( watchers.length ).to.equal( 2 );
-      expect( observers.length ).to.equal( 0 );
+      expect( observers.length ).to.equal( 1 );
 
+      // test Inputs
       const [[firstExp,firstListener],[secondExp,secondListener]] = $scope.$$watchers;
 
       expect(isFunction(firstExp)).to.equal(true);
@@ -861,17 +864,29 @@ describe( `directives/util`, ()=> {
       secondListener( 'hello one' );
       expect( ctrl.one ).to.equal( 'hello one' );
 
+
+      // test Inputs('@') for attr binding
+      const {interpolate:interpolateAttr,} = $attrs.$$observers;
+      const [firstAttrListener] = interpolateAttr;
+
+      expect(isPresent(interpolateAttr)).to.equal(true);
+      expect( ctrl.interpolate ).to.equal( 'hello string' );
+
+      firstAttrListener( 'hello' );
+      expect( ctrl.interpolate ).to.equal( 'hello' );
+
     } );
 
     it( `should create array of attrs.$observe disposable callbacks for @Attr`, ()=> {
 
       const metadata = {
         attrs: [
-          'foo',
-          'one: oneAlias'
+          'foo'
+        ],
+        inputs: [
+          'one: @oneAlias'
         ]
       } as DirectiveMetadata;
-
 
       $attrs.foo = 'hello first';
       $attrs.oneAlias = 'hello one';

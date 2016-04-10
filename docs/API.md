@@ -786,6 +786,8 @@ Note:
 An alternative and more declarative way to using the `inputs` property on `@Component`/`@Directive`.
 
 Binds to Component via two way binding `=` by default or via one way binding on Directive by default.
+Since 1.5 it allows you to bind to an interpolation which was previously handled by `@Attr` via `@Input('@')`
+
 If you wanna use one way binding on Component use `@Input('<') yourProperty`
 
 *Example:*
@@ -798,10 +800,11 @@ class MenuDropdown {
   @Input() options;
   @Input('<') oneWay;
   @Input('aliasMe') value;
+  @Input('@') interpolatedValue: string;
 }
 ```
 ```html
-<menu-dropdown one-way="ctrl.someValue" options="ctrl.options" alias-me="ctrl.foo"></menu-dropdown>
+<menu-dropdown one-way="ctrl.someValue" options="ctrl.options" alias-me="ctrl.foo" interpolated-value="{{ $ctrl.someValToInterpolate }}"></menu-dropdown>
 ```
 
 ###### Parameters
@@ -848,6 +851,8 @@ class MenuDropdown {
 ## @Attrs
 
 > **module:** `ng-metadata/core`
+
+**DEPRECATED** will be removed in 2.0. Instead use `@Input('@)`
 
 An alternative and more declarative way to using the `attrs` property on `@Component`/`@Directive`.
 
