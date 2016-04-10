@@ -1,3 +1,14 @@
+<a name="1.5.0"></a>
+# [1.5.0](https://github.com/ngParty/ng-metadata/compare/1.4.0...v1.5.0) (2016-04-11)
+
+
+### Features
+
+* **core/directives:** allow to create interpolation bindings via Input('@') and set Attr as deprecated ([52e2d1f](https://github.com/ngParty/ng-metadata/commit/52e2d1f))
+* **playground:** use @Input for interpolation bindings ([895cd3a](https://github.com/ngParty/ng-metadata/commit/895cd3a))
+
+
+
 <a name="1.4.0"></a>
 # [1.4.0](https://github.com/ngParty/ng-metadata/compare/1.3.0...v1.4.0) (2016-04-10)
 
@@ -14,7 +25,7 @@
 
 ### BREAKING CHANGES
 
-* core:
+**core:**
 
 - from now on ngMetadata leverages reflect-metadata polyfill, so you need to include it to your app
 - also you need to add `"emitDecoratorMetadata": true` to your tsconfig.json
