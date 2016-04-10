@@ -1,3 +1,26 @@
+<a name="1.4.0"></a>
+# [1.4.0](https://github.com/ngParty/ng-metadata/compare/1.3.0...v1.4.0) (2016-04-10)
+
+
+### Features
+
+* **common:** provide angular 1 directives as abstract classes so we can use them for DI ([42b466a](https://github.com/ngParty/ng-metadata/commit/42b466a))
+* **core:** support Injection by Type via reflect-metadata design:paramtypes ([000553d](https://github.com/ngParty/ng-metadata/commit/000553d))
+* **core/directives:** allow default values for directive/component public API ([076afe6](https://github.com/ngParty/ng-metadata/commit/076afe6))
+* **facade/collections:** add fill ponyfill to ListWrapper ([6a590b1](https://github.com/ngParty/ng-metadata/commit/6a590b1))
+* **facade/exceptions:** create helper for consistent error messages ([5a8ef71](https://github.com/ngParty/ng-metadata/commit/5a8ef71))
+* **playground:** use new injection by type via reflect-metadata ([088ca11](https://github.com/ngParty/ng-metadata/commit/088ca11))
+
+
+### BREAKING CHANGES
+
+* core:
+
+- from now on ngMetadata leverages reflect-metadata polyfill, so you need to include it to your app
+- also you need to add `"emitDecoratorMetadata": true` to your tsconfig.json
+
+
+
 <a name="1.3.0"></a>
 # [1.3.0](https://github.com/ngParty/ng-metadata/compare/1.2.0...v1.3.0) (2016-04-03)
 
