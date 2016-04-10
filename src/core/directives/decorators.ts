@@ -203,6 +203,11 @@ export const ViewChild: ViewChildFactory = makePropDecorator(ViewChildMetadata);
 
 export const Input: InputFactory = makePropDecorator(InputMetadata);
 
+/**
+ *
+ * @type {any}
+ * @deprecated use @Input('@') instead. Will be removed in 2.0
+ */
 export const Attr: AttrFactory = makePropDecorator(AttrMetadata);
 
 export const Output: OutputFactory = makePropDecorator(OutputMetadata);
