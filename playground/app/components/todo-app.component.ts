@@ -11,9 +11,8 @@ export class TodoAppCmp{
   todos: TodoModel[];
 
   constructor(
-    @Inject(TodoStore) private todoStore: TodoStore
+    private todoStore: TodoStore
   ) {
-
     this.todos = this.todoStore.todos;
   }
 
@@ -103,3 +102,5 @@ export class TodoAppCmp{
 
 
 }
+
+console.dir(TodoAppCmp)

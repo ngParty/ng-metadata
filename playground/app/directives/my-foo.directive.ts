@@ -1,4 +1,5 @@
 import { forwardRef, Directive, Inject, Host, Self, Optional, OnInit, AfterContentInit } from 'ng-metadata/core';
+import { NgModel, NgForm } from 'ng-metadata/common';
 import { MyValidatorDirective } from './my-validator.directive';
 import {TodoStore} from '../stores/todoStore.service';
 
@@ -12,10 +13,10 @@ export class MyFooDirective implements OnInit,AfterContentInit{
   };
 
   constructor(
-    @Inject('ngModel') @Host() private ngModelCtrl: ng.INgModelController,
-    @Inject( forwardRef(()=>MyValidatorDirective) ) @Self() private myValidator,
-    @Inject('form') @Optional() @Self() private FormCtrl: ng.IFormController,
-    @Inject( TodoStore ) private todoSvc
+    @Host() private ngModelCtrl: NgModel,
+    @Inject( forwardRef(()=>MyValidatorDirective) ) @Self() private myValidator: MyValidatorDirective,
+    @Optional() @Self() private FormCtrl: NgForm,
+    private todoSvc: TodoStore
   ){}
 
   ngOnInit(){
