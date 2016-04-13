@@ -55,6 +55,9 @@ declare module ngMetadataCore{
   export function Optional(): ParameterDecorator;
   export function Host(): ParameterDecorator;
   export function Parent(): ParameterDecorator;
+  export function Self(): ParameterDecorator;
+  export function SkipSelf(): ParameterDecorator;
+  export function HostListener(eventName:string): MethodDecorator;
 
   /**
    * Factory for {@link ContentChildren}.
@@ -492,8 +495,76 @@ declare module ngMetadataCore{
   export interface OnChildrenChanged {
     _ngOnChildrenChanged?(): any;
   }
+ 
+  export interface OnChanges { 
+    ngOnChanges(changes: {[key: string]: {
+      previousValue: any,
+      currentValue: any,
+      isFirstChange(): boolean
+    }}); 
+  }
+}
 
-
+declare module ngMetadataCommon {
+  export const CORE_DIRECTIVES: Type[]
+  export abstract class NgModel implements ng.INgModelController {
+    $viewValue: any;
+    $modelValue: any;
+    $parsers: ng.IModelParser[];
+    $formatters: ng.IModelFormatter[];
+    $viewChangeListeners: ng.IModelViewChangeListener[];
+    $error: any;
+    $name: string;
+    $touched: boolean;
+    $untouched: boolean;
+    $validators: ng.IModelValidators;
+    $asyncValidators: ng.IAsyncModelValidators;
+    $pending: any;
+    $pristine: boolean;
+    $dirty: boolean;
+    $valid: boolean;
+    $invalid: boolean;
+    $render(): void;
+    $setValidity(validationErrorKey: string, isValid: boolean): void;
+    $setViewValue(value: any, trigger?: string): void;
+    $setPristine(): void;
+    $setDirty(): void;
+    $validate(): void;
+    $setTouched(): void;
+    $setUntouched(): void;
+    $rollbackViewValue(): void;
+    $commitViewValue(): void;
+    $isEmpty(value: any): boolean;
+  }
+  export abstract class NgForm implements ng.IFormController {
+    $pristine: boolean;
+    $dirty: boolean;
+    $valid: boolean;
+    $invalid: boolean;
+    $submitted: boolean;
+    $error: any;
+    $addControl(control: angular.INgModelController): void;
+    $removeControl(control: angular.INgModelController): void;
+    $setValidity(validationErrorKey: string, isValid: boolean, control: angular.INgModelController): void;
+    $setDirty(): void;
+    $setPristine(): void;
+    $commitViewValue(): void;
+    $rollbackViewValue(): void;
+    $setSubmitted(): void;
+    $setUntouched(): void;
+  }
+  export abstract class NgSelect {
+    ngModelCtrl: ng.INgModelController;
+    unknownOption: ng.IAugmentedJQuery;
+    renderUnknownOption(val: string): void;
+    removeUnknownOption(): void;
+    abstract readValue(): string;
+    writeValue(value: string): void;
+    addOption(value: string, element: ng.IAugmentedJQuery): void;
+    removeOption(value: any): void;
+    abstract hasOption(value: any): boolean;
+    registerOption(optionScope: ng.IScope, optionElement: ng.IAugmentedJQuery, optionAttrs: ng.IAttributes, interpolateValueFn?: Function, interpolateTextFn?: Function): void;
+  }
 }
 declare module "ng-metadata/core" {
   export = ngMetadataCore;
@@ -502,6 +573,9 @@ declare module "ng-metadata/platform" {
   export = ngMetadataPlatform;
 }
 
+declare module "ng-metadata/common" {
+  export = ngMetadataCommon
+}
 declare type Type = Function;
 declare type ProvideSpreadType = string|Type;
 

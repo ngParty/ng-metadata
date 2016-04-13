@@ -14,4 +14,7 @@ export class TabsContentComponent implements OnChildrenChanged,AfterViewInit, On
     @Inject(forwardRef(()=>TabsComponent)) @Host() private tabs: TabsComponent
   ){}
 
+  ngAfterViewInit(){}
+  
+  ngOnDestroy(){}
 }

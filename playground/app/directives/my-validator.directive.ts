@@ -18,9 +18,15 @@ export class MyValidatorDirective implements OnInit,AfterContentInit{
   }
   ngAfterContentInit(){
     console.log( this.todoSvc );
-    this.ngModelCtrl.$validators.myValidator = (viewValue,modelValue)=>{
+    (this.ngModelCtrl.$validators as ImyValidators).myValidator = (modelValue,viewValue)=>{
+      var value = modelValue || viewValue;
       return viewValue ==='Martin';
     }
   }
 
+}
+
+//interface to have strict typecheck for custom myValidator and avoid this.ngModelCtrl.$validators["myValidator"]
+interface ImyValidators extends ng.IModelValidators {
+    myValidator: (modelValue: any, viewValue: any) => boolean
 }

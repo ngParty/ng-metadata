@@ -15,5 +15,8 @@ export class TabsChildComponent implements AfterViewInit, OnDestroy{
     @Inject(forwardRef(()=>TabsComponent)) @Host() private tabs: TabsComponent
   ){}
 
+  ngAfterViewInit(){}
+  
+  ngOnDestroy(){}
 
 }

@@ -6,7 +6,9 @@ import {
   ViewChildren,
   ContentChild,
   ContentChildren,
+  AfterViewInit,
   AfterViewChecked,
+  AfterContentInit,
   AfterContentChecked,
   OnChildrenChanged
 } from 'ng-metadata/core';
