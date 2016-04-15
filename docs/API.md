@@ -1082,7 +1082,7 @@ class MyComponent {
   
   ngAfterViewInit(){
     console.assert(this.item.length === 3);
-    console.assert(this.jqDiv.length === 3);
+    console.assert(this.jqDiv.length === 2);
   }
   
   ngAfterViewChecked(){
@@ -1238,7 +1238,7 @@ class MyComponent {
   
   ngAfterContentInit(){
     console.assert(this.item.length === 3);
-    console.assert(this.jqDiv.length === 3);
+    console.assert(this.jqDiv.length === 2);
   }
   
   ngAfterContentChecked(){
