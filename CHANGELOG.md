@@ -1,3 +1,48 @@
+<a name="1.5.2"></a>
+## [1.5.2](https://github.com/ngParty/ng-metadata/compare/1.5.1...v1.5.2) (2016-04-16)
+
+
+### Features
+
+* **platform/bootstrap:** use bootstrap with module name instead of n… (#60) ([34d510a](https://github.com/ngParty/ng-metadata/commit/34d510a))
+
+
+### BREAKING CHANGES
+
+* platform/bootstrap: - you need to export .name from your registered module.
+- This brings consistency across the whole app, because it's by default that Angular 1 exports module names for consumer and this is also aligned with ngUpgrade
+
+before:
+```typescript
+import { provide, Component } from 'ng-metadata/core';
+import { bootstrap } from 'ng-metadata/platform';
+
+@Component({ selector: 'app', template: 'Hello World!' })
+class App { }
+
+const AppModule = angular.module('app', [])
+  .directive( ...provide(App) );
+
+bootstrap(AppModule);
+```
+
+after:
+```typescript
+import { provide, Component } from 'ng-metadata/core';
+import { bootstrap } from 'ng-metadata/platform';
+
+@Component({ selector: 'app', template: 'Hello World!' })
+class App { }
+
+const AppModule = angular.module('app', [])
+  .directive( ...provide(App) )
+  .name;
+
+bootstrap(AppModule);
+```
+
+
+
 <a name="1.5.1"></a>
 ## [1.5.1](https://github.com/ngParty/ng-metadata/compare/1.5.0...v1.5.1) (2016-04-16)
 
