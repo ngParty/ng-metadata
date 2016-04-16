@@ -85,5 +85,4 @@ export const AppModule = angular.module( 'app', [TabsModule] )
       // }
     }
   })*/
-
-  ;
+  .name;
