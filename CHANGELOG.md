@@ -1,3 +1,15 @@
+<a name="1.5.1"></a>
+## [1.5.1](https://github.com/ngParty/ng-metadata/compare/1.5.0...v1.5.1) (2016-04-16)
+
+
+### Bug Fixes
+
+* **common/directives:** fix ngForm implementation to match latest angular typings ([83d6e46](https://github.com/ngParty/ng-metadata/commit/83d6e46))
+* **playground:** fix compilation errors and added missing types in ng-metadata.legacy.d.ts (#57) ([30d4e02](https://github.com/ngParty/ng-metadata/commit/30d4e02)), closes [(#57](https://github.com/(/issues/57)
+* **playground:** fix ngForm implementation to match latest angular typings ([862f4bf](https://github.com/ngParty/ng-metadata/commit/862f4bf))
+
+
+
 <a name="1.5.0"></a>
 # [1.5.0](https://github.com/ngParty/ng-metadata/compare/1.4.0...v1.5.0) (2016-04-11)
 
