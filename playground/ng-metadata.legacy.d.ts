@@ -495,13 +495,13 @@ declare module ngMetadataCore{
   export interface OnChildrenChanged {
     _ngOnChildrenChanged?(): any;
   }
- 
-  export interface OnChanges { 
+
+  export interface OnChanges {
     ngOnChanges(changes: {[key: string]: {
       previousValue: any,
       currentValue: any,
       isFirstChange(): boolean
-    }}); 
+    }});
   }
 }
 
@@ -543,6 +543,7 @@ declare module ngMetadataCommon {
     $invalid: boolean;
     $submitted: boolean;
     $error: any;
+    $pending: any;
     $addControl(control: angular.INgModelController): void;
     $removeControl(control: angular.INgModelController): void;
     $setValidity(validationErrorKey: string, isValid: boolean, control: angular.INgModelController): void;
