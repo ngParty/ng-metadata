@@ -90,7 +90,8 @@ import { bootstrap } from 'ng-metadata/platform';
 class App { }
 
 const AppModule = angular.module('app', [])
-  .directive( ...provide(App) );
+  .directive( ...provide(App) )
+  .name;
 
 bootstrap(AppModule);
 ```
@@ -99,7 +100,7 @@ bootstrap(AppModule);
 
 | Parameter     | Type                            | Description                               |
 | ------------- | ------------------------------- |------------------------------------------ |
-| **ngModule**  | `ngModule`                      | angular module                            |
+| **ngModule**  | `string`                        | angular module name                       |
 | **element?**  | `Element` or `string`(selector) | you can provide on which element or selector you want to boot your app. Default element is `document` |
 
 returns `undefined`
@@ -1746,8 +1747,9 @@ export class App {
 }
 
 const AppModule = angular.module('myApp',[])
-.directive(...provide(MyComponent))
-.directive(...provide(App));
+  .directive(...provide(MyComponent))
+  .directive(...provide(App))
+  .name;
 
 bootstrap(AppModule);
 ```

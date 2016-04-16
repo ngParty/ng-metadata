@@ -2,12 +2,12 @@ export type AppRoot = string | Element | Document;
 
 /**
  * bootstrap angular app
- * @param {ng.IModule}  ngModule
+ * @param {string}  ngModuleName
  * @param {string | Element | Document} [element=document]
  * @param {boolean} [strictDi=true]
  */
 export function bootstrap(
-  ngModule: ng.IModule,
+  ngModuleName: string,
   {element=document,strictDi=true}: {
     element?: AppRoot,
     strictDi?: boolean
@@ -17,7 +17,7 @@ export function bootstrap(
   const appRoot = _getAppRoot( element );
 
   angular.element( document ).ready( ()=> {
-    angular.bootstrap( appRoot, [ ngModule.name ], {
+    angular.bootstrap( appRoot, [ ngModuleName ], {
       strictDi: true
     } )
   } );
