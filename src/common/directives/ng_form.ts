@@ -8,31 +8,24 @@ export abstract class NgForm implements ng.IFormController {
   $invalid: boolean;
   $submitted: boolean;
   $error: any;
+  $pending: any;
 
-  $addControl( control: angular.INgModelController ): void {
-  }
+  $addControl( control: angular.INgModelController ): void {}
 
-  $removeControl( control: angular.INgModelController ): void {
-  }
+  $removeControl( control: angular.INgModelController ): void {}
 
-  $setValidity( validationErrorKey: string, isValid: boolean, control: angular.INgModelController ): void {
-  }
+  $setValidity( validationErrorKey: string, isValid: boolean, control: angular.INgModelController ): void {}
 
-  $setDirty(): void {
-  }
+  $setDirty(): void {}
 
-  $setPristine(): void {
-  }
+  $setPristine(): void {}
 
-  $commitViewValue(): void {
-  }
+  $commitViewValue(): void {}
 
-  $rollbackViewValue(): void {
-  }
+  $rollbackViewValue(): void {}
 
-  $setSubmitted(): void {
-  }
+  $setSubmitted(): void {}
 
-  $setUntouched(): void {
-  }
+  $setUntouched(): void {}
+
 }
