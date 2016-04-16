@@ -32,7 +32,7 @@
     "angular": "1.4.10",
     "chai": "3.4.1",
     "commitizen": "2.4.6",
-    "conventional-changelog": "0.5.3",
+    "conventional-changelog": "1.1.0",
     "cz-conventional-changelog": "1.1.4",
     "ghooks": "1.0.1",
     "live-server": "0.8.2",
