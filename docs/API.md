@@ -5,9 +5,12 @@ Angular 1 bootstrap:
 `ng-metadata/platform`
 - [bootstrap](#bootstrap)
 
+`ng-metadata/core`
+- [enableProdMode](#enableprodmode)
+
 Angular 1 container registration helper Methods:
 
-`ng-metadata/core` 
+`ng-metadata/core`
 - [provide](#provide)
 - [getInjectableName](#getinjectablename)
 - [forwardRef](#forwardref)
@@ -109,6 +112,40 @@ returns `undefined`
 
 `angular.bootstrap` is called on the page element that matches the element parameter or by default on `document`. 
 This action is invoked inside `angular.element( document ).ready` function. 
+
+
+## enableProdMode
+
+> **module:** `ng-metadata/core`
+
+Disable Angular's development mode, which turns off debug data information and optimizes $http calls execution.
+
+Behind the scenes we are setting :
+- [`$compileProvider.debugInfoEnabled(false);`](https://docs.angularjs.org/guide/production#disabling-debug-data)
+- [`$httpProvider.useApplyAsync(true)`](https://docs.angularjs.org/api/ng/provider/$httpProvider#useApplyAsync)
+
+
+*example:*
+```typescript
+// app.ts
+export const AppModule = angular
+  .module('myApp',[])
+  .name;
+  
+// main.ts
+import {bootstrap} from 'ng-metadata/platform';
+import {enableProdMode} from 'ng-metadata/core';
+import {AppModule} from './app';
+
+enableProdMode();
+
+bootstrap( AppModule );
+```
+
+###### Parameters
+none
+
+returns `undefined`
 
 ---
 
