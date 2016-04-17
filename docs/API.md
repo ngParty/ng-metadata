@@ -100,7 +100,7 @@ bootstrap(AppModule);
 
 | Parameter     | Type                            | Description                               |
 | ------------- | ------------------------------- |------------------------------------------ |
-| **ngModule**  | `string` (module name) or `ngModule` | angular module name or angular module itself (internally use the .name of ngModule)                   |
+| **ngModule**  | `string`                        | angular module name                       |
 | **element?**  | `Element` or `string`(selector) | you can provide on which element or selector you want to boot your app. Default element is `document` |
 
 returns `undefined`

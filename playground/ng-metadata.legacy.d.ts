@@ -1,7 +1,7 @@
 declare module ngMetadataPlatform{
 
   type AppRoot = string | Element | Document;
-  function bootstrap(ngModule: string | ng.IModule, {element, strictDi}?: {
+  function bootstrap(ngModule: string, {element, strictDi}?: {
     element?: AppRoot;
     strictDi?: boolean;
   }): void;
