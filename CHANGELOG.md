@@ -1,3 +1,17 @@
+<a name="1.6.0"></a>
+# [1.6.0](https://github.com/ngParty/ng-metadata/compare/1.5.2...v1.6.0) (2016-04-18)
+
+
+### Bug Fixes
+
+* **platform/bootstrap:** correctly use strictDi param when bootstrapping ngMetadata app (#62) ([361f509](https://github.com/ngParty/ng-metadata/commit/361f509))
+
+### Features
+
+* **core:** implement enableProdMode functionality (#61) ([59cd7d2](https://github.com/ngParty/ng-metadata/commit/59cd7d2))
+
+
+
 <a name="1.5.2"></a>
 ## [1.5.2](https://github.com/ngParty/ng-metadata/compare/1.5.1...v1.5.2) (2016-04-16)
 
