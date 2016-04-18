@@ -1,3 +1,4 @@
+import { assertionsEnabled } from '../facade/lang';
 export type AppRoot = string | Element | Document;
 
 /**
@@ -13,6 +14,14 @@ export function bootstrap(
     strictDi?: boolean
   }={}
 ) {
+
+  if ( assertionsEnabled() ) {
+    console.info(
+      'Angular is running in the development mode. Call enableProdMode() to enable the production mode.'
+    );
+  } else {
+    angular.module( ngModuleName ).config( prodModeConfig );
+  }
 
   const appRoot = _getAppRoot( element );
 
@@ -31,4 +40,10 @@ function _getAppRoot( element: AppRoot ): Element {
   }
   return element as Element;
 
+}
+
+prodModeConfig.$inject = [ '$compileProvider', '$httpProvider' ];
+function prodModeConfig( $compileProvider: ng.ICompileProvider, $httpProvider: ng.IHttpProvider ) {
+  $compileProvider.debugInfoEnabled( false );
+  $httpProvider.useApplyAsync( true );
 }

@@ -70,6 +70,24 @@ const reIsUint = /^\d+$/;
  */
 const MAX_SAFE_INTEGER = 9007199254740991;
 
+
+let _devMode: boolean = true;
+/**
+ * Disable Angular's development mode, which turns off assertions and other
+ * checks within the framework.
+ *
+ * One important assertion this disables verifies that a change detection pass
+ * does not result in additional changes to any bindings (also known as
+ * unidirectional data flow).
+ */
+export function enableProdMode() {
+  _devMode = false;
+}
+
+export function assertionsEnabled(): boolean {
+  return _devMode;
+}
+
 export function CONST(): ClassDecorator & PropertyDecorator {
   return ( target ) => target;
 }

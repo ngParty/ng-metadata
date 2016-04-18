@@ -503,6 +503,16 @@ declare module ngMetadataCore{
       isFirstChange(): boolean
     }});
   }
+
+  /**
+   * Disable Angular's development mode, which turns off assertions and other
+   * checks within the framework.
+   *
+   * One important assertion this disables verifies that a change detection pass
+   * does not result in additional changes to any bindings (also known as
+   * unidirectional data flow).
+   */
+  export function enableProdMode(): void;
 }
 
 declare module ngMetadataCommon {
