@@ -18,7 +18,7 @@ export function bootstrap(
 
   angular.element( document ).ready( ()=> {
     angular.bootstrap( appRoot, [ ngModuleName ], {
-      strictDi: true
+      strictDi
     } )
   } );
 
