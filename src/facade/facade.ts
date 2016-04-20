@@ -2,3 +2,4 @@
 // None :)
 
 export {Type} from './lang';
+export {EventEmitter} from './async';
