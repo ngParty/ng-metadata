@@ -513,6 +513,16 @@ declare module ngMetadataCore{
    * unidirectional data flow).
    */
   export function enableProdMode(): void;
+
+  export class EventEmitter<T> {
+    /**
+     * Creates an instance of [EventEmitter], which depending on [isAsync],
+     * delivers events synchronously or asynchronously.
+     */
+    constructor(isAsync?: boolean);
+    emit(value: T): void;
+    subscribe(generatorOrNext?: Function, error?: any, complete?: any): Function;
+  }
 }
 
 declare module ngMetadataCommon {

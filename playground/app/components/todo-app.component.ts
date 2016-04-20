@@ -70,6 +70,10 @@ export class TodoAppCmp{
     this.items.push(newId);
   }
 
+  outputWithEmitReceiver( sentence: string ) {
+    console.log( sentence );
+  }
+
 
   directive = {
     example: {

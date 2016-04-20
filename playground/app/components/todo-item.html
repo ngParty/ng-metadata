@@ -9,7 +9,7 @@
     class="mdl-checkbox__input"
     ng-model="$ctrl.todo.complete"
     ng-change="$ctrl.done($ctrl.todo)">
-  <span class="mdl-checkbox__label">{{ $ctrl.todo.label }}</span>
+  <span class="mdl-checkbox__label" ng-click="$ctrl.callEmit()">{{ $ctrl.todo.label }}</span>
 
 </label>
 <ng-transclude></ng-transclude>
