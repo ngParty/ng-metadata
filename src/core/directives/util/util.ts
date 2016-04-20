@@ -286,7 +286,7 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
     metadata,
     _services
   );
-  $scope.$on( '$destroy', ()=> removeWatches );
+  $scope.$on( '$destroy', () => removeWatches() );
 
   // change injectables to proper inject directives
   // we wanna do this only if we inject some locals/directives
