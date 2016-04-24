@@ -1,3 +1,13 @@
+<a name="1.6.1"></a>
+## [1.6.1](https://github.com/ngParty/ng-metadata/compare/1.6.0...v1.6.1) (2016-04-24)
+
+
+### Bug Fixes
+
+* **core/directives:** properly clean up bindings on destroy (#67) ([cb46729](https://github.com/ngParty/ng-metadata/commit/cb46729))
+
+
+
 <a name="1.6.0"></a>
 # [1.6.0](https://github.com/ngParty/ng-metadata/compare/1.5.2...v1.6.0) (2016-04-18)
 
