@@ -24,6 +24,7 @@ Testing helpers:
 Classes:
 
 `ng-metadata/core`
+- [EventEmitter](#eventemitter)
 - [OpaqueToken](#opaquetoken)
 
 Angular 1 Directives types:
@@ -455,6 +456,99 @@ Within it calls angular 1 well known $compile with provided $scope and re runs $
 
 **Classes:**
 
+## EventEmitter
+
+> **module:** `ng-metadata/core`
+
+Use by directives and components to emit custom Events via `@Output` binding.
+> Under the hood operates under the `&` binding but mitigates the pain of passing `{locals}` to the callback
+
+###### members
+
+| members       | Type                            | Description                                  |
+| ------------- | ------------------------------- |--------------------------------------------- |
+| **emit**      | `(value: T): void`              | emits defined event to parent with provided value, this value is encapsulated in `$event` from within template |
+| **subscribe** | `(next?: Function) : Function`  | abstraction of real observable `subscription`, just works as pubSub and returns dispose callback, Do not use this! |
+
+**Note:**
+This is not Rx `Subject`, it's just an abstraction
+  
+**Note 2:**
+Never call emitter instance methods within constructor, because the `&` binding is wrapped within EventEmitter during class instantiation.
+Instead use `OnInit` phase which you should use anyway for all startup logic.
+- This will be resolved in ngMetadata `2.0` where it will be already emitter instance
+
+**Pure Interface usage:**
+- if you don't preffer to assign `@Output` to new EventEmitter, isntead you can use just interface like `@Output() callUser: EventEmitter<UserModel>`
+-- this is here for migration reasons from traditional callbacks. 
+-- Under the hood we add proper `emit` to angular `&` binding, but preferabble is assigning `new EventEmitter`
+-- so this way you can call `@Output() callUser: EventEmitter<UserModel>` later in code like `doSomething(){ this.callUser.emit({name:'martin'}) }`
+or traditionaly with confusing angular locals `doSomething(){ this.callUser({user:{name:'martin'}}) }`
+
+*example:*
+
+In the following example, Zippy alternatively emits open and close events when its title gets clicked
+
+```typescript
+// app.component.ts
+import {Component} from 'ng-metadata/core';
+
+@Component({
+  selector:'app',
+  template:`<zippy open="$ctrl.onOpen($event)" "$ctrl.onClose($event)"></zippy>`,
+  directives: [ZippyComponent]
+})
+class AppComponent {
+
+  onOpen(zippyVisible: boolean){
+    console.log(`zippy visibility is: {zippyVisible}`);
+  }
+  onClose(zippyVisible: boolean){
+    console.log(`zippy visibility is: {zippyVisible}`);
+  }
+}
+
+// zipy.component.ts
+import {Component, Output, EventEmitter} from 'ng-metadata/core';
+
+@Component({
+  selector: 'zippy',
+  template: `
+    <div class="zippy">
+      <div ng-click="$ctrl.toggle()">Toggle</div>
+      <div ng-hide="!$ctrl.visible">
+        <ng-transclude></ng-transclude>
+      </div>
+    </div>`
+})
+export class ZippyComponent {
+  visible: boolean = true;
+  
+  @Output() open = new EventEmitter<boolean>();
+  @Output() close = new EventEmitter<boolean>();
+  
+  toggle() {
+    this.visible = !this.visible;
+    if (this.visible) {
+      this.open.emit(this.visible);
+    } else {
+      this.close.emit(this.visible);
+    }
+  }
+}
+
+// index.ts
+import * as angular from 'angular';
+import {provide} from 'ng-metadata/core';
+import {AppComponent} from './app.component';
+import {ZippyComponent} from './zippy.component';
+
+export ngModule = angular.module('myApp',[])
+  .directive(...provide(AppComponent))
+  .directive(...provide(ZippyComponent))
+  .name;
+```
+
 ## OpaqueToken
 
 > **module:** `ng-metadata/core`
@@ -857,8 +951,10 @@ class MenuDropdown {
 > **module:** `ng-metadata/core`
 
 An alternative and more declarative way to using the `outputs` property on `@Component`/`@Directive`.
+Via `@Output` and `EventEmitter` you can emit custom events to parent component
 
-Binds to controller via `&` binding or executes expression on directive via `$scope.$eval`
+**Deprecated behaviour: (will be removed in 2.0)**
+- binds to controller via `&` binding or executes expression on directive via `$scope.$eval`
 
 *Example:*
 
@@ -867,16 +963,16 @@ import { Component, Output } from 'ng-metadata/core';
 
 @Component({ ... })
 class MenuDropdown {
-    @Output() onOptionSelect: Function;
-    @Output('onAlias') onFoo: Function;
+    @Output() onOptionSelect = new EventEmitter<void>();
+    @Output('onAlias') onFoo = new EventEmitter<void>();
 
     someMethod() {
-        this.onOptionSelect();
+        this.onOptionSelect.emit();
     }
 }
 ```
 ```html
-<menu-dropdown on-option-select="ctrl.optionSelected()" on-alias="ctrl.onFoo()"></menu-dropdown>
+<menu-dropdown on-option-select="$ctrl.optionSelected()" on-alias="$ctrl.onFoo()"></menu-dropdown>
 ```
 
 ###### Parameters
