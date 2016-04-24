@@ -615,6 +615,13 @@ Specifies which DOM events a directive listens to via a set of `(event)` to `met
 - `event`: the DOM event that the directive listens to.
 - `statement`: the statement to execute when the event occurs. If the evaluation of the statement returns `false`, then `preventDefault` is applied on the DOM event.
 
+To listen to global events, a target must be added to the event name ( before the event separated with colon, like this `(target: click)`). 
+
+The target can be:
+ - `window`, 
+ - `document`
+ - `body`
+
 When writing a directive event binding, you can also refer to the `$event` local variable.
 
 > There is a better way for using host with listeners, via method decorator [@HostListener](#hostlistener)
@@ -1001,11 +1008,33 @@ class CountClicks {
 })
 ```
 
+> Or you can attach to global target if you need
+
+```typescript
+import { Component, Directive, HostListener } from 'ng-metadata/core';
+
+@Directive({
+  selector: '[resize-handler]'
+})
+class ResizeHandlerDirective {
+  
+  @HostListener('window: resize', ['$event'])
+  onResize($event) {
+    console.log('window resized!', $event);
+  }
+}
+@Component({
+  selector: 'app',
+  template: `<div resize-handler>Hello World!</div>`,
+  directives: [ResizeHandlerDirective]
+})
+```
+
 ###### Parameters
 
 | Parameter     | Type     | Description                               |
 | ------------- | ---------|------------------------------------------ |
-| **eventName**  | `string` | event name which the host element should listen to |
+| **eventName**  | `string` | event name which the host element should listen to, or if used for global target use `target: eventName` where target can be one of `window` | `document` | `body`
 | **args?**  | `string[]` | string path which property from $event should be passed to callback method |
 
 ###### Behind scenes

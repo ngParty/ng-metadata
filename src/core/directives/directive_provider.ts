@@ -210,6 +210,7 @@ export class DirectiveProvider {
    * @returns {{}}
    * @private
    * @internal
+   * @deprecated
    */
   _createComponentBindings(
     inputs: string[] = [],
@@ -320,17 +321,22 @@ export class DirectiveProvider {
     }
 
     function processHostListenerCallback( hostListener: {[key:string]:string} ): {[key:string]:string[]} {
-      const [eventName] = Object.keys( hostListener );
-      const cbString = hostListener[ eventName ];
 
+      // eventKey is 'click' or 'document: click' etc
+      const [eventKey] = Object.keys( hostListener );
+      // cbString is just value 'onMove($event.target)' or 'onMove()'
+      const cbString = hostListener[ eventKey ];
+      // here we parse out callback method and its argument to separate strings
+      // - for instance we got from 'onMove($event.target)' --> 'onMove','$event.target'
       const [,cbMethodName,cbMethodArgs] = /^(\w+)\(([$\w.,]*)\)$/.exec( cbString );
+      const eventValue = [
+        cbMethodName,
+        // filter out empty values and trim values
+        ...cbMethodArgs.split( ',' ).filter( argument=>Boolean( argument ) ).map( argument=>argument.trim() )
+      ];
 
       return {
-        [eventName]: [
-          cbMethodName,
-          // filter out empty values and trim values
-          ...cbMethodArgs.split( ',' ).filter( argument=>Boolean( argument ) ).map( argument=>argument.trim() )
-        ]
+        [eventKey.replace( /\s/g, '' )]: eventValue
       };
     }
 
@@ -643,35 +649,98 @@ export function _setHostBindings(
  * @internal
  * @private
  */
-export function _setHostListeners( scope: ng.IScope, element: ng.IAugmentedJQuery, ctrl: any, hostListeners: HostListenersProcessed ): void {
+export function _setHostListeners(
+  scope: ng.IScope,
+  element: ng.IAugmentedJQuery,
+  ctrl: any,
+  hostListeners: HostListenersProcessed
+): void {
 
-  StringMapWrapper.forEach(
-    hostListeners,
-    ( cbArray: string[], eventName: string ) => {
+  StringMapWrapper.forEach( hostListeners, _registerHostListener );
 
-      const [methodName,...methodParams] = cbArray;
+  function _registerHostListener( cbArray: string[], eventKey: string ): void {
 
-      element.on( eventName, ( evt )=> {
+    const [methodName,...methodParams] = cbArray;
+    const { event, target } = _getTargetAndEvent( eventKey, element );
 
-        const cbParams: any[] = _getHostListenerCbParams( evt, methodParams );
+    // console.log( event );
+    target.on( event, eventHandler );
 
-        scope.$applyAsync( ()=> {
+    // global event
+    if ( target !== element ) {
+      scope.$on( '$destroy', () => target.off( event as any, eventHandler ) );
+    }
 
-          const noPreventDefault = ctrl[ methodName ]( ...cbParams );
+    function eventHandler( evt ) {
 
-          // HostListener preventDefault if method name returns false,
-          // which is default if you don't explicitly return truthy value
-          if ( !noPreventDefault ) {
-            evt.preventDefault();
-          }
+      const cbParams: any[] = _getHostListenerCbParams( evt, methodParams );
 
-        } );
+      scope.$applyAsync( ()=> {
+
+        const noPreventDefault = ctrl[ methodName ]( ...cbParams );
+
+        // HostListener preventDefault if method name returns false,
+        // which is default if you don't explicitly return truthy value
+        if ( !noPreventDefault ) {
+          evt.preventDefault();
+        }
 
       } );
 
     }
-  );
 
+  }
+
+}
+
+function _getGlobalTargetReference( $injector: ng.auto.IInjectorService, targetName: string ): ng.IAugmentedJQuery {
+
+  const globalEventTargets = [ 'document', 'window', 'body' ];
+  const $document = $injector.get<ng.IDocumentService>( `$document` );
+
+  if ( targetName === 'document' ) {
+    return $document;
+  }
+
+  if ( targetName === 'window' ) {
+    return angular.element( $injector.get<ng.IWindowService>( `$${targetName}` ) );
+  }
+
+  if ( targetName === 'body' ) {
+    return angular.element($document[ 0 ][ targetName ]);
+  }
+
+  throw new Error(`unsupported global target '${targetName}', only '${globalEventTargets}' are supported`)
+}
+
+/**
+ *
+ * @param definedHostEvent this will be just simple 'event' string name or 'globalTarget:event'
+ * @param hostElement
+ * @returns {any}
+ * @private
+ */
+function _getTargetAndEvent(
+  definedHostEvent: string,
+  hostElement: ng.IAugmentedJQuery
+): {event: string,target: ng.IAugmentedJQuery} {
+
+  // global target
+  const eventWithGlobalTarget = definedHostEvent.split(/\s*:\s*/);
+
+  if ( eventWithGlobalTarget.length === 2 ) {
+    const [globalTarget,eventOnTarget] = eventWithGlobalTarget;
+
+    return {
+      event: eventOnTarget,
+      target: _getGlobalTargetReference( hostElement.injector(), globalTarget )
+    };
+  }
+
+  return {
+    event: definedHostEvent,
+    target: hostElement
+  };
 }
 
 /**

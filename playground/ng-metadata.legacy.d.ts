@@ -57,7 +57,7 @@ declare module ngMetadataCore{
   export function Parent(): ParameterDecorator;
   export function Self(): ParameterDecorator;
   export function SkipSelf(): ParameterDecorator;
-  export function HostListener(eventName:string): MethodDecorator;
+  export function HostListener(eventName: string, args?: string[]): MethodDecorator;
 
   /**
    * Factory for {@link ContentChildren}.

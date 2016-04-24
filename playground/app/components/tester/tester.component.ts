@@ -12,7 +12,7 @@ import { Component, Input, Output } from 'ng-metadata/core';
   <button ng-click="$ctrl.outOne();$event.stopPropagation();">exec outOne</button>
   <hr>
   <ng-transclude></ng-transclude>
-  <fieldset>
+  <fieldset my-global-listener>
     <div>
       <label>TWO WAY</label>
       <input type="text" ng-model="$ctrl.twoWay">

@@ -17,7 +17,7 @@ import {
   HostBinding
 } from '../../../src/core/directives/decorators';
 import { Inject, Host } from '../../../src/core/di/decorators';
-import { $Scope, $Attrs, ElementFactory } from '../../../src/testing/utils';
+import { $Scope, $Attrs, ElementFactory, $Document } from '../../utils';
 import {
   directiveProvider,
   _setHostBindings,
@@ -686,7 +686,10 @@ describe( `directives/directive_provider`, ()=> {
           '[attr.aria-label]': 'ariaLabel',
           '[readonly]': 'isReadonly',
           '(mousemove)': 'onMove($event.target)',
-          '(mouseout)': 'onMoveOut()'
+          '(mouseout)': 'onMoveOut()',
+          '(document: click)': 'onDocumentClick()',
+          '(window    : resize)': 'onWindowResize()',
+          '(body:keydown)': 'onKeyDown()'
         } as any;
         const actual = directiveProvider._processHost( host );
         const expected = {
@@ -708,7 +711,10 @@ describe( `directives/directive_provider`, ()=> {
           },
           hostListeners: {
             'mousemove': [ 'onMove', '$event.target' ],
-            'mouseout': [ 'onMoveOut' ]
+            'mouseout': [ 'onMoveOut' ],
+            'document:click': [ 'onDocumentClick' ],
+            'window:resize': [ 'onWindowResize' ],
+            'body:keydown': [ 'onKeyDown' ]
           }
         };
 
@@ -857,7 +863,7 @@ describe( `directives/directive_provider`, ()=> {
 
       } );
 
-      describe( `#_setHostListeners`, ()=> {
+      describe( `#_setHostListeners`, () => {
 
         const sandbox = sinon.sandbox.create();
         let $element;
@@ -865,12 +871,14 @@ describe( `directives/directive_provider`, ()=> {
         let hostListeners = {
           'click': [ 'onClick', '$event' ],
           'mousemove': [ 'onMove', '$event.target.x', '$event.target.x' ],
-          'mouseout': [ 'onOut' ]
+          'mouseout': [ 'onOut' ],
+          'document: click': [ 'onDocumentClick' ]
         } as {[key:string]:string[]};
         let ctrl = {
           onClick: sandbox.spy( ( evt )=> {} ),
           onMove: sandbox.spy( ( x, y )=> {} ),
-          onOut: sandbox.spy( ()=>true )
+          onOut: sandbox.spy( ()=>true ),
+          onDocumentClick: sandbox.spy( ( evt ) => ({}) )
         };
         let event = {
           target: {
@@ -888,10 +896,8 @@ describe( `directives/directive_provider`, ()=> {
         } );
 
         afterEach( ()=> {
-
           event.preventDefault.reset();
           sandbox.restore();
-
         } );
 
         it( `should register proper host listeners`, ()=> {
@@ -902,6 +908,14 @@ describe( `directives/directive_provider`, ()=> {
 
           expect( $element._eventListeners.length ).to.equal( 3 );
           expect( allAreFunctions ).to.equal( true );
+
+        } );
+
+        it( `should register proper global host listeners`, () => {
+
+          const $document = $element.injector().get( '$document' );
+
+          expect( isFunction( $document._eventListeners[ 0 ].cb ) ).to.equal( true );
 
         } );
 
