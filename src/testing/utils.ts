@@ -2,6 +2,7 @@ import { isFunction } from '../facade/lang';
 import { getInjectableName } from '../core/di/provider';
 import { StringWrapper } from '../facade/primitives';
 import { isArray } from 'util';
+import { assign } from '../facade/lang';
 
 // public helpers
 
@@ -179,6 +180,10 @@ export function getNg1InjectorMock(): ng.auto.IInjectorService {
           return new $Parse();
         case '$interpolate':
           return new $Interpolate();
+        case '$document':
+          return $DocumentStatic;
+        case '$window':
+          return new $Window();
         default:
           return {};
       }
@@ -291,6 +296,17 @@ export class $Attrs {
   }
 }
 
+export class $Document {
+
+  static $element = ElementFactory() as any;
+  constructor() {
+    $Document.$element[ 0 ].body = {};
+    assign( this, $Document.$element );
+  }
+
+}
+
+export class $Window {}
 /**
  *
  * @internal
@@ -330,6 +346,9 @@ export function ElementFactory() {
     parent(){},
     data(){},
     inheritedData(){},
+    injector(){
+      return $InjectorStatic
+    },
     controller( ctrlName: string ){}
   };
 
@@ -337,4 +356,5 @@ export function ElementFactory() {
 
 }
 
-
+const $DocumentStatic = new $Document();
+export const $InjectorStatic = getNg1InjectorMock();
