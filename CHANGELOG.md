@@ -1,3 +1,18 @@
+<a name="1.7.0"></a>
+# [1.7.0](https://github.com/ngParty/ng-metadata/compare/1.6.1...v1.7.0) (2016-04-24)
+
+
+### Bug Fixes
+
+* **playground:** update HostListener type definition ([5d44b9d](https://github.com/ngParty/ng-metadata/commit/5d44b9d))
+
+### Features
+
+* **core/directives:** add global target support for @HostListener ([4af3f69](https://github.com/ngParty/ng-metadata/commit/4af3f69))
+* **playground:** add examples with global hostListeners ([0058df9](https://github.com/ngParty/ng-metadata/commit/0058df9))
+
+
+
 <a name="1.6.1"></a>
 ## [1.6.1](https://github.com/ngParty/ng-metadata/compare/1.6.0...v1.6.1) (2016-04-24)
 
