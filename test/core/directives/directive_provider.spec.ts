@@ -17,7 +17,7 @@ import {
   HostBinding
 } from '../../../src/core/directives/decorators';
 import { Inject, Host } from '../../../src/core/di/decorators';
-import { $Scope, $Attrs, ElementFactory, $Document } from '../../../src/testing/utils';
+import { $Scope, $Attrs, ElementFactory, $Document } from '../../utils';
 import {
   directiveProvider,
   _setHostBindings,

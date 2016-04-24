@@ -1,5 +1,5 @@
 import {expect} from 'chai';
-import {getNg1InjectorMock} from '../../../src/testing/utils';
+import {getNg1InjectorMock} from '../../utils';
 import {isString,isFunction} from '../../../src/facade/lang';
 import {Pipe} from '../../../src/core/pipes/decorators';
 import {pipeProvider} from '../../../src/core/pipes/pipe_provider';

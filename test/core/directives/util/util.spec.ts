@@ -29,7 +29,7 @@ import {
   $Scope,
   $Interpolate,
   $Parse
-} from '../../../../src/testing/utils';
+} from '../../../utils';
 import { global, noop, isFunction, isPresent } from '../../../../src/facade/lang';
 import { DirectiveCtrl, NgmDirective } from '../../../../src/core/directives/directive_provider';
 import { Inject } from '../../../../src/core/di/decorators';

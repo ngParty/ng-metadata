@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import { changesQueueService } from '../../../src/core/change_detection/changes_queue';
-import { $Scope } from '../../../src/testing/utils';
 import { isFunction } from '../../../src/facade/lang';
+import { $Scope } from '../../utils';
 
 describe( `changes_queue`, () => {
 
