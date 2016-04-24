@@ -17,6 +17,7 @@ import { MyFooDirective } from './directives/my-foo.directive';
 import { MyFormBridgeDirective } from './directives/my-form-bridge.directive';
 import { MyDirectiveTesterDirective } from './directives/my-directive-tester.directive';
 import { TesterAttrDirective } from './directives/my-tester.directive';
+import { GlobalListenerDirective } from './directives/global-listener.directive';
 import { TesterComponent } from './components/tester/tester.component';
 export const AppModule = angular.module( 'app', [TabsModule] )
 
@@ -33,6 +34,7 @@ export const AppModule = angular.module( 'app', [TabsModule] )
   .directive( ...provide( MyFormBridgeDirective ) )
   .directive( ...provide( MyDirectiveTesterDirective ) )
   .directive( ...provide( TesterComponent ) )
+  .directive( ...provide( GlobalListenerDirective ) )
   .directive( ...provide( TesterAttrDirective ) )
   /*.directive('myTesterAttr2',function(){
     return {
