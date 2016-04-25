@@ -1,3 +1,13 @@
+<a name="1.7.1"></a>
+## [1.7.1](https://github.com/ngParty/ng-metadata/compare/1.7.0...v1.7.1) (2016-04-25)
+
+
+### Bug Fixes
+
+* **core/directives:** Ensure watchers are functions (#70) ([c4f83d3](https://github.com/ngParty/ng-metadata/commit/c4f83d3)), closes [#69](https://github.com/ngParty/ng-metadata/issues/69)
+
+
+
 <a name="1.7.0"></a>
 # [1.7.0](https://github.com/ngParty/ng-metadata/compare/1.6.1...v1.7.0) (2016-04-24)
 
