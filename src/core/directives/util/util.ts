@@ -826,7 +826,9 @@ export function _createDirectiveBindings(
   function removeWatches(): void {
     const removeWatchCollection = [ ..._internalWatchers, ..._internalObservers ];
     for ( var i = 0, ii = removeWatchCollection.length; i < ii; ++i ) {
-      removeWatchCollection[ i ]();
+      if (removeWatchCollection[ i ] && isFunction(removeWatchCollection[ i ])) {
+        removeWatchCollection[ i ]();
+      }
     }
   }
 
