@@ -5,7 +5,7 @@ import { isFunction } from './lang';
  *
  * ### Examples
  *
- * In the following example, `Zippy` alternatively emits `open` and `close` events when its
+ * In the following example, `ZippyComponent` alternatively emits `open` and `close` events when its
  * title gets clicked:
  *
  * ```
@@ -13,13 +13,15 @@ import { isFunction } from './lang';
  *   selector: 'zippy',
  *   template: `
  *   <div class="zippy">
- *     <div (click)="toggle()">Toggle</div>
- *     <div [hidden]="!visible">
- *       <ng-content></ng-content>
+ *     <div ng-click="$ctrl.toggle()">Toggle</div>
+ *     <div ng-hide="!$ctrl.visible">
+ *       <ng-transclude></ng-transclude>
  *     </div>
- *  </div>`})
- * export class Zippy {
+ *  </div>`
+ * })
+ * export class ZippyComponent {
  *   visible: boolean = true;
+ * 
  *   @Output() open: EventEmitter<boolean> // used as interface
  *   @Output() close: EventEmitter<boolean> = new EventEmitter();
  *
@@ -44,7 +46,7 @@ export class EventEmitter<T> {
   _isAsync: boolean;
 
   private _generatorOrNextFn: EventHandler<T>[] = [];
-  private _ngExpressionBindingCb: _ngEmitPayloadEvent<T> = noop;
+  private _ngExpressionBindingCb: ngEmitPayloadEvent<T> = noop;
 
   /** @internal */
   static makeNgExpBindingEmittable<T>( cb: Function ) {
@@ -53,7 +55,7 @@ export class EventEmitter<T> {
     ee._generatorOrNextFn = [];
 
     ee.emit = function ( value: T ) {
-      EventEmitter.createEmit( value, ee, (cb as _ngEmitPayloadEvent<T>) );
+      EventEmitter.createEmit( value, ee, (cb as ngEmitPayloadEvent<T>) );
     };
 
     ee._dispose = function ( cbRef: EventHandler<T> ) {
@@ -75,7 +77,7 @@ export class EventEmitter<T> {
   }
 
   /** @internal */
-  private static createEmit<T>( value:T, _context: EventEmitter<T>, exprBindingCb?: _ngEmitPayloadEvent<T> ) {
+  private static createEmit<T>( value:T, _context: EventEmitter<T>, exprBindingCb?: ngEmitPayloadEvent<T> ) {
     const payload = { $event: value };
 
     if ( isFunction( exprBindingCb ) ) {
@@ -89,7 +91,7 @@ export class EventEmitter<T> {
   }
 
   /** @internal */
-  private static createSubscribe<T>( generatorOrNext: EventHandler<T>, _context: EventEmitter<T> ): _Disposable {
+  private static createSubscribe<T>( generatorOrNext: EventHandler<T>, _context: EventEmitter<T> ): Disposable {
     console.warn( 'NOTE: This is not a real Observable!' );
     _context._generatorOrNextFn.push( generatorOrNext );
     
@@ -112,7 +114,7 @@ export class EventEmitter<T> {
   /** @internal */
   wrapNgExpBindingToEmitter( cb: Function ) {
     //used in reassignBindingsAndCreteEventEmitters to attach the original @Output binding to the instance new EventEmitter
-    this._ngExpressionBindingCb = ( cb as _ngEmitPayloadEvent<T> );
+    this._ngExpressionBindingCb = ( cb as ngEmitPayloadEvent<T> );
   }
 
   emit( value: T ) {
@@ -130,21 +132,23 @@ export class EventEmitter<T> {
  * 
  *  ### Examples
  * 
- *  In the following esample, `ZParent` (parent component) handle `open` and `close` events emitted by `Zippy` (child component)
+ *  In the following esample, `AppComponent` (parent component) handle `open` and `close` events emitted by `Zippy` (child component)
  * 
  * ```
  * @Component({
- *   selector: 'z-parent',
- *   template: `
- *   Content is visible? {{ $ctrl.zippyState }}
- *   <zippy open="$ctrl.showState($event)" close="$ctrl.showState($event)">
- *      Alternate <i>show</i> and <i>hide</i> of this <b>content</b> ... 
- *   </zippy>
- * `})
- * export class ZParent {
- *   public zippyState: boolean = true;
- *   public showState: EventHandler<boolean> = ( visible ) => {
- *      this.zippyState = visible; // HERE visibile is a boolean === $event passed from zippy child component events
+ *   selector: 'app',
+ *   template: `<zippy open="$ctrl.onOpen($event)" close="$ctrl.onClose($event)"></zippy>`,
+ *   directives: [ZippyComponent]
+ * })
+ * export class AppComponent {
+ * 
+ *   onOpen(zippyVisible: boolean) {
+ *     // Event handler declared as simple method accepting single typed param  
+ *     console.log(`zippy visibility is: ${zippyVisible}`);
+ *   }
+ *   public onClose: EventHandler<boolean> = ( zippyVisible ) => {
+ *     // Event handler declared using explict EventHandler interface specifing the type of the param
+ *     console.log(`zippy visibility is: ${zippyVisible}`); // HERE zippyVisibile is a boolean === $event passed from zippy child component
  *   }  
  * }
  * ```
@@ -154,13 +158,13 @@ export interface EventHandler<T> extends Function {
 }
 
 /** @internal */
-interface _ngEmitPayloadEvent<T> extends Function {
+interface ngEmitPayloadEvent<T> extends Function {
   // signature for ngExpressionBindingCb to pass a standard payload $event 
   ({$event: T}): void;
 }
 
 /** @internal */
-interface _Disposable extends Function {
+interface Disposable extends Function {
   // signature for dispose method returned from .subscribe() to safely unsubscribe later
   ():void;
 }
