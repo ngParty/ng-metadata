@@ -521,7 +521,11 @@ declare module ngMetadataCore{
      */
     constructor(isAsync?: boolean);
     emit(value: T): void;
-    subscribe(generatorOrNext?: Function, error?: any, complete?: any): Function;
+    subscribe(generatorOrNext?: EventHandler<T>, error?: any, complete?: any): Function;
+  }
+  
+  export interface EventHandler<T> {
+    ($event: T):void;
   }
 }
 

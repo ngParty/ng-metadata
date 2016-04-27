@@ -14,18 +14,19 @@ export class TodoItemCmp implements OnChanges{
   @Input('<') idx: number;
   // this is old way how to bindings are created, will be removed in 2.0
   // @Output() onDone: ( todo: {todo:TodoModel} )=>void;
-  @Output() onDone: EventEmitter<TodoModel>;
-  @Output() emitTest = new EventEmitter<string>();
+  @Output() onDone: EventEmitter<TodoModel>; // used as an interface 
+  @Output() emitTest = new EventEmitter<string>(); // use class instance
 
   ngOnInit(){
 
     const dispose = this.onDone.subscribe( (value)=> {
-      console.log( `onDone emitted value: ${value}` );
+      console.log(`Sample SIDE EFFECT: onDone emitted value: ${JSON.stringify(value)}` );
+      console.warn("DISPOSE SIDE EFFECT so it's called only first time...");
       dispose();
     } )
 
   }
-
+  
   ngOnChanges(change){
     console.log('changes:', change);
     if(change.todo){
@@ -38,11 +39,12 @@ export class TodoItemCmp implements OnChanges{
   }
 
   callEmit(){
+    console.info("EMIT 'emitTest' via new EventEmitter class");
     this.emitTest.emit( 'hello from eventEmitter instance!' );
   }
 
   done(todo: TodoModel) {
-
+    console.info("EMIT 'onDone' via EventEmitter interface");
     this.onDone.emit( todo );
 
   }
