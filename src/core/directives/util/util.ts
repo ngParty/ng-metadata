@@ -19,6 +19,7 @@ import { DirectiveCtrl, NgmDirective } from '../directive_provider';
 import { StringWrapper } from '../../../facade/primitives';
 import { ChangeDetectionUtil, SimpleChange } from '../../change_detection/change_detection_util';
 import { changesQueueService } from '../../change_detection/changes_queue';
+import { EventEmitter } from '../../../facade/async';
 
 const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
 
@@ -305,8 +306,11 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   // Finally, invoke the constructor using the injection array and the captured locals
   $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
 
+  reassignBindingsAndCreteEventEmitters( instance, initialInstanceBindingValues );
+
+  // @TODO use this in 2.0
   // reassign back the initial binding values, just in case if we used default values
-  StringMapWrapper.assign( instance, initialInstanceBindingValues );
+  // StringMapWrapper.assign( instance, initialInstanceBindingValues );
 
 
   /*if ( isFunction( instance.ngOnDestroy ) ) {
@@ -321,7 +325,7 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
     instance.ngOnChanges( initialChanges );
   }
 
-  _ddo._ngOnInitBound = function _ngOnInitBound(){
+  _ddo._ngOnInitBound = function _ngOnInitBound() {
 
     // invoke again only if there are any directive requires
     // #perf
@@ -334,8 +338,11 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
 
       $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
 
+      reassignBindingsAndCreteEventEmitters( instance, initialInstanceBindingValues );
+
+      // @TODO use this in 2.0
       // reassign back the initial binding values, just in case if we used default values
-      StringMapWrapper.assign( instance, initialInstanceBindingValues );
+      // StringMapWrapper.assign( instance, initialInstanceBindingValues );
     }
 
     if ( isFunction( instance.ngOnInit ) ) {
@@ -347,6 +354,25 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   // Return the controller instance
   return instance;
 
+}
+
+// @TODO this won't be needed in 2.0 because initial output binding will be wrapped with EventEmitter so just Object.assign will do
+function reassignBindingsAndCreteEventEmitters(
+  instance: {[propName: string]: any},
+  initialBindings: {[propName: string]: any}
+): void {
+  StringMapWrapper.forEach( initialBindings, ( bindingVal: any, propName: string )=> {
+
+    // @TODO in ngMetadata 2.0 we will throw error if instance[propName] will be default assigned function instead of EventEmitter
+    // check if after constructor instantiation, user assigned directly @Output to new EventEmitter()
+    if ( instance[propName] instanceof EventEmitter ) {
+      // this will make sure that instance[ propName ] will be instanceof EventEmitter
+      instance[ propName ].wrapNgExpBindingToEmitter( initialBindings[ propName ] )
+    } else {
+      instance[ propName ] = bindingVal;
+    }
+
+  } );
 }
 
 function getInitialBindings( instance ): {[propName: string]: any} {
@@ -754,9 +780,19 @@ export function _createDirectiveBindings(
     // Don't assign noop to ctrl if expression is not valid
     if (parentGet === noop && optional) return;
 
-    ctrl[propName] = function(locals) {
-      return parentGet(scope, locals);
-    };
+    // @TODO in ngMetadata 2.0 this will be removed
+    EventEmitter.makeNgExpBindingEmittable( _exprBindingCb );
+
+    // @TODO in ngMetadata 2.0 we will assign this property to EventEmitter directly
+    // const emitter = new EventEmitter();
+    // emitter.wrapNgExpBindingToEmitter( _exprBindingCb );
+    // ctrl[propName] = emitter;
+
+    ctrl[propName] = _exprBindingCb;
+
+    function _exprBindingCb( locals ) {
+      return parentGet( scope, locals );
+    }
 
   }
   function _createAttrBinding( attrName: string, propName: string, optional: boolean ): Function {

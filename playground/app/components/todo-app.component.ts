@@ -1,4 +1,4 @@
-import { Component, Inject } from 'ng-metadata/core';
+import { Component, Inject, EventHandler } from 'ng-metadata/core';
 import { TodoModel, TodoStore } from '../stores/todoStore.service';
 
 @Component( {
@@ -44,7 +44,7 @@ export class TodoAppCmp{
   }
 
   markAsDone( todo: TodoModel ) {
-
+    console.log("HANDLE on-done (with a simple method without typed EventHandler)", todo);
     const todoToMarkAsDone = this.todos.filter( (todoItem)=>todoItem.label===todo.label );
     todoToMarkAsDone[0].complete = todo.complete;
 
@@ -68,6 +68,10 @@ export class TodoAppCmp{
   addItem(){
     const newId = this.items[this.items.length-1]+Date.now();
     this.items.push(newId);
+  }
+
+  outputWithEmitReceiver: EventHandler<string> = ( sentence ) => {
+    console.info("HANDLE emit-test (explicit EventHandler typed function)",sentence);
   }
 
 

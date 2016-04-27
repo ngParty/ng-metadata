@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnChanges } from 'ng-metadata/core';
+import { Component, Input, Output, OnChanges, EventEmitter } from 'ng-metadata/core';
 import { TodoModel } from '../stores/todoStore.service';
 
 @Component({
@@ -12,10 +12,21 @@ export class TodoItemCmp implements OnChanges{
 
   @Input('<') todo: TodoModel;
   @Input('<') idx: number;
-  @Output() onDone: ( todo: {todo:TodoModel} )=>void;
+  // this is old way how to bindings are created, will be removed in 2.0
+  // @Output() onDone: ( todo: {todo:TodoModel} )=>void;
+  @Output() onDone: EventEmitter<TodoModel>; // used as an interface 
+  @Output() emitTest = new EventEmitter<string>(); // use class instance
 
-  ngOnInit(){}
+  ngOnInit(){
 
+    const dispose = this.onDone.subscribe( (value)=> {
+      console.log(`Sample SIDE EFFECT: onDone emitted value: ${JSON.stringify(value)}` );
+      console.warn("DISPOSE SIDE EFFECT so it's called only first time...");
+      dispose();
+    } )
+
+  }
+  
   ngOnChanges(change){
     console.log('changes:', change);
     if(change.todo){
@@ -27,9 +38,14 @@ export class TodoItemCmp implements OnChanges{
 
   }
 
-  done(todo: TodoModel) {
+  callEmit(){
+    console.info("EMIT 'emitTest' via new EventEmitter class");
+    this.emitTest.emit( 'hello from eventEmitter instance!' );
+  }
 
-    this.onDone( { todo } );
+  done(todo: TodoModel) {
+    console.info("EMIT 'onDone' via EventEmitter interface");
+    this.onDone.emit( todo );
 
   }
 

@@ -15,6 +15,7 @@ import './core/directives/util/util.spec';
 import './facade/lang.spec';
 import './facade/primitives.spec';
 import './facade/collections.spec';
+import './facade/async.spec';
 
 describe( 'ng-metadata', ()=> {
 } );

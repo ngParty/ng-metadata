@@ -9,8 +9,10 @@
 
     <todo-item
       todo="item"
-      on-done="$ctrl.markAsDone(todo)"
-      idx="$index">
+      on-done="$ctrl.markAsDone($event)"
+      emit-test="$ctrl.outputWithEmitReceiver($event)"
+      idx="$index"
+    >
       <button
         ng-click="$ctrl.removeTodo(item)"
         class="mdl-button mdl-js-button mdl-button--accent">
