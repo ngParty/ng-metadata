@@ -1,3 +1,16 @@
+<a name="1.8.0"></a>
+# [1.8.0](https://github.com/ngParty/ng-metadata/compare/1.7.2...v1.8.0) (2016-04-27)
+
+
+### Features
+
+* **core/directives:** process EventEmitter for `&` bindings or extend existing function ([9c6170e](https://github.com/ngParty/ng-metadata/commit/9c6170e))
+* **facade/async:** create EventEmitter ([131b093](https://github.com/ngParty/ng-metadata/commit/131b093))
+* **facade/async:** fully typed EventEmitter + EventHandler ([0dab5a7](https://github.com/ngParty/ng-metadata/commit/0dab5a7))
+* **playground:** add examples with EventEmitter ([c977ff5](https://github.com/ngParty/ng-metadata/commit/c977ff5))
+
+
+
 <a name="1.7.2"></a>
 ## [1.7.2](https://github.com/ngParty/ng-metadata/compare/1.7.1...v1.7.2) (2016-04-27)
 
