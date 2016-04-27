@@ -1,3 +1,13 @@
+<a name="1.7.2"></a>
+## [1.7.2](https://github.com/ngParty/ng-metadata/compare/1.7.1...v1.7.2) (2016-04-27)
+
+
+### Bug Fixes
+
+* **manual_typings:** Add boolean type annotation to expensiveChecks  ([b684510](https://github.com/ngParty/ng-metadata/commit/b684510)), closes [#73](https://github.com/ngParty/ng-metadata/issues/73)
+
+
+
 <a name="1.7.1"></a>
 ## [1.7.1](https://github.com/ngParty/ng-metadata/compare/1.7.0...v1.7.1) (2016-04-25)
 
