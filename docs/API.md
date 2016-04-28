@@ -27,6 +27,11 @@ Classes:
 - [EventEmitter](#eventemitter)
 - [OpaqueToken](#opaquetoken)
 
+Enums:
+
+`ng-metadata/core`
+- [ChangeDetectionStrategy](#changedetectionstrategy)
+
 Angular 1 Directives types:
  
 `ng-metadata/common`
@@ -578,6 +583,62 @@ expect($injector.get(getInjectableName(key))).to.equal('Dont change me DI!');
 
 ---
 
+
+**Enums:**
+
+## ChangeDetectionStrategy
+
+> **module:** `ng-metadata/core`
+
+Describes within the change detector which strategy will be used the next time change detection is triggered.
+
+It works only with `@Component`s which have bound properties via one way data binding `@Input('<')`.
+
+> Using OnPush is much more convenient than manually declaring ngOnChanges and copying binding values there, so we get immutable data
+> Under the hood it just calls angular.copy and assigns that new binding reference value to component property
+
+###### members
+
+| members       | Type                            | Description                                  |
+| ------------- | ------------------------------- |--------------------------------------------- |
+| **OnPush**    | `enum` | OnPush means that the change detector's mode will be set to CheckOnce during hydration |
+| **Default**   | `enum` | This strategy has every component by default for one way data bound properties. Default means that the change detector's mode will be set to CheckAlways during hydration. |
+
+*example:*
+
+```typescript
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from 'ng-metadata/core';
+import { User } from './user.model';
+
+@Component( {
+  selector: 'child',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div>
+      <input type="text" ng-model="$ctrl.user.name">
+    </div>
+  `
+} )
+export class ChildComponent implements OnChanges {
+
+  // without OnPush if we change some property on this object in the parent, it will mutate also within child,
+  // because that's how javascript works (Objects are passed reference baby!)
+  // => this is not true if the bounded property is a primitive ( again this is how JS works)
+  @Input('<') user: User;  
+
+  ngOnChanges( changes ) {  
+    if(changes.user){
+      // this will execute only when user reference has changed on parent
+      console.log(changes.user)  
+    }
+  }
+
+}
+```
+
+
+---
+
 **Angular 1 Directives types:**
 
 - we are providing angular directives as angular 2 like directives with proper types 
@@ -691,7 +752,8 @@ const AppModule = angular.module('app', [])
 | **selector**  | `string` |  The component's selector. It must be a css element selector, for example `app` or `my-thing` are valid, but `[my-attr]` or `.my-class` are invalid. |
 | **template**  | `string` |  The template string for the component. You can bind to class instance properties by prepending your bindings with the selector in camel-case form, e.g. `<h1>My Component's Name is: {{ctrl.name}}</h1>`  |
 | **templateUrl**  | `string` |  Path to an external html template file. Either template or templateUrl must be provided  |
-| **attrs?**  | `Array<string>` |  String Array of names which you want to expose in bindToController via attribute `@` binding. *Example:* `attrs: ['foo']` will connect the class property `foo` to the attribute `foo`. You can also rename the attrs, *example* `attr:['foo: theFoo']` connects `foo` to the attribute `the-foo`.  |
+| **changeDetection**  | `ChangeDetectionStrategy` |  Defines the used change detection strategy. When a component is instantiated with one way bindings via inputs `@Input('<')`, we can tell it explicitly how to propagate those bindings. The changeDetection property defines, whether the change detection will be checked every time or only when the component tells it to do so. |
+| **attrs?**      | `Array<string>` |  String Array of names which you want to expose in bindToController via attribute `@` binding. *Example:* `attrs: ['foo']` will connect the class property `foo` to the attribute `foo`. You can also rename the attrs, *example* `attr:['foo: theFoo']` connects `foo` to the attribute `the-foo`.  |
 | **inputs?**     | `Array<string>` |  same as `attrs` but binds via `=` two way binding to bindToController  |
 | **outputs?**    | `Array<string>` |  same as `attrs` but binds via `&` expression binding to bindToController |
 | **host?**       | `{[key: string]: string}` |  Specify the events, actions, properties and attributes related to the [host element](#host). |
