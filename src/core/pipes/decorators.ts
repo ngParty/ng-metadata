@@ -1,9 +1,5 @@
-import {
-  makeDecorator,
-  TypeDecorator
-} from '../util/decorators';
-import {Type} from '../../facade/lang';
-import {PipeMetadata} from './metadata';
+import { makeDecorator } from '../util/decorators';
+import { PipeMetadata } from './metadata';
 
 /**
  * {@link PipeMetadata} factory for creating decorators.
@@ -12,9 +8,9 @@ import {PipeMetadata} from './metadata';
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
  */
-export interface PipeFactory {
+export interface PipeMetadataFactory {
   (obj: {name: string, pure?: boolean}): any;
   new (obj: {name: string, pure?: boolean}): any;
 }
 
-export const Pipe: PipeFactory = makeDecorator(PipeMetadata) as PipeFactory;
+export const Pipe: PipeMetadataFactory = makeDecorator(PipeMetadata) as PipeMetadataFactory;

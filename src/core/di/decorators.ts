@@ -11,7 +11,7 @@ import {makeDecorator, makeParamDecorator} from '../util/decorators';
 /**
  * Factory for creating {@link InjectMetadata}.
  */
-export interface InjectFactory {
+export interface InjectMetadataFactory {
   (token: any): any;
   new (token: any): InjectMetadata;
 }
@@ -19,7 +19,7 @@ export interface InjectFactory {
 /**
  * Factory for creating {@link OptionalMetadata}.
  */
-export interface OptionalFactory {
+export interface OptionalMetadataFactory {
   (): any;
   new (): OptionalMetadata;
 }
@@ -27,7 +27,7 @@ export interface OptionalFactory {
 /**
  * Factory for creating {@link InjectableMetadata}.
  */
-export interface InjectableFactory {
+export interface InjectableMetadataFactory {
   (): any;
   new (): InjectableMetadata;
 }
@@ -35,7 +35,7 @@ export interface InjectableFactory {
 /**
  * Factory for creating {@link SelfMetadata}.
  */
-export interface SelfFactory {
+export interface SelfMetadataFactory {
   (): any;
   new (): SelfMetadata;
 }
@@ -43,7 +43,7 @@ export interface SelfFactory {
 /**
  * Factory for creating {@link HostMetadata}.
  */
-export interface HostFactory {
+export interface HostMetadataFactory {
   (): any;
   new (): HostMetadata;
 }
@@ -51,7 +51,7 @@ export interface HostFactory {
 /**
  * Factory for creating {@link SkipSelfMetadata}.
  */
-export interface SkipSelfFactory {
+export interface SkipSelfMetadataFactory {
   (): any;
   new (): SkipSelfMetadata;
 }
@@ -59,29 +59,29 @@ export interface SkipSelfFactory {
 /**
  * Factory for creating {@link InjectMetadata}.
  */
-export const Inject: InjectFactory = makeParamDecorator(InjectMetadata,InjectMetadata.paramDecoratorForNonConstructor);
+export const Inject: InjectMetadataFactory = makeParamDecorator(InjectMetadata,InjectMetadata.paramDecoratorForNonConstructor);
 
 /**
  * Factory for creating {@link OptionalMetadata}.
  */
-export const Optional: OptionalFactory = makeParamDecorator(OptionalMetadata);
+export const Optional: OptionalMetadataFactory = makeParamDecorator(OptionalMetadata);
 
 /**
  * Factory for creating {@link InjectableMetadata}.
  */
-export const Injectable: InjectableFactory = makeDecorator(InjectableMetadata) as InjectableFactory;
+export const Injectable: InjectableMetadataFactory = makeDecorator(InjectableMetadata) as InjectableMetadataFactory;
 
 /**
  * Factory for creating {@link SelfMetadata}.
  */
-export const Self: SelfFactory = makeParamDecorator(SelfMetadata);
+export const Self: SelfMetadataFactory = makeParamDecorator(SelfMetadata);
 
 /**
  * Factory for creating {@link HostMetadata}.
  */
-export const Host: HostFactory = makeParamDecorator(HostMetadata);
+export const Host: HostMetadataFactory = makeParamDecorator(HostMetadata);
 
 /**
  * Factory for creating {@link SkipSelfMetadata}.
  */
-export const SkipSelf: SkipSelfFactory = makeParamDecorator(SkipSelfMetadata);
+export const SkipSelf: SkipSelfMetadataFactory = makeParamDecorator(SkipSelfMetadata);
