@@ -11,19 +11,20 @@ import {
   HostListenerMetadata,
   LegacyDirectiveDefinition
 } from './metadata_directives';
+import { ChangeDetectionStrategy } from '../change_detection/constants';
 
 
 /**
  * Interface for the {@link DirectiveMetadata} decorator function.
  *
- * See {@link DirectiveFactory}.
+ * See {@link DirectiveMetadataFactory}.
  */
 export interface DirectiveDecorator extends TypeDecorator {}
 
 /**
  * Interface for the {@link ComponentMetadata} decorator function.
  *
- * See {@link ComponentFactory}.
+ * See {@link ComponentMetadataFactory}.
  */
 export interface ComponentDecorator extends DirectiveDecorator {}
 
@@ -36,7 +37,7 @@ export interface ComponentDecorator extends DirectiveDecorator {}
  * ```
  *
  */
-export interface DirectiveFactory {
+export interface DirectiveMetadataFactory {
   (obj: {
     selector?: string,
     inputs?: string[],
@@ -70,7 +71,7 @@ export interface DirectiveFactory {
  * ```
  *
  */
-export interface ComponentFactory {
+export interface ComponentMetadataFactory {
   (obj: {
     selector?: string,
     inputs?: string[],
@@ -81,6 +82,7 @@ export interface ComponentFactory {
     exportAs?: string,
     queries?: {[key: string]: any},
     viewProviders?: any[],
+    changeDetection?: ChangeDetectionStrategy,
     templateUrl?: string,
     template?: string,
     styleUrls?: string[],
@@ -99,6 +101,7 @@ export interface ComponentFactory {
     exportAs?: string,
     queries?: {[key: string]: any},
     viewProviders?: any[],
+    changeDetection?: ChangeDetectionStrategy,
     templateUrl?: string,
     template?: string,
     styleUrls?: string[],
@@ -113,7 +116,7 @@ export interface ComponentFactory {
 /**
  * Factory for {@link ContentChildren}.
  */
-export interface ContentChildrenFactory {
+export interface ContentChildrenMetadataFactory {
   (selector: Type | string, {descendants}?: {descendants?: boolean}): any;
   new (selector: Type | string, {descendants}?: {descendants?: boolean}): ContentChildrenMetadata;
 }
@@ -121,15 +124,15 @@ export interface ContentChildrenFactory {
 /**
  * Factory for {@link ContentChild}.
  */
-export interface ContentChildFactory {
+export interface ContentChildMetadataFactory {
   (selector: Type | string): any;
-  new (selector: Type | string): ContentChildFactory;
+  new (selector: Type | string): ContentChildMetadataFactory;
 }
 
 /**
  * Factory for {@link ViewChildren}.
  */
-export interface ViewChildrenFactory {
+export interface ViewChildrenMetadataFactory {
   (selector: Type | string): any;
   new (selector: Type | string): ViewChildrenMetadata;
 }
@@ -137,9 +140,9 @@ export interface ViewChildrenFactory {
 /**
  * Factory for {@link ViewChild}.
  */
-export interface ViewChildFactory {
+export interface ViewChildMetadataFactory {
   (selector: Type | string): any;
-  new (selector: Type | string): ViewChildFactory;
+  new (selector: Type | string): ViewChildMetadataFactory;
 }
 
 /**
@@ -147,7 +150,7 @@ export interface ViewChildFactory {
  *
  * See {@link InputMetadata}.
  */
-export interface InputFactory {
+export interface InputMetadataFactory {
   (bindingPropertyName?: string): any;
   new (bindingPropertyName?: string): any;
 }
@@ -156,8 +159,9 @@ export interface InputFactory {
  * {@link AttrMetadata} factory for creating decorators.
  *
  * See {@link AttrMetadata}.
+ * @deprecated will be removed in 2.0
  */
-export interface AttrFactory {
+export interface AttrMetadataFactory {
   (bindingPropertyName?: string): any;
   new (bindingPropertyName?: string): any;
 }
@@ -167,7 +171,7 @@ export interface AttrFactory {
  *
  * See {@link OutputMetadata}.
  */
-export interface OutputFactory {
+export interface OutputMetadataFactory {
   (bindingPropertyName?: string): any;
   new (bindingPropertyName?: string): any;
 }
@@ -175,7 +179,7 @@ export interface OutputFactory {
 /**
  * {@link HostBindingMetadata} factory function.
  */
-export interface HostBindingFactory {
+export interface HostBindingMetadataFactory {
   (hostPropertyName?: string): any;
   new (hostPropertyName?: string): any;
 }
@@ -183,35 +187,35 @@ export interface HostBindingFactory {
 /**
  * {@link HostListenerMetadata} factory function.
  */
-export interface HostListenerFactory {
+export interface HostListenerMetadataFactory {
   (eventName: string, args?: string[]): any;
   new (eventName: string, args?: string[]): any;
 }
 
 
-export const Component: ComponentFactory = makeDecorator(ComponentMetadata) as ComponentFactory;
+export const Component: ComponentMetadataFactory = makeDecorator(ComponentMetadata) as ComponentMetadataFactory;
 
-export const Directive: DirectiveFactory = makeDecorator(DirectiveMetadata) as DirectiveFactory;
+export const Directive: DirectiveMetadataFactory = makeDecorator(DirectiveMetadata) as DirectiveMetadataFactory;
 
-export const ContentChildren: ContentChildrenFactory = makePropDecorator(ContentChildrenMetadata);
+export const ContentChildren: ContentChildrenMetadataFactory = makePropDecorator(ContentChildrenMetadata);
 
-export const ContentChild: ContentChildFactory = makePropDecorator(ContentChildMetadata);
+export const ContentChild: ContentChildMetadataFactory = makePropDecorator(ContentChildMetadata);
 
-export const ViewChildren: ViewChildrenFactory = makePropDecorator(ViewChildrenMetadata);
+export const ViewChildren: ViewChildrenMetadataFactory = makePropDecorator(ViewChildrenMetadata);
 
-export const ViewChild: ViewChildFactory = makePropDecorator(ViewChildMetadata);
+export const ViewChild: ViewChildMetadataFactory = makePropDecorator(ViewChildMetadata);
 
-export const Input: InputFactory = makePropDecorator(InputMetadata);
+export const Input: InputMetadataFactory = makePropDecorator(InputMetadata);
 
 /**
  *
  * @type {any}
  * @deprecated use @Input('@') instead. Will be removed in 2.0
  */
-export const Attr: AttrFactory = makePropDecorator(AttrMetadata);
+export const Attr: AttrMetadataFactory = makePropDecorator(AttrMetadata);
 
-export const Output: OutputFactory = makePropDecorator(OutputMetadata);
+export const Output: OutputMetadataFactory = makePropDecorator(OutputMetadata);
 
-export const HostBinding: HostBindingFactory = makePropDecorator(HostBindingMetadata);
+export const HostBinding: HostBindingMetadataFactory = makePropDecorator(HostBindingMetadata);
 
-export const HostListener: HostListenerFactory = makePropDecorator(HostListenerMetadata);
+export const HostListener: HostListenerMetadataFactory = makePropDecorator(HostListenerMetadata);

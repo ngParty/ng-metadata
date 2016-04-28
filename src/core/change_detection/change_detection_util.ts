@@ -1,4 +1,9 @@
-import { isPresent, isBlank } from '../../facade/lang';
+import { ChangeDetectionStrategy } from './constants';
+import { isPresent } from '../../facade/lang';
+
+export class UninitializedValue {}
+const uninitialized = new UninitializedValue();
+
 /**
  * Represents a basic change from a previous to a new value.
  */
@@ -8,28 +13,18 @@ export class SimpleChange {
   /**
    * Check whether the new value is the first value assigned.
    */
-  isFirstChange(): boolean { return this.previousValue === ChangeDetectionUtil.uninitialized; }
+  isFirstChange(): boolean { return this.previousValue === uninitialized }
 }
 
-export class UninitializedValue {}
-
-function _simpleChange(previousValue, currentValue): SimpleChange {
-  return new SimpleChange(previousValue, currentValue);
-}
-
-function _uninitializedValue(){
-  return new UninitializedValue();
-}
-
-/* tslint:disable:requireParameterType */
 export class ChangeDetectionUtil {
-  static uninitialized: UninitializedValue = _uninitializedValue();
+  static uninitialized: UninitializedValue = uninitialized;
 
   static simpleChange(previousValue: any, currentValue: any): SimpleChange {
-    return _simpleChange(previousValue, currentValue);
+    return new SimpleChange(previousValue, currentValue);
   }
 
-  static isValueBlank(value: any): boolean { return isBlank(value); }
+  static isOnPushChangeDetectionStrategy(changeDetectionStrategy: ChangeDetectionStrategy): boolean{
+      return isPresent( changeDetectionStrategy ) && changeDetectionStrategy === ChangeDetectionStrategy.OnPush;
+  }
 
-  static s(value: any): string { return isPresent(value) ? `${value}` : ''; }
 }
