@@ -375,7 +375,7 @@ export class DirectiveResolver {
         {
           template: dm.template,
           templateUrl: dm.templateUrl,
-          changeDetection: dm.changeDetection || ChangeDetectionStrategy.Default
+          changeDetection: isPresent(dm.changeDetection) ?  dm.changeDetection : ChangeDetectionStrategy.Default
         }
       );
 

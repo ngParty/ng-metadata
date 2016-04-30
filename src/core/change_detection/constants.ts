@@ -3,7 +3,7 @@ import { isBlank } from '../../facade/lang';
 /**
  * Describes the current state of the change detector.
  */
-export enum ChangeDetectorState {
+export const enum ChangeDetectorState {
   /**
    * `NeverChecked` means that the change detector has not been checked yet, and
    * initialization methods should be called during detection.
@@ -29,7 +29,7 @@ export enum ChangeDetectorState {
  * Describes within the change detector which strategy will be used the next time change
  * detection is triggered.
  */
-export enum ChangeDetectionStrategy {
+export const enum ChangeDetectionStrategy {
   /**
    * `CheckedOnce` means that after calling detectChanges the mode of the change detector
    * will become `Checked`.

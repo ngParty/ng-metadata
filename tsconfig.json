@@ -7,7 +7,8 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "declaration": true,
-    "pretty": true
+    "pretty": true,
+    "preserveConstEnums": true
   },
   "exclude": [
     "typings/main",
