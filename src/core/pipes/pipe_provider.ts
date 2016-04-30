@@ -44,4 +44,5 @@ export class PipeProvider {
 
 }
 
+/** @internal */
 export const pipeProvider = new PipeProvider( new PipeResolver() );
