@@ -110,7 +110,8 @@ bootstrap(AppModule);
 | Parameter     | Type                            | Description                               |
 | ------------- | ------------------------------- |------------------------------------------ |
 | **ngModule**  | `string`                        | angular module name                       |
-| **element?**  | `Element` or `string`(selector) | you can provide on which element or selector you want to boot your app. Default element is `document` |
+| **{ element?, **  | `Element` or `string`(selector) | you can provide on which element or selector you want to boot your app. Default element is `document` |
+| **, strictDi? }** | `boolean`                   | enable strictdi check, to force explicit $inject annotation for all object registered in angular module (more info in [angular docs](https://docs.angularjs.org/error/$injector/strictdi)). Default value is `true` |
 
 returns `undefined`
 
