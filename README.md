@@ -77,7 +77,8 @@ import {HeroService} from './hero.service';
 
 export const HeroModule = angular.module('hero',[])
   .directive(...provide(HeroComponent))
-  .service(...provide(HeroService));
+  .service(...provide(HeroService))
+  .name;
   
 // hero.service.ts
 import {Injectable, Inject} from 'ng-metadata/core';   
