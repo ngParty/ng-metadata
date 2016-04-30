@@ -1,3 +1,13 @@
+<a name="1.9.0"></a>
+# [1.9.0](https://github.com/ngParty/ng-metadata/compare/1.8.0...v1.9.0) (2016-04-30)
+
+
+### Features
+
+* **change_detection:** implement changeDetection strategy for components ([2d9cd2b](https://github.com/ngParty/ng-metadata/commit/2d9cd2b))
+
+
+
 <a name="1.8.0"></a>
 # [1.8.0](https://github.com/ngParty/ng-metadata/compare/1.7.2...v1.8.0) (2016-04-27)
 
