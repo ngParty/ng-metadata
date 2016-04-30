@@ -1,5 +1,6 @@
 import { CONST, Type } from '../../facade/lang';
 import { InjectableMetadata } from '../di/metadata';
+import { ChangeDetectionStrategy } from '../change_detection/constants';
 
 export type LegacyDirectiveDefinition = {
   compile?: ng.IDirectiveCompileFn;
@@ -852,6 +853,17 @@ export class DirectiveMetadata extends InjectableMetadata {
 export class ComponentMetadata extends DirectiveMetadata {
 
   /**
+   * Defines the used change detection strategy.
+   *
+   * When a component is instantiated, Angular creates a change detector, which is responsible for
+   * propagating the component's bindings.
+   *
+   * The `changeDetection` property defines, whether the change detection will be checked every time
+   * or only when the component tells it to do so.
+   */
+  changeDetection: ChangeDetectionStrategy;
+
+  /**
    * Defines the set of injectable objects that are visible to its view DOM children.
    *
    * ## Simple Example
@@ -921,7 +933,8 @@ export class ComponentMetadata extends DirectiveMetadata {
   pipes: Array<Type | any[]>;
 
   constructor({
-    selector, inputs, attrs, outputs, host, exportAs, providers, viewProviders, queries, templateUrl, template,
+    selector, inputs, attrs, outputs, host, exportAs, providers, viewProviders,
+    changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template,
     styleUrls, styles, directives, pipes, legacy
   }: {
     selector?: string,
@@ -932,6 +945,7 @@ export class ComponentMetadata extends DirectiveMetadata {
     providers?: any[],
     exportAs?: string,
     viewProviders?: any[],
+    changeDetection?: ChangeDetectionStrategy,
     queries?: {[key: string]: any},
     templateUrl?: string,
     template?: string,
@@ -953,6 +967,7 @@ export class ComponentMetadata extends DirectiveMetadata {
       legacy: legacy
     });
 
+    this.changeDetection = changeDetection;
     this._viewProviders = viewProviders;
     this.templateUrl = templateUrl;
     this.template = template;

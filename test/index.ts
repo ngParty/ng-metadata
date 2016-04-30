@@ -1,5 +1,6 @@
 import 'reflect-metadata';
 import './core/change_detection/changes_queue.spec';
+import './core/change_detection/change_detection_util.spec';
 import './core/di/decorators.spec';
 import './core/di/provider.spec';
 import './core/di/key.spec';

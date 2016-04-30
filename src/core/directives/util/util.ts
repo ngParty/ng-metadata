@@ -502,8 +502,11 @@ export function createNewInjectablesToMatchLocalDi(
 }
 
 
-export function isAttrDirective( metadata ): boolean {
+export function isAttrDirective( metadata: any ): metadata is DirectiveMetadata {
   return metadata instanceof DirectiveMetadata && !(metadata instanceof ComponentMetadata);
+}
+export function isComponentDirective( metadata: any ): metadata is ComponentMetadata{
+  return metadata instanceof ComponentMetadata;
 }
 
 
@@ -625,7 +628,7 @@ export function _createDirectiveBindings(
   _scope: ng.IScope,
   attributes: ng.IAttributes,
   ctrl: any,
-  metadata: DirectiveMetadata,
+  metadata: ComponentMetadata|DirectiveMetadata,
   { $interpolate, $parse, $rootScope }: {
     $interpolate?: ng.IInterpolateService,
     $parse?: ng.IParseService,
@@ -644,6 +647,7 @@ export function _createDirectiveBindings(
    BOOLEAN_ATTR[value.toLocaleLowerCase()] = value;
    });*/
 
+  const isBindingImmutable = isComponentDirective( metadata ) && ChangeDetectionUtil.isOnPushChangeDetectionStrategy( metadata.changeDetection );
   const scope = hasIsolateScope
     ? _scope.$parent
     : _scope;
@@ -670,7 +674,7 @@ export function _createDirectiveBindings(
 
     const removeWatch = hasTwoWayBinding
       ? _createTwoWayBinding( propName, attrName, optional )
-      : _createOneWayBinding( propName, attrName, optional );
+      : _createOneWayBinding( propName, attrName, optional, isBindingImmutable );
     _internalWatchers.push( removeWatch );
 
   } );
@@ -696,7 +700,7 @@ export function _createDirectiveBindings(
 
   } );
 
-  function _createOneWayBinding( propName: string, attrName: string, optional: boolean ): Function {
+  function _createOneWayBinding( propName: string, attrName: string, optional: boolean, isImmutable: boolean = false ): Function {
 
     if ( !Object.hasOwnProperty.call( attributes, attrName ) ) {
       if ( optional ) return;
@@ -712,7 +716,7 @@ export function _createDirectiveBindings(
     return scope.$watch( parentGet, function parentValueWatchAction( newParentValue ) {
       const oldValue = ctrl[ propName ];
       recordChanges( propName, newParentValue, oldValue );
-      ctrl[ propName ] = newParentValue;
+      ctrl[ propName ] = isImmutable ? angular.copy(newParentValue) : newParentValue;
     }, parentGet.literal );
 
   }

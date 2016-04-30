@@ -20,6 +20,7 @@ import { InjectMetadata, HostMetadata, SelfMetadata, SkipSelfMetadata, OptionalM
 import { ParamMetaInst, PropMetaInst, getInjectableName } from '../di/provider';
 import { resolveForwardRef } from '../di/forward_ref';
 import { getErrorMsg } from '../../facade/exceptions';
+import { ChangeDetectionStrategy } from '../change_detection/constants';
 
 function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;
@@ -373,8 +374,10 @@ export class DirectiveResolver {
         directiveSettings as ComponentMetadata,
         {
           template: dm.template,
-          templateUrl: dm.templateUrl
-        } );
+          templateUrl: dm.templateUrl,
+          changeDetection: isPresent(dm.changeDetection) ?  dm.changeDetection : ChangeDetectionStrategy.Default
+        }
+      );
 
       return new ComponentMetadata( componentSettings );
 

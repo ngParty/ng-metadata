@@ -1,5 +1,5 @@
-import {isPresent, CONST, Type} from '../../facade/lang';
-import {InjectableMetadata} from '../di/metadata';
+import { isPresent, CONST } from '../../facade/lang';
+import { InjectableMetadata } from '../di/metadata';
 
 /**
  * Declare reusable pipe function.
