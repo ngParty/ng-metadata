@@ -105,10 +105,12 @@ clickMeDirective.$inject = ['$log'];
 function clickMeDirective($log){
   return {
     link: function postLink(scope,element,attrs){
-
+      
+      var me = attrs['me'];
+      
       element
         .on('click', function(event){
-          $log.info('you have clicked me!');
+          $log.info('you have clicked ' + me);
         });
 
       scope
@@ -132,27 +134,21 @@ angular.module('clicker',[]);
 ```ts
 // clicker.directive.ts
 
-import {Directive,Inject,OnDestroy} from 'ng-metadata/core';
+import {Directive,Inject,Input,HostListener} from 'ng-metadata/core';
 
 @Directive({
   selector: '[click-me]'
 })
-export class ClickMe implements OnDestroy{
+export class ClickMe {
 
   constructor(
-    @Inject('$element') private $element: ng.IJQueryAugmented,
     @Inject('$log') private $log: ng.ILogService
-  ){
-
-      $element
-        .on('click', function(event){
-          $log.info('you have clicked me!');
-        });
-
-  }
-
-  ngOnDestroy(){
-      this.$element.off('click');
+  ) {}
+  @Input('@') me: string;
+  
+  @HostListener('click')
+  clickOnHostElement() {
+    this.$log.info('you have clicked ' + this.me);
   }
 
 }
