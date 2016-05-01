@@ -35,7 +35,7 @@ function heroCmp(){
       onCall: '&'
     },
     controller: HeroController,
-    controllerAs: 'ctrl',
+    controllerAs: '$ctrl',
     transclude: true,
     templateUrl: 'hero.html'
   };
@@ -76,11 +76,11 @@ export class HeroCmp{
 // hero.ts
 
 import * as angular from 'angular';
-import {provide, makeDirective} from 'ng-metadat/ng-metadata';
+import {provide} from 'ng-metadata/core';
 import {HeroCmp} from './hero.component';
 
 angular.module('hero',[])
-  .directive(provide(HeroCmp), makeDirective(HeroCmp));
+  .directive( ...provide(HeroCmp) );
 ```
 
 
@@ -105,10 +105,12 @@ clickMeDirective.$inject = ['$log'];
 function clickMeDirective($log){
   return {
     link: function postLink(scope,element,attrs){
-
+      
+      var me = attrs['me'];
+      
       element
         .on('click', function(event){
-          $log.info('you have clicked me!');
+          $log.info('you have clicked ' + me);
         });
 
       scope
@@ -132,27 +134,21 @@ angular.module('clicker',[]);
 ```ts
 // clicker.directive.ts
 
-import {Directive,Inject, OnDestroy} from 'ng-metadat/ng-metadata';
+import {Directive,Inject,Input,HostListener} from 'ng-metadata/core';
 
 @Directive({
   selector: '[click-me]'
 })
-export class ClickMe implements OnDestroy{
+export class ClickMe {
 
   constructor(
-    @Inject('$element') private $element: ng.IJQueryAugmented,
     @Inject('$log') private $log: ng.ILogService
-  ){
-
-      $element
-        .on('click', function(event){
-          $log.info('you have clicked me!');
-        });
-
-  }
-
-  onDestroy(){
-      this.$element.off('click');
+  ) {}
+  @Input('@') me: string;
+  
+  @HostListener('click')
+  clickOnHostElement() {
+    this.$log.info('you have clicked ' + this.me);
   }
 
 }
@@ -162,11 +158,11 @@ export class ClickMe implements OnDestroy{
 // clicker.ts
 
 import * as angular from 'angular';
-import {provide, makeDirective} from 'ng-metadat/ng-metadata';
+import {provide} from 'ng-metadata/core';
 import {ClickMe} from './clicker.directive';
 
 angular.module('clicker',[])
-  .directive(provide(ClickMe), makeDirective(clickMe));
+  .directive( ...provide(ClickMe) );
 ```
 
 
@@ -216,7 +212,7 @@ import {Pipe} from 'ng-metadata/core';
 })
 export class UppercasePipe{
 
-  transform(input: string): string|any {
+  transform(input: string|any): string|any {
 
     if(typeof input !== 'string'){
       return input;
@@ -232,11 +228,11 @@ export class UppercasePipe{
 // uppercase.ts
 
 import * as angular from 'angular';
-import {provide, makePipe} from 'ng-metadat/ng-metadata';
+import {provide} from 'ng-metadata/core';
 import {UppercasePipe} from './uppercase.filter';
 
 angular.module('filters',[])
-  .filter(provide(UppercasePipe), makePipe(UppercasePipe));
+  .filter( ...provide(UppercasePipe) );
 ```
 
 
@@ -282,8 +278,9 @@ angular.module('user',[]);
 ```ts
 // user.service.ts
 
-import {Inject} from 'ng-metadata/core';
+import {Inject, Injectable} from 'ng-metadata/core';
 
+@Injectable()
 export class UserSvc{
 
   hobbies: string[] = [];
@@ -306,11 +303,11 @@ export class UserSvc{
 // user.ts
 
 import * as angular from 'angular';
-import {provide} from 'ng-metadat/ng-metadata';
+import {provide} from 'ng-metadata/core';
 import {UserSvc} from './user.service';
 
 angular.module('user',[])
-  .service(provide(UserSvc), UserSvc);
+  .service( ...provide(UserSvc) );
 ```
 
 
@@ -404,13 +401,13 @@ export class DroidSvc{
 // droid.ts
 
 import * as angular from 'angular';
-import {provide} from 'ng-metadat/ng-metadata';
+import {provide} from 'ng-metadata/core';
 import {DroidProvider} from './droid.provider';
 
 angular.module('droid',[])
   // here we are using angular 2 like syntax registration
-  // because we don't want to register the service as 'UserProvider' but as 'userSvc'
-  .provider(provide('userSvc', {useClass:UserProvider}), UserSvc);
+  // because we don't want to register the service as 'DroidProvider' but as 'droidSvc'
+  .provider( ...provide('droidSvc', {useClass:DroidProvider}) );
 ```
 
 
@@ -449,7 +446,7 @@ angular.module('app',[])
 import {Inject} from 'ng-metadata/core';
 import {Authenticator, Translator ) from 'some-library';
 
-class RunBlock{
+export class RunBlock{
 
   constructor(
     @Inject('authenticator') private authenticator: Authenticator,
@@ -470,7 +467,7 @@ import * as angular from 'angular';
 import {RunBlock} from './app.config';
 
 angular.module('app',[])
-  .run(RunBlock);
+  .run(RunBlock); // NOTE: RunBlock class is not instanciated, angular will use the constructor as a factory function
 ```
 
 
@@ -516,7 +513,7 @@ angular.module('app',[])
 
 import {Inject} from 'ng-metadata/core';
 
-class StateConfig{
+export class StateConfig{
 
   constructor(
     @Inject('$stateProvider') private $stateProvider,
@@ -545,5 +542,5 @@ import 'angular-ui-router';
 import {StateConfig} from './app.config';
 
 angular.module('app',[])
-  .config(StateConfig);
+  .config(StateConfig); // NOTE: StateConfig class is not instanciated, angular will use the constructor as a factory function
 ```
