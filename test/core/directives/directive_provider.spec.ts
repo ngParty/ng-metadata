@@ -686,6 +686,8 @@ describe( `directives/directive_provider`, ()=> {
           '[attr.aria-label]': 'ariaLabel',
           '[readonly]': 'isReadonly',
           '(mousemove)': 'onMove($event.target)',
+          '(mouseenter)': 'onMouseEnter($event.clientX,$event.clientY)',
+          '(mouseleave)': 'onMouseLeave($event.clientX, $event.clientY)',
           '(mouseout)': 'onMoveOut()',
           '(document: click)': 'onDocumentClick()',
           '(window    : resize)': 'onWindowResize()',
@@ -711,6 +713,8 @@ describe( `directives/directive_provider`, ()=> {
           },
           hostListeners: {
             'mousemove': [ 'onMove', '$event.target' ],
+            'mouseenter': [ 'onMouseEnter', '$event.clientX', '$event.clientY' ],
+            'mouseleave': [ 'onMouseLeave', '$event.clientX', '$event.clientY' ],
             'mouseout': [ 'onMoveOut' ],
             'document:click': [ 'onDocumentClick' ],
             'window:resize': [ 'onWindowResize' ],
