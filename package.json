@@ -6,8 +6,8 @@
     "typings": "typings",
     "prepublish": "npm run typings -- install && tsc && ./scripts/create_core.sh",
     "start": "tsc -w",
-    "test": "mocha ./test/index.js",
-    "test:live": "mocha ./test/index.js -w",
+    "test": "mocha ./test/index.ts --require ts-node/register --colors --watch-extensions ts",
+    "test:watch": "npm run test -- --watch",
     "commit": "git-cz",
     "playground": "tsc -p playground -w & live-server --no-browser",
     "uglify": "uglifyjs test/host.spec.js --beautify --mangle --compress --output test/__uglifyTest.js",
@@ -43,6 +43,7 @@
     "sinon": "1.17.2",
     "systemjs": "0.19.6",
     "systemjs-builder": "0.14.11",
+    "ts-node": "0.7.2",
     "typescript": "1.8.10",
     "typings": "0.7.12",
     "validate-commit-msg": "2.0.0"
