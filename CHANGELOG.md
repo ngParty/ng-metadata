@@ -1,3 +1,13 @@
+<a name="1.9.1"></a>
+## [1.9.1](https://github.com/ngParty/ng-metadata/compare/1.9.0...v1.9.1) (2016-05-06)
+
+
+### Bug Fixes
+
+* **core/directives/directive_provider:** fix regexp to allow more attributes within @HostListener (#78) ([92bd0a3](https://github.com/ngParty/ng-metadata/commit/92bd0a3)), closes [(#78](https://github.com/(/issues/78)
+
+
+
 <a name="1.9.0"></a>
 # [1.9.0](https://github.com/ngParty/ng-metadata/compare/1.8.0...v1.9.0) (2016-04-30)
 
