@@ -328,7 +328,7 @@ export class DirectiveProvider {
       const cbString = hostListener[ eventKey ];
       // here we parse out callback method and its argument to separate strings
       // - for instance we got from 'onMove($event.target)' --> 'onMove','$event.target'
-      const [,cbMethodName,cbMethodArgs] = /^(\w+)\(([$\w.,]*)\)$/.exec( cbString );
+      const [,cbMethodName,cbMethodArgs] = /^(\w+)\(([$\w.\s,]*)\)$/.exec( cbString );
       const eventValue = [
         cbMethodName,
         // filter out empty values and trim values
