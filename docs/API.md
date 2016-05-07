@@ -66,6 +66,7 @@ Lifecycle hooks:
 `ng-metadata/core`
 - [OnInit](#oninit)
 - [OnChanges](#onchanges)
+- [DoCheck](#docheck)
 - [AfterContentInit](#aftercontentinit)
 - [AfterContentChecked](#aftercontentchecked)
 - [AfterViewInit](#afterviewtinit)
@@ -1982,6 +1983,85 @@ bootstrap(AppModule);
 ###### Members
 
 - `ngOnChanges(changes: {[propName: string]: SimpleChange})`
+
+
+
+## DoCheck
+
+> **module:** `ng-metadata/core`
+
+Implement this interface to get custom granular change detection observations.
+We can use the DoCheck hook to detect and act upon changes that Angular doesn't catch on its own.
+
+`ngDoCheck` gets called to check the changes in the directives.
+
+The default change detection algorithm looks for differences by comparing bound-property values
+by reference across change detection runs. When `DoCheck` is implemented it can be responsible for checking for changes.
+                                                              
+Implementing this interface allows improving performance by using insights about the component,
+its implementation and data types of its properties ( but we don't recommend to use this in production, unless you know what you are doing).
+
+**Note:**
+- The `ngDoCheck` hook is called with enormous frequency — after every change detection cycle no matter where the change occurred 
+(by change detection cycle we mean $digest loop in terms of Angular 1 ).
+- Most of these initial checks are triggered by Angular's first rendering of unrelated data elsewhere on the page. Mere mousing into another input box triggers a call. Relatively few calls reveal actual changes to pertinent data. Clearly our implementation must be very lightweight or the user experience may suffer.
+- directive should not implement both `DoCheck` and [`OnChanges`](#onchanges) at the same time.
+
+
+// @TODO Differs services are not implemented yet, instead use custom changes handling [like shown here](https://angular.io/docs/ts/latest/guide/lifecycle-hooks.html#!#docheck)
+Use `KeyValueDiffers` and `IterableDiffers` to add your custom check mechanisms.
+
+_Example:_
+
+In the following example `ngDoCheck` uses an `IterableDiffers` to detect the updates to the array `list`:
+
+```typescript
+import { Component, Input, DoCheck, IterableDiffers } from 'ng-metadata/core';
+
+ @Component({
+   selector: 'custom-check',
+   template: `
+    <p>Changes:</p>
+    <ul>
+      <li ng-repeat="line in $ctrl.logs">{{line}}</li>
+    </ul>`
+ })
+ class CustomCheckComponent implements DoCheck {
+   @Input() list: any[];
+   differ: any;
+   logs = [];
+ 
+   constructor(differs: IterableDiffers) {
+     this.differ = differs.find([]).create(null);
+   }
+ 
+   ngDoCheck() {
+     const changes = this.differ.diff(this.list);
+ 
+     if (changes) {
+       changes.forEachAddedItem(r => this.logs.push('added ' + r.item));
+       changes.forEachRemovedItem(r => this.logs.push('removed ' + r.item))
+     }
+   }
+ }
+ 
+ @Component({
+   selector: 'app',
+   template: `
+    <button ng-click="$ctrl.list.push($ctrl.list.length)">Push</button>
+    <button ng-click="$ctrl.list.pop()">Pop</button>
+    <custom-check list="$ctrl.list"></custom-check>`,
+   directives: [ CustomCheckComponent ]
+ })
+ export class AppComponent {
+   list = [];
+ }
+```
+
+###### Members
+
+- `ngDoCheck()`
+
 
 
 ## AfterViewInit
