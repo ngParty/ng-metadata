@@ -5,11 +5,13 @@ node_js:
 
 install:
   # Install npm dependecies
+  # Note: "npm install" also runs "npm prepublish"
   - npm install
 
 before_script:
   # Install external definitions
-  - npm run typings
+  # this is not needed because npm install runs also prepublish where we install typings
+  # - npm run typings:install
 
 script:
   - npm test
