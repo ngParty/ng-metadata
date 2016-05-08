@@ -79,6 +79,21 @@ describe( `di/provider`, ()=> {
       expect( Foo.$inject ).to.deep.equal( [ 'myService#1' ] );
 
     } );
+    it( `should skip generating Injectable token if explicitly provided and add $inject prop if needed (Class)`, ()=> {
+      @Injectable('mySuperSvc')
+      class MyService {
+      }
+
+      @Injectable('myFooSvc')
+      class Foo {
+        constructor( @Inject( MyService ) private mySvc ) {}
+      }
+      const actual = provide( Foo );
+      const expected = [ 'myFooSvc', Foo ];
+
+      expect( actual ).to.deep.equal( expected );
+      expect( Foo.$inject ).to.deep.equal( [ 'mySuperSvc' ] );
+    });
     it( `should return string name and filter factory for Angular registry and add $inject prop if needed (Pipe)`,
       ()=> {
 
