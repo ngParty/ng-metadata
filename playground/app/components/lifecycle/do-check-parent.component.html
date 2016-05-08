@@ -1,0 +1,24 @@
+<div class="parent">
+  <h2>{{$ctrl.title}}</h2>
+
+  <table>
+    <tr><td>Power: </td><td><input ng-model="$ctrl.power"></td></tr>
+    <tr><td>Hero.name: </td><td><input ng-model="$ctrl.hero.name"></td></tr>
+  </table>
+  <p><button ng-click="$ctrl.reset()">Reset Log</button></p>
+
+  <do-check hero="$ctrl.hero" power="$ctrl.power"></do-check>
+</div>
+
+<style>
+  do-check-parent > .parent {background: Lavender}
+  do-check-parent .hero {background: LightYellow; padding: 8px; margin-top: 8px}
+  do-check-parent p {background: Yellow; padding: 8px; margin-top: 8px}
+</style>
+
+
+<!--
+Copyright 2016 Google Inc. All Rights Reserved.
+Use of this source code is governed by an MIT-style license that
+can be found in the LICENSE file at http://angular.io/license
+-->

@@ -2,6 +2,7 @@ import { SimpleChange } from '../change_detection/change_detection_util';
 export enum LifecycleHooks {
   OnInit,
   OnDestroy,
+  DoCheck,
   OnChanges,
   AfterContentInit,
   AfterContentChecked,
@@ -16,6 +17,7 @@ export enum LifecycleHooks {
 export var LIFECYCLE_HOOKS_VALUES = [
   LifecycleHooks.OnInit,
   LifecycleHooks.OnDestroy,
+  LifecycleHooks.DoCheck,
   LifecycleHooks.OnChanges,
   LifecycleHooks.AfterContentInit,
   LifecycleHooks.AfterContentChecked,
@@ -123,6 +125,72 @@ export interface OnChanges { ngOnChanges(changes: {[key: string]: SimpleChange})
  */
 export interface OnInit { ngOnInit(); }
 
+/**
+ * Implement this interface to override the default change detection algorithm for your directive.
+ *
+ * `ngDoCheck` gets called to check the changes in the directives instead of the default algorithm.
+ *
+ * The default change detection algorithm looks for differences by comparing bound-property values
+ * by reference across change detection runs. When `DoCheck` is implemented, the default algorithm
+ * is disabled and `ngDoCheck` is responsible for checking for changes.
+ *
+ * Implementing this interface allows improving performance by using insights about the component,
+ * its implementation and data types of its properties.
+ *
+ * Note that a directive should not implement both `DoCheck` and {@link OnChanges} at the same time.
+ * `ngOnChanges` would not be called when a directive implements `DoCheck`. Reaction to the changes
+ * have to be handled from within the `ngDoCheck` callback.
+ *
+ * Use {@link KeyValueDiffers} and {@link IterableDiffers} to add your custom check mechanisms.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/QpnIlF0CR2i5bcYbHEUJ?p=preview))
+ *
+ * In the following example `ngDoCheck` uses an {@link IterableDiffers} to detect the updates to the
+ * array `list`:
+ *
+ * ```typescript
+ * @Component({
+ *   selector: 'custom-check',
+ *   template: `
+ *     <p>Changes:</p>
+ *     <ul>
+ *       <li *ngFor="let line of logs">{{line}}</li>
+ *     </ul>`,
+ *   directives: [NgFor]
+ * })
+ * class CustomCheckComponent implements DoCheck {
+ *   @Input() list: any[];
+ *   differ: any;
+ *   logs = [];
+ *
+ *   constructor(differs: IterableDiffers) {
+ *     this.differ = differs.find([]).create(null);
+ *   }
+ *
+ *   ngDoCheck() {
+ *     var changes = this.differ.diff(this.list);
+ *
+ *     if (changes) {
+ *       changes.forEachAddedItem(r => this.logs.push('added ' + r.item));
+ *       changes.forEachRemovedItem(r => this.logs.push('removed ' + r.item))
+ *     }
+ *   }
+ * }
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: `
+ *     <button (click)="list.push(list.length)">Push</button>
+ *     <button (click)="list.pop()">Pop</button>
+ *     <custom-check [list]="list"></custom-check>`,
+ *   directives: [CustomCheckComponent]
+ * })
+ * export class App {
+ *   list = [];
+ * }
+ * ```
+ */
+export interface DoCheck { ngDoCheck() }
 
 /**
  * Implement this interface to get notified when your directive is destroyed.

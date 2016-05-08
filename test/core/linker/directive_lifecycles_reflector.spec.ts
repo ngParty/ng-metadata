@@ -39,6 +39,8 @@ describe( `linker/lifecycles_reflector`, ()=> {
     const actual = resolveImplementedLifeCycleHooks(Foo);
     const expected = {
       ngOnInit: true,
+      ngOnChanges: false,
+      ngDoCheck: false,
       ngAfterContentInit: false,
       ngAfterContentChecked: false,
       ngAfterViewInit: true,

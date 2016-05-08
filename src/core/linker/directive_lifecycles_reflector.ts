@@ -20,6 +20,10 @@ export function hasLifecycleHook(lcInterface: LifecycleHooks, token: any): boole
       return !!proto.ngOnDestroy;
     case LifecycleHooks.OnInit:
       return !!proto.ngOnInit;
+    case LifecycleHooks.OnChanges:
+      return !!proto.ngOnChanges;
+    case LifecycleHooks.DoCheck:
+      return !!proto.ngDoCheck;
     case LifecycleHooks._OnChildrenChanged:
       return !!proto._ngOnChildrenChanged;
     default:
@@ -31,6 +35,8 @@ export function hasLifecycleHook(lcInterface: LifecycleHooks, token: any): boole
 
 export type ImplementedLifeCycleHooks = {
   ngOnInit: boolean,
+  ngOnChanges: boolean,
+  ngDoCheck: boolean,
   ngAfterContentInit: boolean,
   ngAfterContentChecked: boolean,
   ngAfterViewInit: boolean,
@@ -38,15 +44,15 @@ export type ImplementedLifeCycleHooks = {
   ngOnDestroy: boolean,
   _ngOnChildrenChanged: boolean
 }
+
 /**
- *
- * @param type
- * @returns
  * @internal
  */
 export function resolveImplementedLifeCycleHooks( type: Type ): ImplementedLifeCycleHooks {
   return {
     ngOnInit: hasLifecycleHook( LifecycleHooks.OnInit, type ),
+    ngOnChanges: hasLifecycleHook( LifecycleHooks.OnChanges, type ),
+    ngDoCheck: hasLifecycleHook( LifecycleHooks.DoCheck, type ),
     ngAfterContentInit: hasLifecycleHook( LifecycleHooks.AfterContentInit, type ),
     ngAfterContentChecked: hasLifecycleHook( LifecycleHooks.AfterContentChecked, type ),
     ngAfterViewInit: hasLifecycleHook( LifecycleHooks.AfterViewInit, type ),

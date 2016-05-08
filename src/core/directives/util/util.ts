@@ -287,14 +287,12 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
     metadata,
     _services
   );
-  $scope.$on( '$destroy', () => removeWatches() );
+  cleanUpWatchers( removeWatches );
 
   // change injectables to proper inject directives
   // we wanna do this only if we inject some locals/directives
   if ( StringMapWrapper.size( requireMap ) ) {
-
     controller.$inject = createNewInjectablesToMatchLocalDi( controller.$inject, requireMap );
-
   }
 
   const $requires = getEmptyRequiredControllers( requireMap );
@@ -349,11 +347,39 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
       instance.ngOnInit()
     }
 
+    // DoCheck is called after OnChanges and OnInit
+    if ( isFunction( instance.ngDoCheck ) ) {
+      const removeDoCheckWatcher = $postDigestWatch( $scope, () => instance.ngDoCheck() );
+      cleanUpWatchers( removeDoCheckWatcher );
+    }
+
   };
 
   // Return the controller instance
   return instance;
 
+  function cleanUpWatchers( cb: Function ): void {
+    $scope.$on( '$destroy', () => cb );
+  }
+
+}
+
+/**
+ * Note: $$postDigest will not trigger another digest cycle.
+ * So any modification to $scope inside $$postDigest will not get reflected in the DOM
+ */
+function $postDigestWatch( scope: ng.IScope, cb: Function ): Function {
+  let hasRegistered = false;
+  const removeDoCheckWatcher = scope.$watch( () => {
+    if ( hasRegistered ) { return }
+    hasRegistered = true;
+    scope.$$postDigest( () => {
+      hasRegistered = false;
+      cb();
+    } );
+  } );
+
+  return removeDoCheckWatcher;
 }
 
 // @TODO this won't be needed in 2.0 because initial output binding will be wrapped with EventEmitter so just Object.assign will do
@@ -840,7 +866,7 @@ export function _createDirectiveBindings(
     if (isFunction(ctrl.ngOnChanges) && currentValue !== previousValue) {
       // If we have not already scheduled the top level onChangesQueue handler then do so now
       if (!changesQueueService.onChangesQueue) {
-        (scope as any).$$postDigest(changesQueueService.flushOnChangesQueue);
+        scope.$$postDigest(changesQueueService.flushOnChangesQueue);
         changesQueueService.onChangesQueue = [];
       }
       // If we have not already queued a trigger of onChanges for this controller then do so now

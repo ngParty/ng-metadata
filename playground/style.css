@@ -6,8 +6,9 @@
 
 .demo-content {
   border-radius: 2px;
-  padding: 80px 56px;
-  margin-bottom: 80px;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 0 1rem #ccc;
 }
 .demo-list {
   max-width: 80%;

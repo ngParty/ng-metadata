@@ -59,4 +59,32 @@ declare module angular {
 
   }
 
+  /**
+   * $rootScope - $rootScopeProvider - service in module ng
+   * see https://docs.angularjs.org/api/ng/type/$rootScope.Scope and https://docs.angularjs.org/api/ng/service/$rootScope
+   */
+  interface IRootScopeService {
+
+    // private members
+    $$postDigest( callback: Function ): void,
+    $$postDigestQueue: Function[],
+    $$applyAsyncQueue: Function[],
+    $$asyncQueue: Function[],
+    $$watchers: Watchers[],
+    $$watchersCount: number,
+    $$listenerCount: Object,
+    $$listeners: Object,
+    $$destroyed: boolean,
+
+  }
+
+  /* @private */
+  interface Watchers {
+    eq: boolean,
+    exp: ( s, l, a, i ) => any,
+    fn: ( newValue, oldValue ) => any,
+    get: ( s, l, a, i ) => any,
+    last: any
+  }
+
 }

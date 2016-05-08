@@ -1,7 +1,8 @@
 import * as angular from 'angular';
 import { provide } from 'ng-metadata/core';
 
-import {TabsModule} from './components/tabs/index'
+import { TabsModule } from './components/tabs/index'
+import { LifecycleHooksModule } from './components/lifecycle/index';
 
 import { TodoAppCmp } from './components/todo-app.component';
 import { TodoItemCmp } from './components/todo-item.component';
@@ -19,7 +20,7 @@ import { MyDirectiveTesterDirective } from './directives/my-directive-tester.dir
 import { TesterAttrDirective } from './directives/my-tester.directive';
 import { GlobalListenerDirective } from './directives/global-listener.directive';
 import { TesterComponent } from './components/tester/tester.component';
-export const AppModule = angular.module( 'app', [TabsModule] )
+export const AppModule = angular.module( 'app', [TabsModule,LifecycleHooksModule] )
 
   .directive( ...provide( TodoAppCmp ) )
   .directive( ...provide( AddTodoCmp ) )

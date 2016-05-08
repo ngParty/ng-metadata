@@ -127,3 +127,27 @@
     <button ng-click="$ctrl.cmpTester.changeValues($event)">Change values bindings</button>
   </my-tester>
 </div>
+
+<h3>Docs examples:</h3>
+
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showLcOnChange=!$ctrl.showLcOnChange">
+    {{ $ctrl.showLcOnChange ? 'hide' : 'show'}} <code>OnChange</code> LC example
+  </button>
+  <div ng-if="$ctrl.showLcOnChange">
+    <on-changes-parent></on-changes-parent>
+  </div>
+</section>
+
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showLcDoCheck=!$ctrl.showLcDoCheck">
+    {{ $ctrl.showLcDoCheck? 'hide' : 'show'}} <code>DoCheck</code> LC example
+  </button>
+  <div ng-if="$ctrl.showLcDoCheck">
+    <do-check-parent></do-check-parent>
+  </div>
+</section>
