@@ -1,4 +1,4 @@
-import { isPresent, CONST } from '../../facade/lang';
+import { isPresent } from '../../facade/lang';
 import { InjectableMetadata } from '../di/metadata';
 
 /**
@@ -12,7 +12,6 @@ import { InjectableMetadata } from '../di/metadata';
  *
  * {@example core/ts/metadata/metadata.ts region='pipe'}
  */
-@CONST()
 export class PipeMetadata extends InjectableMetadata {
   name: string;
   /** @internal */
