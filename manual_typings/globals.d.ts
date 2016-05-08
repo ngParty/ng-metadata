@@ -75,6 +75,13 @@ declare module angular {
     $$listenerCount: Object,
     $$listeners: Object,
     $$destroyed: boolean,
+    $$childHead: IScope,
+    $$childTail: IScope,
+    $$prevSibling: IScope,
+    $$nextSibling: IScope,
+
+    // ngMetadata private members
+    $$disconnected?: boolean,
 
   }
 
