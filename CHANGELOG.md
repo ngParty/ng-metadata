@@ -1,3 +1,18 @@
+<a name="1.10.0"></a>
+# [1.10.0](https://github.com/ngParty/ng-metadata/compare/1.9.1...v1.10.0) (2016-05-08)
+
+
+### Features
+
+* **core/change_detection:** implement ChangeDetectorRef ([a7e3d6f](https://github.com/ngParty/ng-metadata/commit/a7e3d6f))
+* **core/change_detection:** properly inject ChangeDetectorRef as local dependency to component/directive ([3be07ad](https://github.com/ngParty/ng-metadata/commit/3be07ad))
+* **core/di:** allow to explicitly set services name by @Injectable('yourExplicitName') ([49f6e7b](https://github.com/ngParty/ng-metadata/commit/49f6e7b))
+* **core/directives/directive_provider:** implement DoCheck/ngDoCheck lc hook ([3ed1bbd](https://github.com/ngParty/ng-metadata/commit/3ed1bbd))
+* **playground:** add ChangeDetectorRef docs examples and update type definitions ([e932aca](https://github.com/ngParty/ng-metadata/commit/e932aca))
+* **playground:** add lifecycle hooks docs examples and update type definitions ([5979336](https://github.com/ngParty/ng-metadata/commit/5979336))
+
+
+
 <a name="1.9.1"></a>
 ## [1.9.1](https://github.com/ngParty/ng-metadata/compare/1.9.0...v1.9.1) (2016-05-06)
 
