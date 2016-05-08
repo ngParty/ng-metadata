@@ -206,7 +206,7 @@ export class StringMapWrapper {
     return true;
   }
 
-  static assign<T,S>( target: T, ...sources: S[] ): T&S {
+  static assign(target: any, ...sources: any[]): any {
 
     if ( !isPresent( target ) ) {
       throw new TypeError( 'Object.assign cannot be called with null or undefined' );
@@ -362,7 +362,7 @@ export class ListWrapper {
         return O;
       };
     }
-    
+
     (list as any).fill(
       value,
       start,
