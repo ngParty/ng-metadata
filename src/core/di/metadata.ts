@@ -1,11 +1,10 @@
-import { CONST, stringify } from '../../facade/lang';
+import { stringify } from '../../facade/lang';
 
 
 /**
  * `DependencyMetadata` is used by the framework to extend DI.
  * This is internal to Angular and should not be used directly.
  */
-@CONST()
 export class DependencyMetadata {
   get token() { return null; }
 }
@@ -49,7 +48,6 @@ export class DependencyMetadata {
  * expect(injector.get(Car).engine instanceof Engine).toBe(true);
  * ```
  */
-@CONST()
 export class InjectMetadata {
 
   static paramDecoratorForNonConstructor(
@@ -92,7 +90,6 @@ export class InjectMetadata {
  * expect(injector.get(Car).engine).toBeNull();
  * ```
  */
-@CONST()
 export class OptionalMetadata {
   toString(): string { return `@Optional()`; }
 }
@@ -126,7 +123,6 @@ export class OptionalMetadata {
  * expect(() => injector.get(NeedsService)).toThrowError();
  * ```
  */
-@CONST()
 export class InjectableMetadata {
 
   constructor(private _id?: string){}
@@ -163,7 +159,6 @@ export class InjectableMetadata {
  * expect(() => child.get(NeedsDependency)).toThrowError();
  * ```
  */
-@CONST()
 export class SelfMetadata {
   toString(): string { return `@Self()`; }
 }
@@ -193,7 +188,6 @@ export class SelfMetadata {
  * expect(() => inj.get(NeedsDependency)).toThrowError();
  * ```
  */
-@CONST()
 export class SkipSelfMetadata {
   toString(): string { return `@SkipSelf()`; }
 }
@@ -252,7 +246,6 @@ export class SkipSelfMetadata {
  * bootstrap(App);
  *```
  */
-@CONST()
 export class HostMetadata {
   toString(): string { return `@Host()`; }
 }

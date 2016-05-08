@@ -21,6 +21,22 @@ describe( `util/decorators`, ()=> {
 
   } );
 
+  it( `should create class decorator with optional id token if provided`, () => {
+
+    class CustomInjectable {
+      constructor( public id: string ) {}
+    }
+    const CustomInjectableDecorator = makeDecorator( CustomInjectable );
+
+    @CustomInjectableDecorator('hello')
+    class TestWithInjectable {}
+
+
+    expect( Reflect.getOwnMetadata( 'annotations', TestWithInjectable ).length ).to.equal( 1 );
+    expect( Reflect.getOwnMetadata( 'annotations', TestWithInjectable )[0].id).to.equal( 'hello' );
+
+  } );
+
   it( `should create property decorator`, ()=> {
 
     class TestMetadata {}

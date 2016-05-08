@@ -1,4 +1,4 @@
-import { CONST, Type } from '../../facade/lang';
+import { Type } from '../../facade/lang';
 import { InjectableMetadata } from '../di/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 
@@ -392,7 +392,6 @@ export type LegacyDirectiveDefinition = {
  * the instantiated
  * view occurs on the second `<li></li>` which is a sibling to the `<template>` element.
  */
-@CONST()
 export class DirectiveMetadata extends InjectableMetadata {
   /**
    * The CSS selector that triggers the instantiation of a directive.
@@ -849,7 +848,6 @@ export class DirectiveMetadata extends InjectableMetadata {
  *
  * {@example core/ts/metadata/metadata.ts region='component'}
  */
-@CONST()
 export class ComponentMetadata extends DirectiveMetadata {
 
   /**
@@ -1019,7 +1017,6 @@ export class ComponentMetadata extends DirectiveMetadata {
  * bootstrap(App);
  * ```
  */
-@CONST()
 export class InputMetadata {
   /**
    *
@@ -1082,7 +1079,6 @@ export class InputMetadata {
  * ```
  *
  */
-@CONST()
 export class AttrMetadata {
   /**
    *
@@ -1132,7 +1128,6 @@ export class AttrMetadata {
  * bootstrap(App);
  * ```
  */
-@CONST()
 export class OutputMetadata {
   /**
    *
@@ -1176,7 +1171,6 @@ export class OutputMetadata {
  * bootstrap(App);
  * ```
  */
-@CONST()
 export class HostBindingMetadata {
   constructor(public hostPropertyName?: string) {}
 }
@@ -1215,7 +1209,6 @@ export class HostBindingMetadata {
  * bootstrap(App);
  * ```
  */
-@CONST()
 export class HostListenerMetadata {
   constructor(public eventName: string, public args?: string[]) {}
 }

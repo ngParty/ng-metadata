@@ -1,4 +1,4 @@
-import { CONST, Type, stringify, isString } from '../../facade/lang';
+import { Type, stringify, isString } from '../../facade/lang';
 import { resolveForwardRef } from '../di/forward_ref';
 import { DependencyMetadata } from '../di/metadata';
 
@@ -109,7 +109,6 @@ import { DependencyMetadata } from '../di/metadata';
  * The injected object is an unmodifiable live list.
  * See {@link QueryList} for more details.
  */
-@CONST()
 export class QueryMetadata extends DependencyMetadata {
   /**
    * whether we want to query only direct children (false) or all
@@ -175,7 +174,6 @@ export class QueryMetadata extends DependencyMetadata {
  * }
  * ```
  */
-@CONST()
 export class ContentChildrenMetadata extends QueryMetadata {
   constructor( _selector: Type | string, { descendants = false}: {descendants?: boolean} = {} ) {
     super( _selector, { descendants: descendants } );
@@ -202,7 +200,6 @@ export class ContentChildrenMetadata extends QueryMetadata {
  * }
  * ```
  */
-@CONST()
 export class ContentChildMetadata extends QueryMetadata {
   constructor( _selector: Type | string ) {
     super( _selector, { descendants: true, first: true } );
@@ -244,7 +241,6 @@ export class ContentChildMetadata extends QueryMetadata {
  * The injected object is an iterable and observable live list.
  * See {@link QueryList} for more details.
  */
-@CONST()
 export class ViewQueryMetadata extends QueryMetadata {
   constructor(
     _selector: Type | string,
@@ -282,7 +278,6 @@ export class ViewQueryMetadata extends QueryMetadata {
  * }
  * ```
  */
-@CONST()
 export class ViewChildrenMetadata extends ViewQueryMetadata {
   constructor( _selector: Type | string ) {
     super( _selector, { descendants: true } );
@@ -311,7 +306,6 @@ export class ViewChildrenMetadata extends ViewQueryMetadata {
  * }
  * ```
  */
-@CONST()
 export class ViewChildMetadata extends ViewQueryMetadata {
   constructor(_selector: Type | string) {
     super(_selector, {descendants: true, first: true});

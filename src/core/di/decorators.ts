@@ -28,8 +28,8 @@ export interface OptionalMetadataFactory {
  * Factory for creating {@link InjectableMetadata}.
  */
 export interface InjectableMetadataFactory {
-  (): any;
-  new (): InjectableMetadata;
+  (_id?:string): any;
+  new (_id?:string): InjectableMetadata;
 }
 
 /**

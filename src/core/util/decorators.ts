@@ -65,7 +65,8 @@ export function makeDecorator(
        * and we have unique names after mangling our JS
        */
       if ( annotationInstance instanceof InjectableMetadata ) {
-        annotationInstance.id = globalKeyRegistry.get( cls );
+        // set id if it was explicitly provided by user @Injectable('mySvc') otherwise generate
+        annotationInstance.id = annotationInstance.id || globalKeyRegistry.get( cls );
       }
 
       let annotations = reflector.ownAnnotations(cls);

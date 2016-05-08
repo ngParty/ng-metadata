@@ -1,5 +1,3 @@
-import {CONST} from '../../facade/lang';
-
 /**
  * Creates a token that can be used in a DI Provider.
  *
@@ -21,7 +19,6 @@ import {CONST} from '../../facade/lang';
  * Using an `OpaqueToken` is preferable to using an `Object` as tokens because it provides better
  * error messages.
  */
-@CONST()
 export class OpaqueToken {
   constructor(private _desc: string) {}
 

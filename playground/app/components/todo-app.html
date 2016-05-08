@@ -151,3 +151,14 @@
     <do-check-parent></do-check-parent>
   </div>
 </section>
+
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showChangeDetectorRef=!$ctrl.showChangeDetectorRef">
+    {{ $ctrl.showChangeDetectorRef? 'hide' : 'show'}} <code>ChangeDetectorRef</code> example
+  </button>
+  <div ng-if="$ctrl.showChangeDetectorRef">
+    <change-detector></change-detector>
+  </div>
+</section>

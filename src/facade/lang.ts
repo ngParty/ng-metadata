@@ -88,10 +88,6 @@ export function assertionsEnabled(): boolean {
   return _devMode;
 }
 
-export function CONST(): ClassDecorator & PropertyDecorator {
-  return ( target ) => target;
-}
-
 export function isPresent( obj: any ): boolean {
   return obj !== undefined && obj !== null;
 }

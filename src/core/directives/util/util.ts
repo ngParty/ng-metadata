@@ -20,6 +20,7 @@ import { StringWrapper } from '../../../facade/primitives';
 import { ChangeDetectionUtil, SimpleChange } from '../../change_detection/change_detection_util';
 import { changesQueueService } from '../../change_detection/changes_queue';
 import { EventEmitter } from '../../../facade/async';
+import { ChangeDetectorRef } from '../../change_detection/change_detector_ref';
 
 const REQUIRE_PREFIX_REGEXP = /^(?:(\^\^?)?(\?)?(\^\^?)?)?/;
 
@@ -259,12 +260,15 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   metadata: DirectiveMetadata | ComponentMetadata
 ): T & U {
 
+  const { $scope, $element, $attrs } = locals;
   const _services = {
     $parse: $injector.get<ng.IParseService>( '$parse' ),
     $interpolate: $injector.get<ng.IInterpolateService>( '$interpolate' ),
     $rootScope: $injector.get<ng.IRootScopeService>( '$rootScope' )
   };
-  const { $scope, $element, $attrs } = locals;
+  const _localServices = {
+    changeDetectorRef: ChangeDetectorRef.create( $scope )
+  };
 
   // Create an instance of the controller without calling its constructor
   const instance = Object.create( controller.prototype );
@@ -302,7 +306,7 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   const initialInstanceBindingValues = getInitialBindings( instance );
 
   // Finally, invoke the constructor using the injection array and the captured locals
-  $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
+  $injector.invoke( controller, instance, StringMapWrapper.assign( locals, _localServices, $requires ) );
 
   reassignBindingsAndCreteEventEmitters( instance, initialInstanceBindingValues );
 
@@ -334,7 +338,7 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
       // and which have set default values in constructor. We need to store them and reassign after this invoke
       const initialInstanceBindingValues = getInitialBindings( instance );
 
-      $injector.invoke( controller, instance, StringMapWrapper.assign( locals, $requires ) );
+      $injector.invoke( controller, instance, StringMapWrapper.assign( locals, _localServices, $requires ) );
 
       reassignBindingsAndCreteEventEmitters( instance, initialInstanceBindingValues );
 
