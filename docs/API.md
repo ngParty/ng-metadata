@@ -32,6 +32,11 @@ Enums:
 `ng-metadata/core`
 - [ChangeDetectionStrategy](#changedetectionstrategy)
 
+Local Injectables:
+
+`ng-metadata/core`
+- [ChangeDetectorRef](#changedetectorref)
+
 Angular 1 Directives types:
  
 `ng-metadata/common`
@@ -638,6 +643,236 @@ export class ChildComponent implements OnChanges {
 }
 ```
 
+---
+
+**Local Injectables:**
+
+- these services can be only injected from Component/Directive
+- these are not singletons, every component/directive owns it's own instance of the service
+
+## ChangeDetectorRef
+
+> **module:** `ng-metadata/core`
+
+Can be used for custom change detection controll, which can bring us various performance benefits 
+
+###### members
+
+Note: by change detector, we mean in Angular 1 terms, local component `$scope`
+
+| members           | Type       | Description                                  |
+| ----------------- | ---------- |--------------------------------------------- |
+| **markForCheck**  | `Function` | Marks all ancestors to be checked. ( calls `$scope.$applyAsync()` ) |
+| **detectChanges** | `Function` | Checks the change detector and its children. ( calls `$scope.$digest()` ). This can also be used in combination with `detach` to implement local change detection checks. |
+| **detach**        | `Function` | Detaches the change detector from the change detector tree. The detached change detector($scope) will not be checked until it is reattached. |
+| **reattach**      | `Function` | Reattach the change detector to the change detector tree |
+
+All of following examples can be seen live in [playground](playground/app/components/change-detector/change-detector.component.ts) ( clone project, npm install, npm run playground, open localhost:8080/playground )
+
+*example:*
+
+This example showcases `markForCheck`. We are using window.setInterval which won't notify angular about changes.
+With ChangeDetectorRef, we can mitigate this problem pretty easily:
+
+```typescript
+import * as angular from 'angular';
+import {
+  provide,
+  Component,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  OnInit,
+  Input
+} from 'ng-metadata/core';
+import { bootstrap } from 'ng-metadata/platform';
+
+@Component( {
+  selector: 'mark-for-check',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `Number of ticks inside child: {{ $ctrl.ticks }}`
+} )
+export class MarkForCheckComponent implements OnInit {
+  @Input() ticks;
+
+  constructor( private ref: ChangeDetectorRef ) {}
+
+  ngOnInit() {
+    setInterval( () => {
+      this.ticks++;
+      // the following is required, otherwise the view and parent component will not be updated
+      this.ref.markForCheck();
+      // if we call instead detectChanges, only view and children will be updated
+      // this.ref.detectChanges();
+    }, 1000 );
+  }
+
+}
+
+@Component( {
+  selector: 'app',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    Number of ticks inside parent: {{ $ctrl.numberOfTicks }}
+    <mark-for-check ticks="$ctrl.numberOfTicks"></mark-for-check>
+  `,
+  directives: [ MarkForCheckComponent ]
+} )
+export class AppComponent {
+  numberOfTicks = 0;
+}
+
+const AppModule = angular.module('myApp',[])
+  .directive(...provide(AppComponent))
+  .directive(...provide(MarkForCheckComponent))
+  .name;
+  
+bootstrap(AppModule);
+```
+
+*example:*
+
+The following example defines a component with a large list of readonly data.
+
+Imagine the data changes constantly, many times per second. For performance reasons,
+we want to check and update the list every five seconds. We can do that by detaching
+the component's change detector and doing a local check every five seconds.
+   
+```typescript
+import * as angular from 'angular';
+import {
+  provide,
+  Component,
+  Injectable,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef
+} from 'ng-metadata/core';
+import { bootstrap } from 'ng-metadata/platform';
+
+@Injectable()
+export class DataProvider {
+  private _data = [ 1, 2, 3 ];
+  private _interval;
+
+  constructor(){
+    setInterval(()=>{
+      this._data = [...this._data,...this._data.slice(-2).map(num=>num*2)];
+    },3000);
+  }
+  // in a real application the returned data will be different every time
+  get data() {
+    return this._data;
+  }
+
+}
+
+@Component( {
+  selector: 'detach',
+  template: `
+    <li ng-repeat="d in $ctrl.dataProvider.data track by $index">Data {{d}}</li>
+  `
+} )
+export class DetachComponent {
+  constructor( private ref: ChangeDetectorRef, private dataProvider: DataProvider ) {
+    ref.detach();
+    setInterval( () => {
+      this.ref.detectChanges();
+    }, 5000 );
+  }
+}
+
+@Component( {
+  selector: 'app',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `   
+   <detach></detach>
+  `,
+  providers: [ DataProvider ],
+  directives: [ DetachComponent ]
+} )
+export class AppComponent {}
+
+const AppModule = angular.module('myApp',[])
+  .directive(...provide(AppComponent))
+  .directive(...provide(DetachComponent))
+  .service(...provide(DataProvider))
+  .name;
+  
+bootstrap(AppModule);
+```
+
+*example:*
+
+The following example creates a component displaying `live` data. The component will detach
+its change detector from the main change detector tree when the component's live property
+is set to false.
+
+```typescript
+import * as angular from 'angular';
+import {
+  provide,
+  Component,
+  Injectable,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef
+} from 'ng-metadata/core';
+import { bootstrap } from 'ng-metadata/platform';
+
+@Injectable()
+export class DataProvider {
+  data = 1;
+
+  constructor() {
+    setInterval( () => {
+      this.data = this.data * 2;
+    }, 2500 );
+  }
+}
+
+@Component( {
+  selector: 'reattach',
+  template: `Data: {{$ctrl.dataProvider.data}}`
+} )
+export class ReattachComponent implements OnChanges {
+
+  @Input( '<' ) live: boolean;
+
+  constructor( private ref: ChangeDetectorRef, private dataProvider: DataProvider ) {}
+
+  ngOnChanges( changes ) {
+    const liveChange = changes.live as SimpleChange;
+    if ( liveChange ) {
+      if ( liveChange.currentValue ) {
+        this.ref.reattach();
+      } else {
+        this.ref.detach();
+      }
+    }
+  }
+
+}
+
+@Component( {
+  selector: 'app',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `   
+    Live Update: <input type="checkbox" ng-model="$ctrl.live">
+    <reattach live="$ctrl.live"></reattach>
+  `,
+  providers: [ DataProvider ],
+  directives: [ ReattachComponent ]
+} )
+export class AppComponent {
+  live = true;
+}
+
+const AppModule = angular.module('myApp',[])
+  .directive(...provide(AppComponent))
+  .directive(...provide(ReattachComponent))
+  .service(...provide(DataProvider))
+  .name;
+  
+bootstrap(AppModule);
+```
 
 ---
 
