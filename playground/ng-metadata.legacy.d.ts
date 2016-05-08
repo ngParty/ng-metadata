@@ -18,6 +18,50 @@ declare module ngMetadataCore{
     toString(): string;
   }
 
+  /**
+ * Represents a basic change from a previous to a new value.
+ */
+  export class SimpleChange {
+    previousValue: any;
+    currentValue: any;
+    constructor(previousValue: any, currentValue: any);
+    /**
+     * Check whether the new value is the first value assigned.
+     */
+    isFirstChange(): boolean;
+  }
+
+  /**
+ * Describes within the change detector which strategy will be used the next time change
+ * detection is triggered.
+ */
+export const enum ChangeDetectionStrategy {
+    /**
+     * `CheckedOnce` means that after calling detectChanges the mode of the change detector
+     * will become `Checked`.
+     */
+    /**
+     * `Checked` means that the change detector should be skipped until its mode changes to
+     * `CheckOnce`.
+     */
+    /**
+     * `CheckAlways` means that after calling detectChanges the mode of the change detector
+     * will remain `CheckAlways`.
+     */
+    /**
+     * `Detached` means that the change detector sub tree is not a part of the main tree and
+     * should be skipped.
+     */
+    /**
+     * `OnPush` means that the change detector's mode will be set to `CheckOnce` during hydration.
+     */
+    OnPush = 0,
+    /**
+     * `Default` means that the change detector's mode will be set to `CheckAlways` during hydration.
+     */
+    Default = 1,
+}
+
   export type ProviderType = Type | string | OpaqueToken;
   /**
    * should extract the string token from provided Type and add $inject angular 1 annotation to constructor if @Inject
@@ -34,7 +78,7 @@ declare module ngMetadataCore{
     selector: string;
     legacy?: ng.IDirective;
   }): ClassDecorator;
-  function Component({selector, template, templateUrl, inputs, attrs, outputs, legacy}: {
+  function Component({selector, template, templateUrl, inputs, attrs, outputs, legacy, changeDetection, directives}: {
     selector: string;
     template?: string;
     templateUrl?: string;
@@ -42,6 +86,8 @@ declare module ngMetadataCore{
     outputs?: string[];
     attrs?: string[];
     legacy?: ng.IDirective;
+    changeDetection?: ChangeDetectionStrategy;
+    directives?: Function[];
   }): ClassDecorator;
   function Output(bindingPropertyName?: string): PropertyDecorator;
   function Input(bindingPropertyName?: string): PropertyDecorator;
@@ -141,14 +187,58 @@ declare module ngMetadataCore{
    */
   export var LIFECYCLE_HOOKS_VALUES: LifecycleHooks[];
   /**
-   * Lifecycle hooks are guaranteed to be called in the following order:
-   * - `OnInit` (after the first check only),
-   * - `AfterContentInit`,
-   * - `AfterContentChecked`,
-   * - `AfterViewInit`,
-   * - `AfterViewChecked`,
-   * - `OnDestroy` (at the very end before destruction)
-   */
+ * Lifecycle hooks are guaranteed to be called in the following order:
+ * - `OnChanges` (if any bindings have changed),
+ * - `OnInit` (after the first check only),
+ * - `AfterContentInit`,
+ * - `AfterContentChecked`,
+ * - `AfterViewInit`,
+ * - `AfterViewChecked`,
+ * - `OnDestroy` (at the very end before destruction)
+ */
+/**
+ * Implement this interface to get notified when any data-bound property of your directive changes.
+ *
+ * `ngOnChanges` is called right after the data-bound properties have been checked and before view
+ * and content children are checked if at least one of them has changed.
+ *
+ * The `changes` parameter contains an entry for each of the changed data-bound property. The key is
+ * the property name and the value is an instance of {@link SimpleChange}.
+ *
+ * ### Example ([live example](http://plnkr.co/edit/AHrB6opLqHDBPkt4KpdT?p=preview)):
+ *
+ * ```typescript
+ * @Component({
+ *   selector: 'my-cmp',
+ *   template: `<p>myProp = {{myProp}}</p>`
+ * })
+ * class MyComponent implements OnChanges {
+ *   @Input() myProp: any;
+ *
+ *   ngOnChanges(changes: {[propName: string]: SimpleChange}) {
+ *     console.log('ngOnChanges - myProp = ' + changes['myProp'].currentValue);
+ *   }
+ * }
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: `
+ *     <button (click)="value = value + 1">Change MyComponent</button>
+ *     <my-cmp [my-prop]="value"></my-cmp>`,
+ *   directives: [MyComponent]
+ * })
+ * export class App {
+ *   value = 0;
+ * }
+ *
+ * bootstrap(App).catch(err => console.error(err));
+ * ```
+ */
+export interface OnChanges {
+    ngOnChanges(changes: {
+        [key: string]: SimpleChange;
+    }): any;
+}
   /**
    * Implement this interface to execute custom initialization logic after your directive's
    * data-bound properties have been initialized.
@@ -193,6 +283,74 @@ declare module ngMetadataCore{
   export interface OnInit {
     ngOnInit(): any;
   }
+  /**
+ * Implement this interface to override the default change detection algorithm for your directive.
+ *
+ * `ngDoCheck` gets called to check the changes in the directives instead of the default algorithm.
+ *
+ * The default change detection algorithm looks for differences by comparing bound-property values
+ * by reference across change detection runs. When `DoCheck` is implemented, the default algorithm
+ * is disabled and `ngDoCheck` is responsible for checking for changes.
+ *
+ * Implementing this interface allows improving performance by using insights about the component,
+ * its implementation and data types of its properties.
+ *
+ * Note that a directive should not implement both `DoCheck` and {@link OnChanges} at the same time.
+ * `ngOnChanges` would not be called when a directive implements `DoCheck`. Reaction to the changes
+ * have to be handled from within the `ngDoCheck` callback.
+ *
+ * Use {@link KeyValueDiffers} and {@link IterableDiffers} to add your custom check mechanisms.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/QpnIlF0CR2i5bcYbHEUJ?p=preview))
+ *
+ * In the following example `ngDoCheck` uses an {@link IterableDiffers} to detect the updates to the
+ * array `list`:
+ *
+ * ```typescript
+ * @Component({
+ *   selector: 'custom-check',
+ *   template: `
+ *     <p>Changes:</p>
+ *     <ul>
+ *       <li *ngFor="let line of logs">{{line}}</li>
+ *     </ul>`,
+ *   directives: [NgFor]
+ * })
+ * class CustomCheckComponent implements DoCheck {
+ *   @Input() list: any[];
+ *   differ: any;
+ *   logs = [];
+ *
+ *   constructor(differs: IterableDiffers) {
+ *     this.differ = differs.find([]).create(null);
+ *   }
+ *
+ *   ngDoCheck() {
+ *     var changes = this.differ.diff(this.list);
+ *
+ *     if (changes) {
+ *       changes.forEachAddedItem(r => this.logs.push('added ' + r.item));
+ *       changes.forEachRemovedItem(r => this.logs.push('removed ' + r.item))
+ *     }
+ *   }
+ * }
+ *
+ * @Component({
+ *   selector: 'app',
+ *   template: `
+ *     <button (click)="list.push(list.length)">Push</button>
+ *     <button (click)="list.pop()">Pop</button>
+ *     <custom-check [list]="list"></custom-check>`,
+ *   directives: [CustomCheckComponent]
+ * })
+ * export class App {
+ *   list = [];
+ * }
+ * ```
+ */
+export interface DoCheck {
+    ngDoCheck(): any;
+}
   /**
    * Implement this interface to get notified when your directive is destroyed.
    *
@@ -523,7 +681,7 @@ declare module ngMetadataCore{
     emit(value: T): void;
     subscribe(generatorOrNext?: EventHandler<T>, error?: any, complete?: any): Function;
   }
-  
+
   export interface EventHandler<T> {
     ($event: T):void;
   }

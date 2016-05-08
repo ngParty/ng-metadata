@@ -33,19 +33,23 @@ export class TesterComponent{
   @Output() outOne = ()=>{ console.log( 'boooo' ) };
 
   constructor(){
-    console.log( '===Tester CMP ctor====' );
+    console.info( '===Tester CMP ctor====' );
     console.log( this.outOne.toString() );
     console.log( angular.toJson( this, true ) );
   }
 
-  ngOnInit(){
-    console.log( '===Tester CMP, OnInit====' );
-    console.log( this.outOne.toString() );
-    console.log( angular.toJson(this,true) );
-  }
+  // ngOnInit(){
+  //   console.info( '===Tester CMP, OnInit====' );
+  //   console.log( this.outOne.toString() );
+  //   console.log( angular.toJson(this,true) );
+  // }
 
   ngOnChanges(changes){
-    console.log( 'TesterComponent changes:', changes );
+    console.info( '====Tester CMP, OnChanges:===', changes );
+  }
+
+  ngDoCheck(){
+    console.count('===Tester CMP, DoCheck===');
   }
 
 }
