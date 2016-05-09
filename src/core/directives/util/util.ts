@@ -619,13 +619,21 @@ export function _parseBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindi
     return bindingArr.reduce( ( acc, binding: string )=> {
 
       const [name,modeConfigAndAlias=''] = binding.split( SPLIT_BY ).map( part=>part.trim() );
-
-      const [, mode=defaultMode, optional='', alias=''] = modeConfigAndAlias.match( INPUT_MODE_REGEX ) || [];
+      const parsedConfigAndAlias = modeConfigAndAlias.match( INPUT_MODE_REGEX );
+      const [, mode=defaultMode, optional='', alias=''] = parsedConfigAndAlias || [];
 
       // exit early if processed mode is not allowed
       // for example if we are parsing Input('@') which produces attr binding instead of one or two way
       if ( excludeMode.indexOf( mode ) !== -1 ) {
         return acc;
+      }
+
+      // @TODO remove this in next version where template parsing will be implemented
+      if ( (defaultMode !== BINDING_MODE.output) && !(parsedConfigAndAlias && parsedConfigAndAlias[ 1 ]) ) {
+        console.warn( `
+        You need to explicitly provide type of binding(=,<,@) within your <code>'@Input() ${name};</code>.
+        Next version 2.0 will create binding by parsing template if you provide '@Input()' without binding type.
+        ` )
       }
 
       acc[ name ] = {

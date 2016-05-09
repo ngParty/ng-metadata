@@ -312,9 +312,9 @@ describe( `directives/util`, ()=> {
       locals = {$scope,$element,$attrs,$transclude};
       metadata = new DirectiveMetadata( {
         selector: '[my-dir]',
-        inputs: [ 'bindingOne' ],
+        inputs: [ 'bindingOne: =' ],
         outputs: [ 'cbOne' ],
-        attrs: [ 'attrOne' ]
+        attrs: [ 'attrOne: @' ]
       } );
       $injector = getNg1InjectorMock();
       jqParentStub = sinon.stub($element,'parent');
@@ -833,8 +833,8 @@ describe( `directives/util`, ()=> {
 
       const metadata = {
         inputs: [
-          'foo',
-          'one: oneAlias',
+          'foo: =',
+          'one: =oneAlias',
           'interpolate: @'
         ]
       } as DirectiveMetadata;
@@ -881,7 +881,7 @@ describe( `directives/util`, ()=> {
 
       const metadata = {
         attrs: [
-          'foo'
+          'foo: @'
         ],
         inputs: [
           'one: @oneAlias'

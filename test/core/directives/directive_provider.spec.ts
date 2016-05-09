@@ -649,11 +649,16 @@ describe( `directives/directive_provider`, ()=> {
       it( `should create bindings from inputs,attrs,outputs`, ()=> {
 
         const inputs = [
-          'one', 'two: twoAlias',
-          'oneOpt: ?oneOpt',
-          'oneWay: <', 'oneWayAlias: <oneWayAlas'
+          'one: =',
+          'two: =twoAlias',
+          'oneOpt: =?oneOpt',
+          'oneWay: <',
+          'oneWayAlias: <oneWayAlas'
         ];
-        const attrs = [ 'color', 'brood: broodAlias' ];
+        const attrs = [
+          'color: @',
+          'brood: @broodAlias'
+        ];
         const outputs = [ 'onFoo', 'onMoo: onMooAlias' ];
 
         const actual = directiveProvider._createComponentBindings( inputs, attrs, outputs );
