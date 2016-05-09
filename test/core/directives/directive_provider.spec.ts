@@ -592,6 +592,38 @@ describe( `directives/directive_provider`, ()=> {
 
     } );
 
+    it( `should allow @Directive to implements AfterViewInit/AfterViewCheck`, ()=> {
+
+      @Directive( { selector: '[myDir]' } )
+      class MyDirective implements AfterViewInit, AfterContentInit {
+        ngAfterViewInit() {}
+        ngAfterContentInit() {}
+      }
+
+      const ctrl = [ new MyDirective() ];
+      const spyAfterViewInit = sinon.spy( ctrl[0],'ngAfterViewInit' );
+      const spyAfterContentInit = sinon.spy( ctrl[0],'ngAfterContentInit' );
+      const ddo = directiveProvider.createFromType( MyDirective )[1]();
+      const { pre:preLink, post:postLink } = ddo.link as ng.IDirectivePrePost;
+
+      expect( ()=>directiveProvider.createFromType( MyDirective ) ).to.not.throw();
+
+      expect( isFunction( preLink ) ).to.equal( true );
+      expect( isFunction( postLink ) ).to.equal( true );
+
+      expect( spyAfterContentInit.called ).to.equal( false );
+      expect( spyAfterViewInit.called ).to.equal( false );
+
+      postLink( $scope, $element, $attrs, ctrl, $transclude );
+
+      expect( spyAfterContentInit.called ).to.equal( true );
+      expect( spyAfterViewInit.called ).to.equal( true );
+
+      spyAfterContentInit.restore();
+      spyAfterViewInit.restore();
+
+    } );
+
     describe( `error handling`, ()=> {
 
       it( `should throw if @Component implements both AfterViewInit and AfterContentInit`, ()=> {
@@ -603,17 +635,6 @@ describe( `directives/directive_provider`, ()=> {
         }
 
         expect( ()=>directiveProvider.createFromType( MyComponent ) ).to.throw();
-
-      } );
-
-      it( `should throw if @Directive implements AfterViewInit because it doesn't have any View`, ()=> {
-
-        @Directive( { selector: '[myDir]' } )
-        class MyDirective implements AfterViewInit {
-          ngAfterViewInit() {}
-        }
-
-        expect( ()=>directiveProvider.createFromType( MyDirective ) ).to.throw();
 
       } );
 

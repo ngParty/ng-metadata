@@ -367,7 +367,7 @@ export class DirectiveProvider {
     lfHooks: ImplementedLifeCycleHooks
   ): ng.IDirectiveLinkFn {
 
-    if ( (lfHooks.ngAfterContentChecked || lfHooks.ngAfterViewChecked) && StringMapWrapper.size(metadata.queries)===0 ) {
+    if ( (lfHooks.ngAfterContentChecked || lfHooks.ngAfterViewChecked) && StringMapWrapper.size( metadata.queries ) === 0 ) {
       throw new Error( `
               Hooks Impl for ${ stringify( type ) }:
               ===================================
@@ -375,21 +375,7 @@ export class DirectiveProvider {
               we cannot invoke After(Content|View)Checked without provided @Query decorators
               ` )
     }
-
-    // we need to implement this if query are present on class, because during postLink _ngOnChildrenChanged is not yet
-    // implemented on controller instance
-    if ( StringMapWrapper.size(metadata.queries) ) {
-      type.prototype._ngOnChildrenChanged = noop;
-    }
-
-    const hostProcessed = this._processHost( metadata.host );
-
-    let postLink: ng.IDirectiveLinkFn;
-
-    // postLink
     if ( metadata instanceof ComponentMetadata ) {
-
-
       if ( (lfHooks.ngAfterContentInit || lfHooks.ngAfterContentChecked) && !StringMapWrapper.getValueFromPath( metadata,
           'legacy.transclude' ) ) {
         throw new Error( `
@@ -399,129 +385,72 @@ export class DirectiveProvider {
               turn transclusion on within decorator like this: @Component({legacy:{transclude:true}})
               ` )
       }
-
-      postLink = function (
-        scope: ng.IScope,
-        element: ng.IAugmentedJQuery,
-        attrs: ng.IAttributes,
-        controller: [DirectiveCtrl,any],
-        transclude?: ng.ITranscludeFunction
-      ) {
-
-        const _watchers = [];
-        const [ctrl,...requiredCtrls] = controller;
-
-        _setHostStaticAttributes( element, hostProcessed.hostStatic );
-
-        // setup @HostBindings
-        _watchers.push(
-          ..._setHostBindings( scope, element, ctrl, hostProcessed.hostBindings )
-        );
-
-        // setup @HostListeners
-        _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
-
-        const parentCheckedNotifiers = _getParentCheckNotifiers(ctrl,requiredCtrls);
-        _watchers.push(...parentCheckedNotifiers);
-        // setup @ContentChild/@ContentChildren/@ViewChild/@ViewChildren
-         _setQuery( scope, element, ctrl, metadata.queries );
-
-
-        // AfterContentInit/AfterViewInit Hooks
-        // if there are query defined schedule $evalAsync semaphore
-        if ( StringMapWrapper.size( metadata.queries ) ) {
-
-          ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromView, [
-            parentCheckedNotifiers.forEach(cb=>cb()),
-            ctrl.ngAfterViewInit && ctrl.ngAfterViewInit.bind( ctrl ),
-            ctrl.ngAfterViewChecked && ctrl.ngAfterViewChecked.bind( ctrl ),
-          ] );
-          ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromContent, [
-            parentCheckedNotifiers.forEach(cb=>cb()),
-            ctrl.ngAfterContentInit && ctrl.ngAfterContentInit.bind( ctrl ),
-            ctrl.ngAfterContentChecked && ctrl.ngAfterContentChecked.bind( ctrl ),
-          ] );
-
-        } else {
-
-          parentCheckedNotifiers.forEach(cb=>cb());
-          ctrl.ngAfterViewInit && ctrl.ngAfterViewInit();
-          ctrl.ngAfterContentInit && ctrl.ngAfterContentInit();
-
-        }
-
-        // destroy
-        _setupDestroyHandler( scope, element, ctrl, lfHooks.ngOnDestroy, _watchers );
-
-      }
-
-
-    } else {
-
-      // Directive postLink
-      if ( lfHooks.ngAfterViewInit || lfHooks.ngAfterViewChecked ) {
-
-        throw new Error( `
-        Hooks Impl for ${ stringify( type ) }:
-        ===================================
-        You cannot implement AfterViewInit/AfterViewChecked for @Directive,
-        because directive doesn't have View so you probably doing something wrong.
-        @Directive support only AfterContentInit/AfterContentChecked hook which is triggered from postLink
-        ` )
-
-      }
-
-      postLink = function (
-        scope: ng.IScope,
-        element: ng.IAugmentedJQuery,
-        attributes: ng.IAttributes,
-        controller: [DirectiveCtrl,any],
-        transclude: ng.ITranscludeFunction
-      ) {
-
-        const _watchers = [];
-        const _observers = [];
-        const [ctrl,...requiredCtrls] = controller;
-
-
-        _setHostStaticAttributes( element, hostProcessed.hostStatic );
-
-        // setup @HostBindings
-        _watchers.push(
-          ..._setHostBindings( scope, element, ctrl, hostProcessed.hostBindings )
-        );
-
-        // setup @HostListeners
-        _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
-
-        const parentCheckedNotifiers = _getParentCheckNotifiers(ctrl,requiredCtrls);
-        _watchers.push(...parentCheckedNotifiers);
-
-        // setup @ContentChild/@ContentChildren
-        _setQuery( scope, element, ctrl, metadata.queries );
-
-        // AfterContent Hooks
-        // if there are query defined schedule $evalAsync semaphore
-        if ( StringMapWrapper.size( metadata.queries ) ) {
-          ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromContent, [
-            parentCheckedNotifiers.forEach(cb=>cb()),
-            ctrl.ngAfterContentInit && ctrl.ngAfterContentInit.bind( ctrl ),
-            ctrl.ngAfterContentChecked && ctrl.ngAfterContentChecked.bind( ctrl )
-          ] );
-        } else {
-          // no @ContentChild(ren) decorators exist, call just controller init method
-          parentCheckedNotifiers.forEach(cb=>cb());
-          ctrl.ngAfterContentInit && ctrl.ngAfterContentInit();
-        }
-
-        // destroy
-        _setupDestroyHandler( scope, element, ctrl, lfHooks.ngOnDestroy, _watchers, _observers );
-
-      }
-
     }
 
+    // we need to implement this if query are present on class, because during postLink _ngOnChildrenChanged is not yet
+    // implemented on controller instance
+    if ( StringMapWrapper.size( metadata.queries ) ) {
+      type.prototype._ngOnChildrenChanged = noop;
+    }
+
+    const hostProcessed = this._processHost( metadata.host );
+
     return postLink;
+
+    function postLink(
+      scope: ng.IScope,
+      element: ng.IAugmentedJQuery,
+      attrs: ng.IAttributes,
+      controller: [DirectiveCtrl,any],
+      transclude?: ng.ITranscludeFunction
+    ) {
+
+      const _watchers = [];
+      const [ctrl,...requiredCtrls] = controller;
+
+      _setHostStaticAttributes( element, hostProcessed.hostStatic );
+
+      // setup @HostBindings
+      _watchers.push(
+        ..._setHostBindings( scope, element, ctrl, hostProcessed.hostBindings )
+      );
+
+      // setup @HostListeners
+      _setHostListeners( scope, element, ctrl, hostProcessed.hostListeners );
+
+      const parentCheckedNotifiers = _getParentCheckNotifiers( ctrl, requiredCtrls );
+      _watchers.push( ...parentCheckedNotifiers );
+
+      // setup @ContentChild/@ContentChildren/@ViewChild/@ViewChildren
+      _setQuery( scope, element, ctrl, metadata.queries );
+
+      // AfterContentInit/AfterViewInit Hooks
+      // if there are query defined schedule $evalAsync semaphore
+      if ( StringMapWrapper.size( metadata.queries ) ) {
+
+        ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromView, [
+          parentCheckedNotifiers.forEach( cb=>cb() ),
+          ctrl.ngAfterViewInit && ctrl.ngAfterViewInit.bind( ctrl ),
+          ctrl.ngAfterViewChecked && ctrl.ngAfterViewChecked.bind( ctrl ),
+        ] );
+        ctrl._ngOnChildrenChanged( ChildrenChangeHook.FromContent, [
+          parentCheckedNotifiers.forEach( cb=>cb() ),
+          ctrl.ngAfterContentInit && ctrl.ngAfterContentInit.bind( ctrl ),
+          ctrl.ngAfterContentChecked && ctrl.ngAfterContentChecked.bind( ctrl ),
+        ] );
+
+      } else {
+
+        // no @ContentChild/@ViewChild(ref) decorators exist, call just controller init method
+        parentCheckedNotifiers.forEach( cb=>cb() );
+        ctrl.ngAfterViewInit && ctrl.ngAfterViewInit();
+        ctrl.ngAfterContentInit && ctrl.ngAfterContentInit();
+
+      }
+
+      _setupDestroyHandler( scope, element, ctrl, lfHooks.ngOnDestroy, _watchers );
+
+    }
 
   }
 
