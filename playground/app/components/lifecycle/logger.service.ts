@@ -1,6 +1,4 @@
-import { Injectable } from 'ng-metadata/core';
-import { NgTimeout } from '../../shared/index';
-
+import { Injectable, Inject } from 'ng-metadata/core';
 
 @Injectable()
 export class LoggerService {
@@ -8,7 +6,7 @@ export class LoggerService {
   prevMsg = '';
   prevMsgCount = 1;
 
-  constructor( private $timeout: NgTimeout ) {}
+  constructor( @Inject('$timeout') private $timeout: ng.ITimeoutService ) {}
 
   log( msg: string ) {
     if ( msg === this.prevMsg ) {

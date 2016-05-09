@@ -9,7 +9,6 @@ import {
   forwardRef
 } from 'ng-metadata/core';
 
-import { NgTimeout } from '../../shared/index';
 import { LoggerService }  from './logger.service';
 
 //////////////////
@@ -132,7 +131,7 @@ export class AfterContentParentComponent implements OnDestroy {
   show = true;
 
   constructor(
-    private $timeout: NgTimeout,
+    @Inject('$timeout') private $timeout: ng.ITimeoutService,
     logger: LoggerService
   ) {
     this.logs = logger.logs;

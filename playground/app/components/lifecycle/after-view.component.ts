@@ -9,7 +9,6 @@ import {
   forwardRef
 } from 'ng-metadata/core';
 
-import { NgTimeout } from '../../shared/index';
 import { LoggerService }  from './logger.service';
 
 //////////////////
@@ -57,7 +56,10 @@ export class AfterViewComponent implements AfterViewChecked, AfterViewInit {
   // Query for a VIEW child of type `ChildViewComponent`
   @ViewChild( ChildViewComponent ) viewChild: ChildViewComponent;
 
-  constructor( private $timeout: NgTimeout, private logger: LoggerService ) {
+  constructor(
+    @Inject('$timeout') private $timeout: ng.ITimeoutService,
+    private logger: LoggerService
+  ) {
     this.logIt( 'AfterView constructor' );
   }
 
@@ -132,7 +134,7 @@ export class AfterViewParentComponent implements OnDestroy {
   show = true;
 
   constructor(
-    private $timeout: NgTimeout,
+    @Inject('$timeout') private $timeout: ng.ITimeoutService,
     logger: LoggerService
   ) {
     this.logs = logger.logs;
