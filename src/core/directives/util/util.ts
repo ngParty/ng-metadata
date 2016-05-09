@@ -271,7 +271,7 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   };
 
   // Create an instance of the controller without calling its constructor
-  const instance = Object.create( controller.prototype );
+  const instance: T & U = Object.create( controller.prototype );
 
   // NOTE: this is not needed because we are creating bindings manually because of
   // angular behaviour https://github.com/ngParty/ng-metadata/issues/53
