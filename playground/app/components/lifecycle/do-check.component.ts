@@ -17,8 +17,8 @@ class Hero {
   `
 })
 export class DoCheckComponent implements DoCheck, OnChanges {
-  @Input('>') hero: Hero;
-  @Input('>') power: string;
+  @Input('<') hero: Hero;
+  @Input('<') power: string;
 
   changeDetected = false;
   changeLog: string[] = [];
