@@ -1,13 +1,22 @@
-import { AfterViewChecked, AfterViewInit, Component, ViewChild, Inject, Host, forwardRef } from 'ng-metadata/core';
+import {
+  AfterViewChecked,
+  AfterViewInit,
+  OnDestroy,
+  Component,
+  ViewChild,
+  Inject,
+  Host,
+  forwardRef
+} from 'ng-metadata/core';
 
 import { NgTimeout } from '../../shared/index';
 import { LoggerService }  from './logger.service';
 
 //////////////////
-@Component({
-  selector: 'my-child',
+@Component( {
+  selector: 'my-child-view',
   template: '<input ng-model="$ctrl.hero" ng-change="$ctrl.notifyParent()" ng-blur="$ctrl.notifyParent()">'
-})
+} )
 export class ChildViewComponent {
   hero = 'Magneta';
 
@@ -18,18 +27,18 @@ export class ChildViewComponent {
 
   notifyParent() {
     // NOTE: we have to manually notify parent, in Angular 2 this is done by the framework automatically
-    // in Angular one #ngAfterViewChecked from parent will be automatically called only during child instantiation/removal
-    this.afterViewCmp.ngAfterViewChecked()
+    // in Angular 1, #ngAfterViewChecked from parent will be automatically called only during child instantiation/removal
+    this.afterViewCmp.ngAfterViewChecked();
   }
 }
 
 //////////////////////
-@Component({
+@Component( {
   selector: 'after-view',
   template: `
     <button ng-click="$ctrl.toggleChild()">Toggle Child</button>
     <div>-- child view begins --</div>
-      <my-child ng-if="$ctrl.show"></my-child>
+      <my-child-view ng-if="$ctrl.show"></my-child-view>
     <div>-- child view ends --</div>
     
     <p ng-if="$ctrl.comment" class="comment">
@@ -38,8 +47,8 @@ export class ChildViewComponent {
   `,
 
   directives: [ ChildViewComponent ]
-})
-export class AfterViewComponent implements  AfterViewChecked, AfterViewInit {
+} )
+export class AfterViewComponent implements AfterViewChecked, AfterViewInit {
 
   private prevHero = '';
   comment = '';
@@ -49,54 +58,57 @@ export class AfterViewComponent implements  AfterViewChecked, AfterViewInit {
   @ViewChild( ChildViewComponent ) viewChild: ChildViewComponent;
 
   constructor( private $timeout: NgTimeout, private logger: LoggerService ) {
-    this.logIt('AfterView constructor');
+    this.logIt( 'AfterView constructor' );
   }
 
   ngAfterViewInit() {
     // viewChild is set after the view has been initialized
-    this.logIt('AfterViewInit');
+    this.logIt( 'AfterViewInit' );
     this.doSomething();
   }
 
   ngAfterViewChecked() {
-    // if(!this.viewChild) return;
     const vc = this.viewChild;
 
     // viewChild is updated after the view has been checked
-    if (vc && this.prevHero === vc.hero) {
-      this.logIt('AfterViewChecked (no change)');
+    if ( vc && this.prevHero === vc.hero ) {
+      this.logIt( 'AfterViewChecked (no change)' );
     } else {
       this.prevHero = vc && vc.hero;
-      this.logIt('AfterViewChecked');
+      this.logIt( 'AfterViewChecked' );
       this.doSomething();
     }
   }
 
-  toggleChild(){
+  toggleChild() {
     this.show = !this.show;
   }
 
   // This surrogate for real business logic sets the `comment`
   private doSomething() {
-    if(!this.viewChild) return;
+    if ( !this.viewChild ) return;
 
-    let c = this.viewChild.hero.length > 10 ? `That's a long name` : '';
-    if (c !== this.comment) {
+    const c = this.viewChild.hero.length > 10
+      ? `That's a long name`
+      : '';
+    if ( c !== this.comment ) {
       // Wait a tick because the component's view has already been checked
-      this.$timeout(() => this.comment = c, 0);
+      this.$timeout( () => this.comment = c, 0 );
     }
   }
 
-  private logIt(method:string){
+  private logIt( method: string ) {
     const vc = this.viewChild;
-    let message = `${method}: ${vc ? vc.hero : 'no'} child view`;
-    this.logger.log(message);
+    let message = `${method}: ${vc
+      ? vc.hero
+      : 'no'} child view`;
+    this.logger.log( message );
   }
 
 }
 
 //////////////
-@Component({
+@Component( {
   selector: 'after-view-parent',
   template: `
   <div class="parent">
@@ -112,16 +124,16 @@ export class AfterViewComponent implements  AfterViewChecked, AfterViewInit {
   </div>
   <style>after-view-parent > .parent {background: burlywood}</style>
   `,
-  providers:[ LoggerService ],
+  providers: [ LoggerService ],
   directives: [ AfterViewComponent ]
-})
-export class AfterViewParentComponent {
+} )
+export class AfterViewParentComponent implements OnDestroy {
   logs: string[];
   show = true;
 
   constructor(
     private $timeout: NgTimeout,
-    private logger: LoggerService
+    logger: LoggerService
   ) {
     this.logs = logger.logs;
   }
@@ -134,11 +146,11 @@ export class AfterViewParentComponent {
     this.$timeout( () => this.show = true, 0 )
   }
 
-  ngOnDestroy(){
+  ngOnDestroy() {
     this._emptyLog();
   }
 
-  private _emptyLog(){ this.logs.length = 0 }
+  private _emptyLog() { this.logs.length = 0 }
 
 }
 
