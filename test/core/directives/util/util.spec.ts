@@ -20,16 +20,10 @@ import {
   getEmptyRequiredControllers,
   createNewInjectablesToMatchLocalDi,
   isAttrDirective,
-  _createDirectiveBindings
+  _createDirectiveBindings,
+  _parseBindings
 } from '../../../../src/core/directives/util/util';
-import {
-  ElementFactory,
-  getNg1InjectorMock,
-  $Attrs,
-  $Scope,
-  $Interpolate,
-  $Parse
-} from '../../../utils';
+import { ElementFactory, getNg1InjectorMock, $Attrs, $Scope, $Interpolate, $Parse } from '../../../utils';
 import { global, noop, isFunction, isPresent } from '../../../../src/facade/lang';
 import { DirectiveCtrl, NgmDirective } from '../../../../src/core/directives/directive_provider';
 import { Inject } from '../../../../src/core/di/decorators';
@@ -935,6 +929,55 @@ describe( `directives/util`, ()=> {
       expect( Object.keys( ctrl ) ).to.deep.equal( [ 'onFoo', 'onOne' ] );
       expect( ctrl.onFoo() ).to.equal( '$ctrl.parentFoo() evaluated' );
       expect( ctrl.onOne() ).to.equal( '$ctrl.parentOne() evaluated' );
+
+    } );
+
+  } );
+
+  describe( `Binding parser`, () => {
+
+    describe( `#_parseBindings`, () => {
+
+      it( `should create bindings from inputs,attrs,outputs`, ()=> {
+
+        const inputs = [
+          'one: =',
+          'two: =twoAlias',
+          'oneOpt: =?oneOpt',
+          'oneWay: <',
+          'oneWayAlias: <oneWayAlas'
+        ];
+        const attrs = [
+          'color: @',
+          'brood: @broodAlias'
+        ];
+        const outputs = [
+          'onFoo',
+          'onMoo: onMooAlias'
+        ];
+
+        const actual = _parseBindings( {inputs, attrs, outputs} );
+        const expected = {
+          inputs: {
+            one: { mode: '=', alias: '', optional: true },
+            oneOpt: { mode: '=', alias: 'oneOpt', optional: true },
+            two: { mode: '=', alias: 'twoAlias', optional: true },
+            oneWay: { mode: '<', alias: '', optional: true },
+            oneWayAlias: { mode: '<', alias: 'oneWayAlas', optional: true }
+          },
+          attrs: {
+            color: { mode: '@', alias: '', optional: true },
+            brood: { mode: '@', alias: 'broodAlias', optional: true },
+          },
+          outputs: {
+            onFoo: { mode: '&', alias: '', optional: true },
+            onMoo: { mode: '&', alias: 'onMooAlias', optional: true },
+          }
+        };
+
+        expect( actual ).to.deep.equal( expected );
+
+      } );
 
     } );
 

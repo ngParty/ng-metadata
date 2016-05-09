@@ -539,47 +539,6 @@ export function isComponentDirective( metadata: any ): metadata is ComponentMeta
   return metadata instanceof ComponentMetadata;
 }
 
-
-/**
- * returns angular 1 bindToController Map
- * ```js
- * { property: '=', onEvent: '&', attrVal: '@', oneWay: '<' }
- * ```
- * @returns {StringMap}
- * @internal
- * @deprecated
- * @private
- */
-export function _extractBindings(
-  {
-    inputs=[],
-    outputs=[],
-    attrs=[]
-  }: {
-    inputs?: string[],
-    outputs?: string[],
-    attrs?: string[]
-  }={}
-): StringMap {
-
-  const parsedBindings = _parseBindings( { inputs, outputs, attrs } );
-
-  return StringMapWrapper
-    .values( parsedBindings )
-    .reduce( ( acc, bindingMap: ParsedBindingsMap ) => {
-
-      StringMapWrapper.forEach( bindingMap, ( config: ParsedBindingValue, name: string ) => {
-        const optionalSymbol = config.optional
-          ? '?'
-          : '';
-        acc[ name ] = `${ config.mode }${ optionalSymbol }${ config.alias }`;
-      } );
-
-      return acc;
-    }, {} as StringMap );
-
-}
-
 export type ParsedBindingValue = { mode: string, alias: string, optional: boolean}
 export type ParsedBindingsMap = {[name:string]:ParsedBindingValue};
 export type ParsedBindings = {
@@ -704,6 +663,7 @@ export function _createDirectiveBindings(
 
   // setup @Inputs '<' or '='
   // by default '='
+  // @TODO starting 2.0 there will be no default, if no explicit type provided it will be determined from template
   StringMapWrapper.forEach( parsedBindings.inputs, ( config: ParsedBindingValue, propName: string ) => {
 
     const { alias, optional, mode } = config;

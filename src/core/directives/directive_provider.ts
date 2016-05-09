@@ -35,8 +35,7 @@ import {
 import {
   _resolveChildrenFactory,
   _getParentCheckNotifiers,
-  directiveControllerFactory,
-  _extractBindings
+  directiveControllerFactory
 } from './util/util';
 
 export type HostBindingsProcessed = {
@@ -201,27 +200,6 @@ export class DirectiveProvider {
       ddo,
       legacyDDO
     )
-  }
-
-  /**
-   * NOTE: this is not used anymore
-   * we are creating bindings manually
-   * @param inputs
-   * @param attrs
-   * @param outputs
-   * @returns {{}}
-   * @private
-   * @internal
-   * @deprecated
-   */
-  _createComponentBindings(
-    inputs: string[] = [],
-    attrs: string[] = [],
-    outputs: string[] = []
-  ): StringMap {
-
-    return _extractBindings( { inputs, outputs, attrs } );
-
   }
 
   /**

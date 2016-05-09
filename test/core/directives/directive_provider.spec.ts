@@ -17,7 +17,7 @@ import {
   HostBinding
 } from '../../../src/core/directives/decorators';
 import { Inject, Host } from '../../../src/core/di/decorators';
-import { $Scope, $Attrs, ElementFactory, $Document } from '../../utils';
+import { $Scope, $Attrs, ElementFactory } from '../../utils';
 import {
   directiveProvider,
   _setHostBindings,
@@ -643,42 +643,6 @@ describe( `directives/directive_provider`, ()=> {
   } );
 
   describe( `private API`, ()=> {
-
-    describe( `#_createComponentBindings`, ()=> {
-
-      it( `should create bindings from inputs,attrs,outputs`, ()=> {
-
-        const inputs = [
-          'one: =',
-          'two: =twoAlias',
-          'oneOpt: =?oneOpt',
-          'oneWay: <',
-          'oneWayAlias: <oneWayAlas'
-        ];
-        const attrs = [
-          'color: @',
-          'brood: @broodAlias'
-        ];
-        const outputs = [ 'onFoo', 'onMoo: onMooAlias' ];
-
-        const actual = directiveProvider._createComponentBindings( inputs, attrs, outputs );
-        const expected = {
-          one: '=?',
-          oneOpt: '=?oneOpt',
-          two: '=?twoAlias',
-          color: '@?',
-          brood: '@?broodAlias',
-          onFoo: '&?',
-          onMoo: '&?onMooAlias',
-          oneWay: '<?',
-          oneWayAlias: '<?oneWayAlas'
-        };
-
-        expect( actual ).to.deep.equal( expected );
-
-      } );
-
-    } );
 
     describe( `#_createRequires`, ()=> {
 
