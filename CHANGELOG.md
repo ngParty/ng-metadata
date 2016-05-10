@@ -1,3 +1,68 @@
+<a name="1.11.0"></a>
+# [1.11.0](https://github.com/ngParty/ng-metadata/compare/1.10.0...v1.11.0) (2016-05-10)
+
+
+### Bug Fixes
+
+* **playground:** fix DoChanges example binding ([2cb8ff4](https://github.com/ngParty/ng-metadata/commit/2cb8ff4))
+
+### Features
+
+* **core/directives/directive_provider:** allow AfterViewInit/AfterViewChecked lc for @Directive ([6a9fe6e](https://github.com/ngParty/ng-metadata/commit/6a9fe6e))
+* **core/directives/util:** notify user to refactor their @Input bindings for easy upgrade to 2.0 ([65e1d3d](https://github.com/ngParty/ng-metadata/commit/65e1d3d))
+* **playground:** add AfterContentInit/Checked docs demos ([b47610b](https://github.com/ngParty/ng-metadata/commit/b47610b))
+* **playground:** add AfterViewInit/Checked docs demos ([46bffa7](https://github.com/ngParty/ng-metadata/commit/46bffa7))
+
+This contains few tweaks to codebase and **preparation for breaking changes in 2.0**
+
+## IMPORTANT
+- you will get `console.warning` if you are using two way binding by default `@Input() myTwoWay`
+- fix is very easy, just global replace `@Input() myTwoWay` to `@Input('=') myTwoWay`
+- this is included so you'll be prepared for ngMetadata 2.0 which will determine binding from your template if you'll use `@Input() binding` without setting explicit mode, or by setting explicit mode
+
+in ngMetadata 2.0 you will have two options to define type of your bindings:
+
+### 1. From template ( preferred )
+```html
+<my-cmp 
+  inter="{{$ctrl.foo}}" 
+  [data]="$ctrl.values" 
+  [(two-way)]="$ctrl.problems" 
+  (notify)="$ctrl.doSomething()"
+></my-cmp>
+```
+```typescript
+@Component({ selector: 'my-cmp', template: '....'})
+class MyComponent{
+  @Input() inter: string;  // determined that this is '@' type
+  @Input() data: { name: string, age: number }; // determined that this is '<' type
+  @Input() twoWay: { name: string, age: number }; // determined that this is '<= type
+  @Output() notify = new EventEmitter<any>();
+}
+```
+
+### 2. Defined by user from Input ( deprecated, but still there till you migrate )
+```html
+<my-cmp 
+  inter="{{$ctrl.foo}}" 
+  data="$ctrl.values" 
+  two-way="$ctrl.problems" 
+  notify="$ctrl.doSomething()"
+></my-cmp>
+```
+```typescript
+@Component({ selector: 'my-cmp', template: '....'})
+class MyComponent{
+  @Input('@') inter: string;  // explicitly set type
+  @Input('<') data: { name: string, age: number };  // explicitly set type
+  @Input('=') twoWay: { name: string, age: number }; // explicitly set type
+  @Output() notify = new EventEmitter<any>();
+}
+```
+
+**NOTE:** you  cannot mix those two for one component
+
+
 <a name="1.10.0"></a>
 # [1.10.0](https://github.com/ngParty/ng-metadata/compare/1.9.1...v1.10.0) (2016-05-08)
 
