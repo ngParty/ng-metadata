@@ -154,6 +154,18 @@ export class $Interpolate{
 export class $Scope {
   $$watchers = [];
   $$events = [];
+  $$postDigestQueue = [];
+  $$applyAsyncQueue = [];
+  $$asyncQueue = [];
+  $$watchersCount = 0;
+  $$listenerCount = {} as any;
+  $$listeners = {} as any;
+  $$destroyed = false;
+  $$childHead = {} as any;
+  $$childTail = {} as any;
+  $$prevSibling = {} as any;
+  $$nextSibling = {} as any;
+  $$postDigest = ( callback: Function ): void => {};
 
   $watch( watchExp: Function|string, watchListener: Function ) {
     this.$$watchers.push( [ watchExp, watchListener ] );
