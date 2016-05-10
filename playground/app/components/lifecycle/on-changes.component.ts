@@ -31,7 +31,7 @@ export class OnChangesComponent implements OnChanges {
       let prop = changes[propName];
       let cur  = JSON.stringify(prop.currentValue);
       let prev = JSON.stringify(prop.previousValue);
-      this.changeLog.push(`${propName}: currentValue = ${cur}, previousValue = ${prev}`);
+      this.changeLog.push(`OnChanges: ${propName}: currentValue = ${cur}, previousValue = ${prev}`);
     }
   }
 

@@ -130,6 +130,7 @@
 
 <h3>Docs examples:</h3>
 
+<!--LC HOOKS-->
 <section class="demo-content">
   <button
     class="mdl-button mdl-js-button mdl-button--accent"
@@ -152,6 +153,29 @@
   </div>
 </section>
 
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showLcAfterView=!$ctrl.showLcAfterView">
+    {{ $ctrl.showLcAfterView ? 'hide' : 'show'}} <code>AfterViewInit/AfterViewChecked</code> LC example
+  </button>
+  <div ng-if="$ctrl.showLcAfterView">
+    <after-view-parent></after-view-parent>
+  </div>
+</section>
+
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showLcAfterContent=!$ctrl.showLcAfterContent">
+    {{ $ctrl.showLcAfterContent? 'hide' : 'show'}} <code>AfterContentInit/AfterContentChecked</code> LC example
+  </button>
+  <div ng-if="$ctrl.showLcAfterContent">
+    <after-content-parent></after-content-parent>
+  </div>
+</section>
+
+<!--CHANGE DETECTOR REF-->
 <section class="demo-content">
   <button
     class="mdl-button mdl-js-button mdl-button--accent"
