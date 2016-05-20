@@ -415,7 +415,8 @@ angular.module('droid',[])
 
 #### Run Blocks
 
-> try to not to use `run` api, because there is no equivalent in Angular 2
+> try to not to use `run` api, because there is no equivalent in Angular 2,
+> instead do your initial run logic within service `constructor`
 
 **ES5**
 
@@ -440,18 +441,18 @@ angular.module('app',[])
 
 **TS + ng-metadata**
 
+**NOTE:** don't use `this` within `RunBlock` class, because angular invokes `.config` function via `Function.apply` so `this` is `undefined`
+
 ```ts
 // app.config.ts
 
 import {Inject} from 'ng-metadata/core';
 import {Authenticator, Translator ) from 'some-library';
 
-export class RunBlock{
-
-  constructor(
-    @Inject('authenticator') private authenticator: Authenticator,
-    @Inject('translator') private translator: Translator
-  ){
+export class RunBlock {
+  
+  static $inject = ['authenticator', 'translator'];
+  constructor( authenticator: Authenticator, translator: Translator ) {
      authenticator.initialize();
      translator.initialize();
   }
@@ -467,11 +468,12 @@ import * as angular from 'angular';
 import {RunBlock} from './app.config';
 
 angular.module('app',[])
-  .run(RunBlock); // NOTE: RunBlock class is not instanciated, angular will use the constructor as a factory function
+  // NOTE: RunBlock class is not instantiated, angular will use the constructor as a factory function
+  .run(RunBlock); 
 ```
 
 
-#### Configuration
+#### Configuration/Routing
 
 > try to not to use `config` api, because there is no equivalent in Angular 2
 > use it only for routes/states definition
@@ -479,7 +481,7 @@ angular.module('app',[])
 **ES5**
 
 ```js
-// app.config.js
+// app.states.js
 
 angular.module('app')
   .config(stateConfig);
@@ -501,28 +503,26 @@ function stateConfig($stateProvider, $urlRouterProvider) {
 ```
 
 ```js
-// app.js
+// index.js
 
-angular.module('app',[])
+angular.module('app',['uiRouter'])
 ```
 
 **TS + ng-metadata**
 
+**NOTE:** don't use `this` within `StateConfig` class, because angular invokes `.config` function via `Function.apply` so `this` is `undefined`
+ 
 ```ts
-// app.config.ts
-
-import {Inject} from 'ng-metadata/core';
+// app.states.ts
 
 export class StateConfig{
-
-  constructor(
-    @Inject('$stateProvider') private $stateProvider,
-    @Inject('$urlRouterProvider') private $urlRouterProvider
-  ){
-     //
-     // For any unmatched url, redirect to /state1
-     $urlRouterProvider.otherwise("/state1");
-    //
+  
+  // we need to manualy annotate DI
+  static $inject = ['$stateProvider', '$urlRouterProvider'];
+  constructor( $stateProvider, $urlRouterProvider ){
+    // For any unmatched url, redirect to /state1
+    $urlRouterProvider.otherwise("/state1");
+    
     // Now set up the states
     $stateProvider
       .state('state1', {
@@ -535,12 +535,13 @@ export class StateConfig{
 ```
 
 ```ts
-// app.ts
+// index.ts
 
 import * as angular from 'angular';
-import 'angular-ui-router';
+import * as uiRouter from 'angular-ui-router';
 import {StateConfig} from './app.config';
 
-angular.module('app',[])
-  .config(StateConfig); // NOTE: StateConfig class is not instanciated, angular will use the constructor as a factory function
+angular.module('app',[uiRouter])
+  // NOTE: StateConfig class is not instantiated, angular will use the constructor as a factory function
+  .config(StateConfig); 
 ```
