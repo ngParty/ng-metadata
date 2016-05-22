@@ -1,3 +1,14 @@
+<a name="1.11.1"></a>
+## [1.11.1](https://github.com/ngParty/ng-metadata/compare/1.11.0...v1.11.1) (2016-05-22)
+
+
+### Bug Fixes
+
+* **manual_typings:** explicitly annotate all arguments in Watchers interface methods (#86) ([7649847](https://github.com/ngParty/ng-metadata/commit/7649847)), closes [#72](https://github.com/ngParty/ng-metadata/issues/72)
+* **playground:** fix wrong tsconfig.json ([7ea64b0](https://github.com/ngParty/ng-metadata/commit/7ea64b0))
+
+
+
 <a name="1.11.0"></a>
 # [1.11.0](https://github.com/ngParty/ng-metadata/compare/1.10.0...v1.11.0) (2016-05-10)
 
