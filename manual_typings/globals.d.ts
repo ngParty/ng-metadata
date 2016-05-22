@@ -88,9 +88,9 @@ declare module angular {
   /* @private */
   interface Watchers {
     eq: boolean,
-    exp: ( s, l, a, i ) => any,
-    fn: ( newValue, oldValue ) => any,
-    get: ( s, l, a, i ) => any,
+    exp: ( s: any, l: any, a: any, i: any ) => any,
+    fn: ( newValue: any, oldValue: any ) => any,
+    get: ( s: any, l: any, a: any, i: any ) => any,
     last: any
   }
 
