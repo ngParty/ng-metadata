@@ -11,8 +11,6 @@
     "preserveConstEnums": true
   },
   "exclude": [
-    "typings/main",
-    "typings/main.d.ts",
     "playground",
     "node_modules"
   ]
