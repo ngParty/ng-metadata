@@ -10,10 +10,7 @@
   },
   "files": [
     "app/main.ts",
-    "../typings/main.d.ts",
+    "../typings/index.d.ts",
     "ng-metadata.legacy.d.ts"
-  ],
-  "exclude": [
-    "node_modules"
   ]
 }
