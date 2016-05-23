@@ -1,4 +1,4 @@
 # Summary
 
-* Design patterns
+* [Design patterns](docs/DESIGN-PATTERNS.md)
 
