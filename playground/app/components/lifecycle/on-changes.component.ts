@@ -1,7 +1,7 @@
 /* tslint:disable:forin */
 import {
   Component, Input, OnChanges,
-  SimpleChange, ViewChild
+  SimpleChange, SimpleChanges, ViewChild
 } from 'ng-metadata/core';
 
 
@@ -26,7 +26,7 @@ export class OnChangesComponent implements OnChanges {
 
   changeLog: string[] = [];
 
-  ngOnChanges(changes: {[propertyName: string]: SimpleChange}) {
+  ngOnChanges(changes: SimpleChanges) {
     for (let propName in changes) {
       let prop = changes[propName];
       let cur  = JSON.stringify(prop.currentValue);
