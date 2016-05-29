@@ -634,6 +634,62 @@ describe( `directives/directive_provider`, ()=> {
 
   } );
 
+  describe( `ngComponentRouter life cycles`, () => {
+
+    it( `should enable $routeConfig withing legacy property and set it do directiveFactory as a property`, () => {
+
+      @Component( {
+        selector: 'root',
+        template: `<h1>hello</h1><ng-outlet></ng-outlet>`,
+        legacy: {
+          $routeConfig: [
+            { path: '/users', name: 'Users', component: 'users', useAsDefault: true },
+            { path: '/users/:id', name: 'UserDetail', component: 'usersDetail' }
+          ]
+        }
+      } )
+      class RootComponent {
+      }
+
+      const [name,factory]:[string,any] = directiveProvider.createFromType( RootComponent );
+      const expected = [
+        { path: '/users', name: 'Users', component: 'users', useAsDefault: true },
+        { path: '/users/:id', name: 'UserDetail', component: 'usersDetail' }
+      ];
+
+      expect( factory.$routeConfig ).to.deep.equal( expected );
+
+
+    } );
+
+    it( `should set all component router lc hooks to direcitveFactory function as static properties`, () => {
+
+      @Component( {
+        selector: 'root',
+        template: `<h1>hello</h1><ng-outlet></ng-outlet>`,
+        legacy: {
+          $routeConfig: [
+            { path: '/users', name: 'Users', component: 'users', useAsDefault: true },
+            { path: '/users/:id', name: 'UserDetail', component: 'usersDetail' }
+          ]
+        }
+      } )
+      class RootComponent {
+        static $canActivate() {}
+
+        $routeOnActivate() {}
+
+        $routeOnDeactivate() {}
+      }
+
+      const [name,factory]:[string,any] = directiveProvider.createFromType( RootComponent );
+
+      expect( factory.$canActivate ).to.equal( RootComponent.$canActivate );
+
+    } );
+
+  } );
+
   describe( `private API`, ()=> {
 
     describe( `#_createRequires`, ()=> {
