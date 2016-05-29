@@ -18,5 +18,6 @@ export interface DirectiveCtrl extends AfterContentInit, AfterContentChecked, Af
 }
 
 export interface NgmDirective extends ng.IDirective {
-  _ngOnInitBound?():void;
+  _ngOnInitBound?():void,
+  $canActivate?(): boolean|ng.IPromise<boolean>,
 }
