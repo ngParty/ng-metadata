@@ -2162,6 +2162,8 @@ Called whenever one-way (`@Input(<)`) or interpolation (`@Attr()`) bindings are 
 The `changes` parameter is a hash whose keys (implements `SimpleChange`) are the names of the bound properties that have changed, 
 and the values are an object of the form `{ currentValue, previousValue, isFirstChange() }`. 
 
+> you can use `SimpleChanges`(alias for `{[propName: string]: SimpleChange}`) for annotating `changes` parameter
+
 Use this hook to trigger updates within a component such as cloning the bound value to prevent accidental mutation of the outer value.
 
 `ngOnChanges` is called right after the data-bound properties have been checked and before view
@@ -2174,7 +2176,7 @@ _Example:_
 
 ```typescript
 import { bootstrap } from 'ng-metadata/platform';
-import { Component, Input, Attr, OnChanges, SimpleChange, provide } from 'ng-metadata/core';
+import { Component, Input, Attr, OnChanges, SimpleChanges, provide } from 'ng-metadata/core';
 
 @Component({
   selector: 'my-cmp',
@@ -2187,7 +2189,7 @@ class MyComponent implements OnChanges {
   @Attr() myAttr: string;
   @Input('<') myProp: any;
 
-  ngOnChanges(changes: {[propName: string]: SimpleChange}) {
+  ngOnChanges(changes: SimpleChanges) {
     console.log('ngOnChanges - myProp = ' + changes['myProp'].currentValue);
     console.log('ngOnChanges - myAttr = ' + changes['myAttr'].currentValue);
   }

@@ -19,6 +19,13 @@ declare module ngMetadataCore{
   }
 
   /**
+   * A `changes` object whose keys are property names and
+   * values are instances of {@link SimpleChange}. See {@link OnChanges}
+   */
+  export interface SimpleChanges {
+    [propName: string]: SimpleChange;
+  }
+  /**
  * Represents a basic change from a previous to a new value.
  */
   export class SimpleChange {
@@ -428,9 +435,7 @@ export const enum ChangeDetectionStrategy {
  * ```
  */
 export interface OnChanges {
-    ngOnChanges(changes: {
-        [key: string]: SimpleChange;
-    }): any;
+  ngOnChanges(changes: SimpleChanges): any;
 }
   /**
    * Implement this interface to execute custom initialization logic after your directive's

@@ -28,3 +28,5 @@ export class ChangeDetectionUtil {
   }
 
 }
+
+export { SimpleChanges } from '../linker/directive_lifecycle_interfaces';
