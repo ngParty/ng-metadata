@@ -1,6 +1,40 @@
 import { Injectable } from '../core/di/decorators';
 import { RouteDefinition } from './route_definition';
 import { Instruction } from './instructions';
+import { OpaqueToken } from '../core/di/opaque_token';
+
+
+/**
+ * Token used to bind the component with the top-level {@link RouteConfig}s for the
+ * application.
+ *
+ * ### Example ([live demo](http://plnkr.co/edit/iRUP8B5OUbxCWQ3AcIDm))
+ *
+ * ```
+ * import {Component} from '@angular/core';
+ * import {
+ *   ROUTER_DIRECTIVES,
+ *   ROUTER_PROVIDERS,
+ *   RouteConfig
+ * } from '@angular/router-deprecated';
+ *
+ * @Component({directives: [ROUTER_DIRECTIVES]})
+ * @RouteConfig([
+ *  {...},
+ * ])
+ * class AppCmp {
+ *   // ...
+ * }
+ *
+ * bootstrap(AppCmp, [
+ *    ROUTER_PROVIDERS,
+ *    provide(ROUTER_PRIMARY_COMPONENT, {useValue: AppCmp})
+ * ])
+ * ```
+ */
+// export const ROUTER_PRIMARY_COMPONENT: OpaqueToken = new OpaqueToken('RouterPrimaryComponent');
+// angular 1 specific
+export const ROUTER_PRIMARY_COMPONENT: OpaqueToken = new OpaqueToken('$routerRootComponent');
 
 /**
  * The RouteRegistry holds route configurations for each component in an Angular app.
