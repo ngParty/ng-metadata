@@ -126,10 +126,34 @@ export class DirectiveProvider {
     // legacy property overrides all generated DDO stuff
     const ddo = this._createDDO( _ddo, metadata.legacy );
 
-    return [
-      directiveName,
-      function directiveFactory() { return ddo }
-    ]
+    function directiveFactory() { return ddo }
+
+    // ==========================
+    // ngComponentRouter Support:
+    // ==========================
+
+    // @TODO(pete) remove the following `forEach` before we release 1.6.0
+    // The component-router@0.2.0 looks for the annotations on the controller constructor
+    // Nothing in Angular looks for annotations on the factory function but we can't remove
+    // it from 1.5.x yet.
+
+    // Copy any annotation properties (starting with $) over to the factory and controller constructor functions
+    // These could be used by libraries such as the new component router
+    StringMapWrapper.forEach( ddo as any, function ( val: any, key: string ) {
+      if ( key.charAt( 0 ) === '$' ) {
+        directiveFactory[ key ] = val;
+        // Don't try to copy over annotations to named controller
+        if ( isFunction( ddo.controller ) ) { ddo.controller[ key ] = val }
+      }
+    } );
+    // support componentRouter $canActivate lc hook as static instead of defined within legacy object
+    // componentRouter reads all lc hooks from directiveFactory ¯\_(ツ)_/¯
+    // @TODO update this when new component router will be available for Angular 1 ( 1.6 release probably )
+    if ( isFunction( (type as any).$canActivate ) ) {
+      (directiveFactory as any).$canActivate = (type as any).$canActivate;
+    }
+
+    return [ directiveName, directiveFactory ]
 
   }
 

@@ -2,17 +2,28 @@ import { Type } from '../../facade/lang';
 import { InjectableMetadata } from '../di/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 
+export type RouteConfig = RouteDefinition[];
+export type RouteDefinition = {
+  path: string,
+  name: string,
+  component?: string,
+  loader?: any,
+  redirectTo?: any,
+  useAsDefault?: boolean,
+  data?: any
+}
 export type LegacyDirectiveDefinition = {
-  compile?: ng.IDirectiveCompileFn;
-  controllerAs?: string;
-  priority?: number;
-  replace?: boolean;
-  scope?: any;
-  template?: any;
-  templateNamespace?: string;
-  templateUrl?: any;
-  terminal?: boolean;
-  transclude?: any;
+  compile?: ng.IDirectiveCompileFn,
+  controllerAs?: string,
+  priority?: number,
+  replace?: boolean,
+  scope?: any,
+  template?: any,
+  templateNamespace?: string,
+  templateUrl?: any,
+  terminal?: boolean,
+  transclude?: any,
+  $routeConfig?: RouteConfig,
 }
 /**
  * Directives allow you to attach behavior to elements in the DOM.
