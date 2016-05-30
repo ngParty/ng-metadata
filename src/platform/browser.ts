@@ -1,4 +1,6 @@
 import { assertionsEnabled } from '../facade/lang';
+
+export * from './title';
 export type AppRoot = string | Element | Document;
 
 /**
