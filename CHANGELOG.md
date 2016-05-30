@@ -1,3 +1,18 @@
+<a name="1.12.0"></a>
+# [1.12.0](https://github.com/ngParty/ng-metadata/compare/1.11.1...v1.12.0) (2016-05-30)
+
+
+### Features
+
+* **core/directives:** add support for ngComponentRouter with ng1 method names ([393f440](https://github.com/ngParty/ng-metadata/commit/393f440))
+* **core/linker:** add SimpleChanges type to lifecycle_interfaces to simplify OnChanges signature ( ([67ea144](https://github.com/ngParty/ng-metadata/commit/67ea144))
+* **platform/title:** backport and add Title service ([2c2bb11](https://github.com/ngParty/ng-metadata/commit/2c2bb11))
+* **playground:** add title handling example ([53af10f](https://github.com/ngParty/ng-metadata/commit/53af10f))
+* **router-deprecate:** add ROUTER_PRIMARY_COMPONENT opaque token to be able to register rootComponent w ([9b9ab44](https://github.com/ngParty/ng-metadata/commit/9b9ab44))
+* **router-deprecated:** add router-deprecated module which backports @angular/router-deprecated API ([2aa0702](https://github.com/ngParty/ng-metadata/commit/2aa0702))
+
+
+
 <a name="1.11.1"></a>
 ## [1.11.1](https://github.com/ngParty/ng-metadata/compare/1.11.0...v1.11.1) (2016-05-22)
 
