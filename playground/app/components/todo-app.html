@@ -186,3 +186,15 @@
     <change-detector></change-detector>
   </div>
 </section>
+
+<!--Title-->
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showTitleHandler=!$ctrl.showTitleHandler">
+    {{ $ctrl.showTitleHandler? 'hide' : 'show'}} <code>Title</code> example
+  </button>
+  <div ng-if="$ctrl.showTitleHandler">
+    <my-title-handler></my-title-handler>
+  </div>
+</section>

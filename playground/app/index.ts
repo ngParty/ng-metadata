@@ -1,9 +1,11 @@
 import * as angular from 'angular';
 import { provide } from 'ng-metadata/core';
+import { Title } from 'ng-metadata/platform';
 
 import { TabsModule } from './components/tabs/index'
 import { LifecycleHooksModule } from './components/lifecycle/index';
 import { ChangeDetectorModule } from './components/change-detector/index';
+import { TitleHandlerModule } from './components/title/index';
 
 import { TodoAppCmp } from './components/todo-app.component';
 import { TodoItemCmp } from './components/todo-item.component';
@@ -21,7 +23,15 @@ import { MyDirectiveTesterDirective } from './directives/my-directive-tester.dir
 import { TesterAttrDirective } from './directives/my-tester.directive';
 import { GlobalListenerDirective } from './directives/global-listener.directive';
 import { TesterComponent } from './components/tester/tester.component';
-export const AppModule = angular.module( 'app', [TabsModule,LifecycleHooksModule,ChangeDetectorModule] )
+export const AppModule = angular.module( 'app', [
+  TabsModule,
+  LifecycleHooksModule,
+  ChangeDetectorModule,
+  TitleHandlerModule
+] )
+
+  // we need to register the service manually
+  .service( ...provide( Title ) )
 
   .directive( ...provide( TodoAppCmp ) )
   .directive( ...provide( AddTodoCmp ) )
