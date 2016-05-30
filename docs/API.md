@@ -32,17 +32,36 @@ Enums:
 `ng-metadata/core`
 - [ChangeDetectionStrategy](#changedetectionstrategy)
 
+Injectables:
+
+`ng-metadata/router-deprecated`
+- [RootRouter](#rootrouter)
+
 Local Injectables:
 
 `ng-metadata/core`
 - [ChangeDetectorRef](#changedetectorref)
 
-Angular 1 Directives types:
- 
+`ng-metadata/router-deprecated`
+- [Router](#router)
+- [RouteParams][#routeparams]
+- [RouteData](#routerdata)
+
+Types:
+
+- Angular 1 Directives: 
 `ng-metadata/common`
- - [NgModel](#ngmodel)
- - [NgForm](#ngform)
- - [NgSelect](#ngselect)
+  - [NgModel](#ngmodel)
+  - [NgForm](#ngform)
+  - [NgSelect](#ngselect)
+  
+- Angular 1 Component Router:
+`ng-metadata/router-deprecated`
+  - [RouteDefinition](#routedefinition)  
+  - [RouteConfig](#routeconfig)
+  - [Instruction](#instruction)
+  - [ComponentInstruction](#componentinstruction)
+
 
 Decorators:
 
@@ -77,6 +96,13 @@ Lifecycle hooks:
 - [AfterViewInit](#afterviewtinit)
 - [AfterViewChecked](#afterviewchecked)
 - [OnDestroy](#ondestroy)
+
+`ng-metadata/router-deprecated`
+- [CanActivate](#canactivate)
+- [OnActivate](#onactivate)
+- [CanReuse](#canreuse)
+- [OnReuse](#onreuse)
+- [OnDeactivate](#ondeactivate)
 
 Static methods on Component/Directive classes (angular 1 specific API)
 
@@ -645,6 +671,55 @@ export class ChildComponent implements OnChanges {
 
 ---
 
+**Injectables:**
+
+- these services can be injected globally ( standard Angular 1 injectables )
+
+## RootRouter
+
+> **module** `ng-metadata/router-deprecated`
+
+The singleton instance of the `RootRouter` type, which is associated with the top level `$routerRootComponent`.
+[Angular 1 docs](https://docs.angularjs.org/api/ngComponentRouter/service/$routerRootComponent).
+
+Thanks to ng-metadata we can inject it via Type without any strings. 
+
+###### members
+> it extends [`Router`](https://github.com/ngParty/ng-metadata/tree/master/src/router-deprecated/router.ts) base class, which has quite huge API.
+
+| members           | Type       | Description                                  |
+| ----------------- | ---------- |--------------------------------------------- |
+| **registry**  | `RouteRegistry` | The RouteRegistry holds route configurations for each component in an Angular app. It is responsible for creating Instructions from URLs, and generating URLs based on route and parameters. |
+| **location**  | `Location`      | window.location                             |
+| **commit(instruction: `Instruction`, _skipLocationChange?: `boolean`)**  | `Function` | --- |
+| **dispose()**  | `Function` | --- |
+
+*example:*
+
+```typescript
+import { Component ,OnInit } from 'ng-metadata/core';
+import { RootRouter } from 'ng-metadata/router-deprecated';
+
+@Component( {
+  selector: 'crisis-detail',
+  template: `....`
+} )
+export class CrisisDetailComponent implements OnInit {
+
+  constructor(
+    // you can Inject rootRouter with Angular 1
+    private rootRouter: RootRouter
+  ) {}
+
+  ngOnInit() {
+    // log whole app router registry
+    console.log(this.rootRouter.registry)
+  }
+}
+```
+
+---
+
 **Local Injectables:**
 
 - these services can be only injected from Component/Directive
@@ -667,7 +742,7 @@ Note: by change detector, we mean in Angular 1 terms, local component `$scope`
 | **detach**        | `Function` | Detaches the change detector from the change detector tree. The detached change detector($scope) will not be checked until it is reattached. |
 | **reattach**      | `Function` | Reattach the change detector to the change detector tree |
 
-All of following examples can be seen live in [playground](playground/app/components/change-detector/change-detector.component.ts) ( clone project, npm install, npm run playground, open localhost:8080/playground )
+All of following examples can be seen live in [playground](https://github.com/ngParty/ng-metadata/tree/master/playground/app/components/change-detector/change-detector.component.ts) ( clone project, npm install, npm run playground, open localhost:8080/playground )
 
 *example:*
 
@@ -874,9 +949,196 @@ const AppModule = angular.module('myApp',[])
 bootstrap(AppModule);
 ```
 
+
+## Router
+
+> **module** `ng-metadata/router-deprecated`
+
+A Router is responsible for mapping URLs to components.
+[Angular 1 docs](https://docs.angularjs.org/api/ngComponentRouter/type/Router).
+
+Each component has its own `Router`. 
+
+**NOTE:**
+> Unlike in Angular 2, we cannot use the dependency injector to get hold of a component's Router !!!
+ 
+We can only inject the `RootRouter`. Instead we use the fact that the `ng-outlet` directive binds the current router to a `$router` attribute on our component.
+
+So we can "inject it" via `@Input('<') $router: ChildRouter` binding to our component class.
+The binding is available once the component has been activated, and the `$routerOnActivate` hook is called.
+
+It is highly recommeded to use this local `Router` for imperative navigation handling via `navigate()` and related methods
+
+###### members
+> it has quite huge API: [`Router`](https://github.com/ngParty/ng-metadata/tree/master/src/router-deprecated/router.ts).
+
+| members           | Type       | Description                                  |
+| ----------------- | ---------- |--------------------------------------------- |
+| **navigating**  | `boolean` | You can see the state of a router by inspecting the read-only field router.navigating. This may be useful for showing a spinner, for instance. |
+| **parent**  | `Router` | direct parent router on parent component if any. For `RootRoute` this is always `null` |
+| **hostComponent** | `any` | hostComponent ( within angular 1 it's always string name of that component |
+| **navigate( linkParams: any[] ): ng.IPromise<any>** | `Function` | Navigate based on the provided Route Link DSL. It's preferred to navigate with this method over `navigateByUrl`|
+| **navigateByUrl( url: string, _skipLocationChange?: boolean ): ng.IPromise<any>** | `Function` | Navigate to a URL. Returns a promise that resolves when navigation is complete. It's preferred to navigate with `navigate` instead of this method, since URLs are more brittle.|
+| **navigateByInstruction( instruction: Instruction, _skipLocationChange?: boolean ): ng.IPromise<any>** | `Function` | Navigate via the provided instruction. Returns a promise that resolves when navigation is complete|
+| **generate( linkParams: any[] ): Instruction** | `Function` | Generate an `Instruction` based on the provided Route Link DSL. |
+  
+**example**
+
+```typescript
+import { Component } from 'ng-metadata/core';
+import { ChildRouter } from 'ng-metadata/router-deprecated';
+
+@Component({
+  selector: 'crisis-detail',
+  template: `
+  <div>
+    <md-spinner ng-if="$ctrl.navigationInProggess"></md-spinner>
+  </div>`
+})
+export class CrisisDetailComponent implements OnInit, OnActivate, CanDeactivate {
+
+  @Input( '<' ) $router: ChildRouter;
+  
+  get navigationInProggess(): boolean { return this.$router.navigating }
+  
+  gotoCrisis() {
+    this.$router.navigate(['HeroList']);
+  }
+
+  // Generate an Instruction for a route and navigate directly with this instruction.  
+  navigateViaInstruction(){
+    const instruction = this.$router.generate(['HeroList']);
+    this.$router.navigateByInstruction(instruction);
+  }
+  
+  // this is discouraged because it couples the code of your component to the router URLs.
+  manuallyCreateURLandNavigate(){
+    this.$router.navigateByUrl('you/mama/is/fat');
+  }    
+  
+}
+```
+
+
+
+## RouteParams
+
+> **module** `ng-metadata/router-deprecated`
+
+A map of parameters for a given route, passed as part of the `ComponentInstruction` to the Lifecycle Hooks, 
+such as `$routerOnActivate` and `$routerOnDeactivate`
+
+**NOTE:**
+> Unlike in Angular 2, we cannot use the dependency injector to get hold of a component's RouterParams !!!
+
+We obtain `RouteParams` via Lifecycle Hooks:
+
+**example:**
+
+```typescript
+import { Component, OnInit } from 'ng-metadata/core';
+import { ComponentInstruction, OnActivate } from 'ng-metadata/router-deprecated';
+
+// we need to tell explicitly to typescript which keys should our route have
+type CustomRouteParams = {
+  [key: string]: string;
+  id: string;
+}
+
+@Component( {
+  selector: 'hero-detail',
+  template: `
+    <div ng-if="$ctrl.hero">     
+      <button ng-click="$ctrl.gotoHeroes()">Back</button>
+    </div>
+  `
+} )
+export class HeroDetailComponent implements OnInit, OnActivate {
+
+  @Input( '<' ) $router: Router;
+  hero: Hero = null;
+
+  constructor( private heroService: HeroService ) { }
+
+  $routerOnActivate( next: ComponentInstruction ): void {
+    // set routeParams with proper type annotation
+    const routeParams = next.params as CustomRouteParams;
+    // Get the hero identified by the route parameter
+    const id = routeParams.id;
+    
+    this.heroService.getHero( id ).then( ( hero ) => {
+      this.hero = hero;
+    } );
+  }
+
+  gotoHeroes() {
+    const heroId = this.hero && this.hero.id;
+    this.$router.navigate( [ 'HeroList', { id: heroId } ] );
+  }
+
+  ngOnInit() { }
+
+}
+```
+
+
+## RouteData
+
+> **module** `ng-metadata/router-deprecated`
+
+An immutable map of additional data you can configure in your Route, passed as part of the `ComponentInstruction` to the Lifecycle Hooks, 
+such as `$routerOnActivate` and `$routerOnDeactivate`
+
+**NOTE:**
+> Unlike in Angular 2, we cannot use the dependency injector to get hold of a component's RouterData !!!
+
+We obtain `RouteParams` via Lifecycle Hooks:
+
+**example:**
+
+```typescript
+import { Component, OnInit } from 'ng-metadata/core';
+import { ComponentInstruction, OnActivate, RouterData } from 'ng-metadata/router-deprecated';
+
+// we need to tell explicitly to typescript which keys should our routeData have
+type CustomRouteData = {
+  [key: string]: string;
+  foo: string;
+}
+
+@Component( {
+  selector: 'hero-detail',
+  template: `
+    <div ng-if="$ctrl.hero">     
+      <button ng-click="$ctrl.gotoHeroes()">Back</button>
+    </div>
+  `
+} )
+export class HeroDetailComponent implements OnInit, OnActivate {
+
+  constructor( private heroService: HeroService ) { }
+
+  $routerOnActivate( next: ComponentInstruction ): void {
+    // set routeParams with proper type annotation
+    const routeData = next.routeData;
+    const cutomRouteData = routeData.data as CustomRouteData;
+    // Get some data
+    const foo = routeData.foo;
+    
+    console.log('data aquired!:', foo );
+    
+  }
+
+  ngOnInit() { }
+
+}
+```
+
 ---
 
-**Angular 1 Directives types:**
+### Types
+
+**Angular 1 Directives:**
 
 - we are providing angular directives as angular 2 like directives with proper types 
 - you can leverage these for DI
@@ -951,8 +1213,80 @@ export class MyFormHandlerDirective{
 > **module:** `ng-metadata/common`
 
 [angular 1 docs](https://docs.angularjs.org/api/ng/type/select.SelectController)
+
+
+
+**Angular 1 Component Router**
+
+> **module:** `ng-metadata/router-deprecated`
+
+## RouteDefinition
+
+Each item in the RouteConfig for a Routing Component is an instance of this type ( Object ). It can have the following properties:
+
+- `path` or (regex and serializer) - defines how to recognize and generate this route (`string`)
+- `component` | `loader` | `redirectTo` (requires exactly one of these) (camelCase - angular directive name `string`)
+- `name` - the name used to identify the Route Definition when generating links (CapitalCase `string`)
+- `useAsDefault` - (`boolean`)  indicates that if no other Route Definition matches the URL, then this Route Definition should be used by default.
+- `data` (optional) `any`
+
+## RouteConfig
+
+- array of `RouteDefinition`
+- declare it within `@Component` `legacy` property via `$routeConfig` key
+- don't worry, Component definition are strictly typed so if you will make a typo there or provide wrong type for your route definition Typescript will tell you
+
+**example**
+```typescript
+import { Component } from 'ng-metadata/core';
+
+@Component( {
+  selector: 'heroes',
+  providers: [ HeroService ],
+  template: `<h2>Heroes</h2><ng-outlet></ng-outlet>`,
+  legacy: {
+    $routeConfig: [
+      { path: '/', name: 'HeroList', component: 'heroList', useAsDefault: true },
+      { path: '/:id', name: 'HeroDetail', component: 'heroDetail' }
+    ]
+  }
+} )
+export class HeroesComponent {}
+```
+
+## Instruction
+
+Instruction is a tree of ComponentInstructions with all the information needed to transition each component in the app to a given route, including all auxiliary routes.
+
+Instructions can be created using Router, and can be used to perform route changes with Router.
+
+
+## ComponentInstruction
+
+A ComponentInstruction represents the route state for a single component.
+
+ComponentInstructions is a public API. Instances of ComponentInstruction are passed to route lifecycle hooks
+You should never construct one yourself with "new." Instead, rely on router's internal recognizer to construct ComponentInstructions.
+
+You should not modify this object. It should be treated as immutable.
+
+###### members
+
+| Parameter     | Type     | Description        |
+| ------------- | ---------|------------------- |
+| **reuse** | `boolean` |    |
+| **urlPath** | `string` |    |
+| **urlParams** | `string[]` |  |
+| **routeData** | `RouteData` |   |
+| **componentType** | `string` |  |
+| **terminal** | `boolean` |  |
+| **specifity** | `string` |  |
+| **params** | `RouteParams` |  |
+| **routeName** | `string` |  |
+ 
  
 ---
+
 
 **Decorators:**
 
@@ -2122,6 +2456,12 @@ We internally create unique name string token on InjectableMetadata, from class.
 name if JS engine doesn't implements ES6 name property
 
 
+---
+
+
+**Lifecycle hooks:**
+
+
 ## OnInit
 
 > **module:** `ng-metadata/core`
@@ -2430,6 +2770,207 @@ _Example:_
 ###### Members
 
 - `ngOnDestroy()`
+
+
+
+**Router Lifecycle Hoooks:**
+
+> **module:** `ng-metadata/router-deprecated`
+
+## CanActivate
+
+Defines route lifecycle hook `CanActivate`, which is called by the router to determine if a component can be instantiated as part of a navigation.
+
+**Note:**
+> Note that unlike other lifecycle hooks, this one is injectable and needs to be defined as `static method` on component Class, rather than an interface.
+> This is because the `$canActivate` function is called before the component is instantiated.
+
+If `$canActivate`:
+- returns or resolves to false, the navigation is cancelled. 
+- throws or rejects, the navigation is also cancelled
+- returns or resolves to true, navigation continues, the component is instantiated, and the `OnActivate` hook of that component is called if implemented.
+
+
+`$canActivate` hook is Injectable by two injection types:
+
+- Local:
+The CanActivate hook is called with two ComponentInstructions as parameters, 
+the first representing the current route being navigated to, and the second parameter representing the previous route or null.
+
+Theses locals need be explicitly annoted via:
+  - '$nextInstruction'
+  - '$prevInstruction' 
+
+- Global:
+You can Inject any other service
+
+You can of course mix injecting both local and global
+
+**example:**
+
+```typescript
+import { Component, Inject } from 'ng-metadata/core';
+import { ComponentInstruction } from 'ng-metadata/router-deprecated';
+
+@Component( {
+  selector: 'crisis-list',
+  template: `....`
+} )
+export class CrisisListComponent {
+
+  static $canActivate(
+    @Inject( '$nextInstruction' ) $nextInstruction: ComponentInstruction,
+    @Inject( '$prevInstruction' ) $prevInstruction: ComponentInstruction,
+    @Inject( '$q' ) $q: ng.IQService,
+    @Inject( '$timeout' ) $timeout: ng.ITimeoutService
+  ): ng.IPromise<boolean> {
+    const args = arguments;
+    console.info( '$canActivate started!' );
+    const promise = $q( ( resolve, reject ) => {
+      $timeout( function () {
+        resolve( true );
+        console.info( '$canActivate with 500ms delay', args );
+      }, 500 )
+    } );
+    return promise;
+  }
+```
+
+
+## OnActivate
+
+Defines route lifecycle method `$routerOnActivate`, which is called by the router at the end of a successful route navigation.
+
+For a single component's navigation, only one of either `OnActivate` or `OnReuse` will be called depending on the result of `CanReuse`.
+
+The `$routerOnActivate` hook is called with two ComponentInstructions as parameters, the first representing the current route being navigated to, and the second parameter representing the previous route or null.
+
+If `$routerOnActivate` returns a promise, the route change will wait until the promise settles to instantiate and activate child components.
+
+Implemented component class method signature:
+
+```typescript
+$routerOnActivate(
+  nextInstruction: ComponentInstruction,
+  prevInstruction: ComponentInstruction
+): any |ng.IPromise<any>;
+```
+
+**Example**
+
+For our HeroList Component we want to load up the list of heroes when the Component is activated. So we implement the `$routerOnActivate()` instance method.
+Running the application should update the browser's location to /heroes and display the list of heroes returned from the heroService.
+
+*Important:*
+> By returning a promise for the list of heroes from `$routerOnActivate()` **we can delay the activation of the Route until the heroes have arrived successfully**. This is similar to how a resolve works in `ngRoute`.
+
+```typescript
+import { Component, OnInit } from 'ng-metadata/core';
+import { HeroService, Hero } from './hero.service';
+
+@Component( {
+  selector: 'hero-list',
+  template: `
+    <div ng-repeat="hero in $ctrl.heroes" >
+      <a ng-link="['HeroDetail', {id: hero.id}]">{{hero.name}}</a>
+    </div>
+  `
+} )
+export class HeroListComponent implements OnInit {
+
+  private selectedId = null;
+  heroes: Hero[];
+
+  constructor(private heroService: HeroService) { }
+
+  ngOnInit() { }
+
+  $routerOnActivate( next ): void {
+    // Load up the heroes for this view, the component will be loaded after the promise is resolved!
+    this.heroService.getHeroes().then( ( heroes ) => {
+      this.heroes = heroes;
+      this.selectedId = next.params.id;
+    } );
+  }
+
+}
+```
+
+## CanReuse
+
+Defines route lifecycle method `$routerCanReuse`, which is called by the router to determine whether a component should be reused across routes, or whether to destroy and instantiate a new component every time.
+
+The `$routerCanReuse` hook is called with two `ComponentInstructions` as parameters, the first representing the current route being navigated to, and the second parameter representing the previous route.
+
+If `$routerCanReuse`:
+- returns or resolves to true, the component instance will be reused and the `OnDeactivate` hook will be run.
+- returns or resolves to false, a new component will be instantiated, and the existing component will be deactivated and removed as part of the navigation.
+- throws or rejects, the navigation will be cancelled.
+
+Implemented component class method signature:
+
+```typescript
+$routerCanReuse(
+    nextInstruction: ComponentInstruction,
+    prevInstruction: ComponentInstruction
+  ): boolean | ng.IPromise<boolean>;
+```
+
+## OnReuse
+
+Defines route lifecycle method `$routerOnReuse`, which is called by the router at the **end of a successful route navigation** when `CanReuse` is implemented and returns or resolves to true.
+
+For a single component's navigation, only one of either `OnActivate` or `OnReuse` will be called, depending on the result of `CanReuse`.
+
+The `$routerOnReuse` hook is called with two `ComponentInstructions` as parameters, the first representing the current route being navigated to, and the second parameter representing the previous route or null.
+
+Implemented component class method signature:
+
+```typescript
+$routerOnReuse(
+    nextInstruction: ComponentInstruction,
+    prevInstruction: ComponentInstruction
+  ): any | ng.IPromise<any>;
+```
+
+## CanDeactivate
+
+Defines route lifecycle method `$routerCanDeactivate`, which is called by the router to determine if a component can be removed as part of a navigation.
+
+The `$routerCanDeactivate` hook is called with two `ComponentInstructions` as parameters, the first representing the current route being navigated to, and the second parameter representing the previous route.
+
+If `$routerCanDeactivate`:
+- returns or resolves to false, the navigation is cancelled. If it returns or resolves to true, then the navigation continues, and the component will be deactivated (the OnDeactivate hook will be run) and removed.
+- throws or rejects, the navigation is also cancelled.
+
+Implemented component class method signature:
+
+```typescript
+$routerCanDeactivate(
+  nextInstruction: ComponentInstruction,
+  prevInstruction: ComponentInstruction
+): boolean | ng.IPromise<boolean>;
+```
+
+## OnDeactivate
+
+Defines route lifecycle method `$routerOnDeactivate`, which is called by the router before destroying a component as part of a route change.
+
+The `$routerOnDeactivate` hook is called with two ComponentInstructions as parameters, the first representing the current route being navigated to, and the second parameter representing the previous route.
+
+If `$routerOnDeactivate` returns a promise, the route change will wait until the promise settles.
+
+Implemented component class method signature:
+
+```typescript
+$routerCanDeactivate(
+  nextInstruction: ComponentInstruction,
+  prevInstruction: ComponentInstruction
+): boolean | ng.IPromise<boolean>;
+```
+
+
+---
 
 
 ## Angular 1 specific API's
