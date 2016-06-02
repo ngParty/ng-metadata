@@ -1,3 +1,13 @@
+<a name="1.12.1"></a>
+## [1.12.1](https://github.com/ngParty/ng-metadata/compare/1.12.0...v1.12.1) (2016-06-02)
+
+
+### Bug Fixes
+
+* **testing:** tweak IRender type definition to properly propagate generic type (#92) ([3a6372a](https://github.com/ngParty/ng-metadata/commit/3a6372a))
+
+
+
 <a name="1.12.0"></a>
 # [1.12.0](https://github.com/ngParty/ng-metadata/compare/1.11.1...v1.12.0) (2016-05-30)
 
