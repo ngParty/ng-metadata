@@ -1,23 +1,18 @@
-import { isFunction } from '../facade/lang';
 import { getInjectableName } from '../core/di/provider';
 import { StringWrapper } from '../facade/primitives';
-import { isArray } from 'util';
-import { assign } from '../facade/lang';
 
 // public helpers
 
 
-export interface IRender{
-  <T extends Type>(Directive: T, {jqHost, attrs, jqChildren}?: {
+export type IRender<T extends Type> = (
+  Directive: Type,
+  { jqHost, attrs, jqChildren }?: {
     jqHost?: ng.IAugmentedJQuery,
     attrs?: { [key: string]: any },
     jqChildren?: ng.IAugmentedJQuery
   }
-  ):{
-    compiledElement: ng.IAugmentedJQuery,
-    ctrl: T
-  }
-}
+) => { compiledElement: ng.IAugmentedJQuery, ctrl: T }
+
 /**
  * factory which will return function which will be used as your render method
  */
