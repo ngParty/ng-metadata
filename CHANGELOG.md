@@ -1,3 +1,13 @@
+<a name="1.12.2"></a>
+## [1.12.2](https://github.com/ngParty/ng-metadata/compare/1.12.1...v1.12.2) (2016-06-03)
+
+
+### Bug Fixes
+
+* **testing:** remove `Type` constraint from generic type to make TS happy ([3f1dc9d](https://github.com/ngParty/ng-metadata/commit/3f1dc9d))
+
+
+
 <a name="1.12.1"></a>
 ## [1.12.1](https://github.com/ngParty/ng-metadata/compare/1.12.0...v1.12.1) (2016-06-02)
 
