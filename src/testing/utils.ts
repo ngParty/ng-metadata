@@ -4,7 +4,7 @@ import { StringWrapper } from '../facade/primitives';
 // public helpers
 
 
-export type IRender<T extends Type> = (
+export type IRender<T> = (
   Directive: Type,
   { jqHost, attrs, jqChildren }?: {
     jqHost?: ng.IAugmentedJQuery,
