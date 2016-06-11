@@ -6,6 +6,7 @@ import './core/di/provider.spec';
 import './core/di/key.spec';
 import './core/di/forward_ref.spec';
 import './core/util/decorators.spec';
+import './core/util/bundler.spec';
 import './core/reflection/reflection.spec';
 import './core/linker/pipe_resolver.spec';
 import './core/pipes/pipe_provider.spec';
