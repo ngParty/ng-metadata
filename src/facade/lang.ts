@@ -96,26 +96,26 @@ export function isBlank( obj: any ): boolean {
   return obj === undefined || obj === null;
 }
 
-export function isString( obj: any ): obj is String {
+export function isString( obj: any ): obj is string {
   return typeof obj === "string";
 }
 
-export function isFunction( obj: any ): boolean {
+export function isFunction( obj: any ): obj is Function {
   return typeof obj === "function";
 }
-export function isBoolean( obj: any ): boolean {
+export function isBoolean( obj: any ): obj is boolean {
   return typeof obj === "boolean";
 }
 
-export function isArray( obj: any ): boolean {
+export function isArray( obj: any ): obj is Array<any> {
   return Array.isArray( obj );
 }
 
-export function isNumber( obj ): boolean {
+export function isNumber( obj: any ): obj is number {
   return typeof obj === 'number';
 }
 
-export function isDate( obj ): boolean {
+export function isDate( obj: any ): obj is Date {
   return obj instanceof Date && !isNaN( obj.valueOf() );
 }
 
@@ -123,7 +123,7 @@ export function isType( obj: any ): obj is Type {
   return isFunction( obj );
 }
 
-export function isStringMap( obj: any ): boolean {
+export function isStringMap( obj: any ): obj is Object {
   return typeof obj === 'object' && obj !== null;
 }
 
