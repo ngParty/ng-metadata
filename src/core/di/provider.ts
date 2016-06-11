@@ -6,7 +6,7 @@ import {
   resolveDirectiveNameFromSelector,
   isPresent,
   stringify,
-  getFuncName
+  getFuncName, normalizeBool
 } from '../../facade/lang';
 import { reflector } from '../reflection/reflection';
 import { OpaqueToken } from './opaque_token';
@@ -25,47 +25,228 @@ import { directiveProvider } from '../directives/directive_provider';
 import { ListWrapper } from '../../facade/collections';
 import { resolveForwardRef } from './forward_ref';
 import { getErrorMsg } from '../../facade/exceptions';
+import { isArray } from '../../facade/lang';
 
 
 export type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
 export type ParamMetaInst = HostMetadata | InjectMetadata | SelfMetadata | SkipSelfMetadata;
 export type ProviderType = Type | string | OpaqueToken;
+export type ProviderAliasOptions = {useClass?: Type,useValue?: any,useFactory?: Function, deps?: Object[]};
+
+export class Provider {
+  /**
+   * Token used when retrieving this provider. Usually, it is a type {@link Type}.
+   */
+  token: any;
+
+  /**
+   * Binds a DI token to an implementation class.
+   *
+   * ### Example ([live demo](http://plnkr.co/edit/RSTG86qgmoxCyj9SWPwY?p=preview))
+   *
+   * Because `useExisting` and `useClass` are often confused, the example contains
+   * both use cases for easy comparison.
+   *
+   * ```typescript
+   * class Vehicle {}
+   *
+   * class Car extends Vehicle {}
+   *
+   * var injectorClass = Injector.resolveAndCreate([
+   *   Car,
+   *   {provide: Vehicle,  useClass: Car }
+   * ]);
+   * var injectorAlias = Injector.resolveAndCreate([
+   *   Car,
+   *   {provide: Vehicle,  useExisting: Car }
+   * ]);
+   *
+   * expect(injectorClass.get(Vehicle)).not.toBe(injectorClass.get(Car));
+   * expect(injectorClass.get(Vehicle) instanceof Car).toBe(true);
+   *
+   * expect(injectorAlias.get(Vehicle)).toBe(injectorAlias.get(Car));
+   * expect(injectorAlias.get(Vehicle) instanceof Car).toBe(true);
+   * ```
+   */
+  useClass: Type;
+
+  /**
+   * Binds a DI token to a value.
+   *
+   * ### Example ([live demo](http://plnkr.co/edit/UFVsMVQIDe7l4waWziES?p=preview))
+   *
+   * ```javascript
+   * var injector = Injector.resolveAndCreate([
+   *   new Provider("message", { useValue: 'Hello' })
+   * ]);
+   *
+   * expect(injector.get("message")).toEqual('Hello');
+   * ```
+   */
+  useValue: any;
+
+  /**
+   * Binds a DI token to an existing token.
+   *
+   * {@link Injector} returns the same instance as if the provided token was used.
+   * This is in contrast to `useClass` where a separate instance of `useClass` is returned.
+   *
+   * ### Example ([live demo](http://plnkr.co/edit/QsatsOJJ6P8T2fMe9gr8?p=preview))
+   *
+   * Because `useExisting` and `useClass` are often confused the example contains
+   * both use cases for easy comparison.
+   *
+   * ```typescript
+   * class Vehicle {}
+   *
+   * class Car extends Vehicle {}
+   *
+   * var injectorAlias = Injector.resolveAndCreate([
+   *   Car,
+   *   {provide: Vehicle,  useExisting: Car }
+   * ]);
+   * var injectorClass = Injector.resolveAndCreate([
+   *   Car,
+   *   {provide: Vehicle,  useClass: Car }
+   * ]);
+   *
+   * expect(injectorAlias.get(Vehicle)).toBe(injectorAlias.get(Car));
+   * expect(injectorAlias.get(Vehicle) instanceof Car).toBe(true);
+   *
+   * expect(injectorClass.get(Vehicle)).not.toBe(injectorClass.get(Car));
+   * expect(injectorClass.get(Vehicle) instanceof Car).toBe(true);
+   * ```
+   */
+  useExisting: any;
+
+  /**
+   * Binds a DI token to a function which computes the value.
+   *
+   * ### Example ([live demo](http://plnkr.co/edit/Scoxy0pJNqKGAPZY1VVC?p=preview))
+   *
+   * ```typescript
+   * var injector = Injector.resolveAndCreate([
+   *   {provide: Number,  useFactory: () => { return 1+2; }},
+   *   new Provider(String, { useFactory: (value) => { return "Value: " + value; },
+   *                       deps: [Number] })
+   * ]);
+   *
+   * expect(injector.get(Number)).toEqual(3);
+   * expect(injector.get(String)).toEqual('Value: 3');
+   * ```
+   *
+   * Used in conjunction with dependencies.
+   */
+  useFactory: Function;
+
+  /**
+   * Specifies a set of dependencies
+   * (as `token`s) which should be injected into the factory function.
+   *
+   * ### Example ([live demo](http://plnkr.co/edit/Scoxy0pJNqKGAPZY1VVC?p=preview))
+   *
+   * ```typescript
+   * var injector = Injector.resolveAndCreate([
+   *   {provide: Number,  useFactory: () => { return 1+2; }},
+   *   new Provider(String, { useFactory: (value) => { return "Value: " + value; },
+   *                       deps: [Number] })
+   * ]);
+   *
+   * expect(injector.get(Number)).toEqual(3);
+   * expect(injector.get(String)).toEqual('Value: 3');
+   * ```
+   *
+   * Used in conjunction with `useFactory`.
+   */
+  dependencies: Object[];
+
+  /** @internal */
+  _multi: boolean;
+
+  constructor(
+    token: any , {useClass, useValue, useExisting, useFactory, deps, multi}: {
+      useClass?: Type,
+      useValue?: any,
+      useExisting?: any,
+      useFactory?: Function,
+      deps?: Object[],
+      multi?: boolean
+    }) {
+    this.token = token;
+    this.useClass = useClass;
+    this.useValue = useValue;
+    this.useExisting = useExisting;
+    this.useFactory = useFactory;
+    this.dependencies = deps;
+    this._multi = multi;
+  }
+
+  /**
+   * Creates multiple providers matching the same token (a multi-provider).
+   *
+   * Multi-providers are used for creating pluggable service, where the system comes
+   * with some default providers, and the user can register additional providers.
+   * The combination of the default providers and the additional providers will be
+   * used to drive the behavior of the system.
+   *
+   * ### Example
+   *
+   * ```typescript
+   * var injector = Injector.resolveAndCreate([
+   *   new Provider("Strings", { useValue: "String1", multi: true}),
+   *   new Provider("Strings", { useValue: "String2", multi: true})
+   * ]);
+   *
+   * expect(injector.get("Strings")).toEqual(["String1", "String2"]);
+   * ```
+   *
+   * Multi-providers and regular providers cannot be mixed. The following
+   * will throw an exception:
+   *
+   * ```typescript
+   * var injector = Injector.resolveAndCreate([
+   *   new Provider("Strings", { useValue: "String1", multi: true }),
+   *   new Provider("Strings", { useValue: "String2"})
+   * ]);
+   * ```
+   */
+  get multi(): boolean { return normalizeBool(this._multi); }
+}
 
 class ProviderBuilder{
 
-  static createFromType(type: ProviderType, {useClass,useValue}:{useClass?:Type,useValue?:any} = {}): [string,Type]{
+  static createFromType(
+    type: ProviderType,
+    { useClass, useValue, useFactory, deps }: ProviderAliasOptions
+  ): [string,Type] {
+
+    // ...provide('myFactory',{useFactory: () => { return new Foo(); } })
+    if ( isPresent( useFactory ) ) {
+      const factoryToken = getInjectableName(type);
+      const injectableDeps = isArray( deps ) ? deps.map(getInjectableName) : [];
+      useFactory.$inject = injectableDeps;
+      return [
+        factoryToken,
+        useFactory
+      ];
+    }
 
     // ...provide(opaqueTokenInst,{useValue: {foo:12312} })
-    if ( type instanceof OpaqueToken ) {
-
-      if(isBlank(useValue)){
-        throw new Error(`
-        Provider registration: "${ type.desc }":
-        =======================================================
-        you must provide useValue when registering constant/value via OpaqueToken
-        `);
-      }
-      return [
-        type.desc,
-        useValue
-      ];
-
-    }
-
     // ...provide('myValue',{useValue: {foo:12312} })
-    if ( isString( type ) && isPresent( useValue ) ) {
+    if ( isPresent( useValue ) ) {
+      const valueToken = getInjectableName(type);
       return [
-        type,
+        valueToken,
         useValue
       ];
     }
 
-    const injectableType = isString( type )
+    const injectableType = isString( type ) || isOpaqueToken( type )
       ? resolveForwardRef(useClass as Type)
       : resolveForwardRef(type as Type);
 
-    const overrideName = isString( type )
-      ? type
+    const overrideName = isString( type ) || isOpaqueToken( type )
+      ? getInjectableName(type)
       : '';
 
     if ( !isType( injectableType ) ) {
@@ -118,17 +299,17 @@ class ProviderBuilder{
 
     injectableType.$inject = _dependenciesFor( injectableType );
 
-    if (rootAnnotation instanceof PipeMetadata ) {
+    if ( isPipe( rootAnnotation ) ) {
       return pipeProvider.createFromType( injectableType );
     }
 
-    if (rootAnnotation instanceof DirectiveMetadata ) {
+    if ( isDirective( rootAnnotation ) ) {
       return directiveProvider.createFromType( injectableType );
     }
 
-    if (rootAnnotation instanceof InjectableMetadata ) {
+    if ( isService( rootAnnotation ) ) {
       return [
-        overrideName ||rootAnnotation.id,
+        overrideName || rootAnnotation.id,
         injectableType
       ];
     }
@@ -140,13 +321,14 @@ class ProviderBuilder{
 /**
  * should extract the string token from provided Type and add $inject angular 1 annotation to constructor if @Inject
  * was used
- * @param type
- * @returns {string}
+ * @returns {[string,Type]}
+ * @deprecated
  */
-export function provide( type: ProviderType, {useClass,useValue}:{useClass?:Type,useValue?:any} = {} ): [string,Type] {
-
-  return ProviderBuilder.createFromType( type, { useClass, useValue } );
-
+export function provide(
+  type: ProviderType,
+  { useClass, useValue, useFactory, deps }: ProviderAliasOptions = {}
+  ): [string,Type] {
+  return ProviderBuilder.createFromType( type, { useClass, useValue, useFactory, deps } );
 }
 
 /**
@@ -227,17 +409,13 @@ export function getInjectableName(injectable: ProviderType): string{
 
   // @Inject('foo') foo
   if ( isString( injectable ) ) {
-
     return injectable;
-
   }
 
   // const fooToken = new OpaqueToken('foo')
   // @Inject(fooToken) foo
-  if ( injectable instanceof OpaqueToken ) {
-
+  if ( isOpaqueToken(injectable) ) {
     return injectable.desc;
-
   }
 
   // @Injectable()
@@ -257,15 +435,15 @@ export function getInjectableName(injectable: ProviderType): string{
       ` );
     }
 
-    if ( annotation instanceof PipeMetadata ) {
+    if ( isPipe(annotation) ) {
       return annotation.name;
     }
 
-    if ( annotation instanceof DirectiveMetadata ) {
+    if ( isDirective( annotation ) ) {
       return resolveDirectiveNameFromSelector( annotation.selector );
     }
 
-    if ( annotation instanceof InjectableMetadata ) {
+    if ( isService( annotation ) ) {
       return annotation.id;
     }
 
@@ -310,20 +488,47 @@ export function _areAllDirectiveInjectionsAtTail( metadata: ParamMetaInst[][] ):
 
 }
 
-
-function isDirective( annotation: DirectiveMetadata ): boolean {
+export function isOpaqueToken( obj: any ): obj is OpaqueToken {
+  return obj instanceof OpaqueToken;
+}
+export function isDirective( annotation: any ): annotation is DirectiveMetadata {
   return isString( annotation.selector ) && annotation instanceof DirectiveMetadata;
 }
-function isComponent( annotation: ComponentMetadata ): boolean {
+export function isComponent( annotation: any ): annotation is ComponentMetadata {
   const hasTemplate = !isBlank( annotation.template || annotation.templateUrl );
   return isString( annotation.selector ) && hasTemplate && annotation instanceof ComponentMetadata
 }
-function isService(annotation: InjectableMetadata): boolean{
+export function isService(annotation: any): annotation is InjectableMetadata{
   return annotation instanceof InjectableMetadata;
 }
-function isPipe(annotation: PipeMetadata): boolean{
+export function isPipe(annotation: any): annotation is PipeMetadata {
   return isString(annotation.name) && annotation instanceof PipeMetadata;
 }
 function isInjectMetadata( injectMeta: any ): injectMeta is InjectMetadata {
   return injectMeta instanceof InjectMetadata;
+}
+
+export function getNgModuleMethodByType( injectable: Type ): string {
+  // only the first class annotations is injectable
+  const [annotation] = reflector.annotations( injectable );
+
+  if ( isBlank( annotation ) ) {
+    throw new Error( `
+        cannot get injectable name token from none decorated class ${ getFuncName( injectable ) }
+        Only decorated classes by one of [ @Injectable,@Directive,@Component,@Pipe ], can be injected by reference
+      ` );
+  }
+
+  if ( isPipe( annotation ) ) {
+    return 'filter';
+  }
+
+  if ( isDirective( annotation ) ) {
+    return 'directive';
+  }
+
+  if ( isService( annotation ) ) {
+    return 'service';
+  }
+
 }
