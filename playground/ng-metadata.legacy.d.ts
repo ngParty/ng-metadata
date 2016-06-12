@@ -298,7 +298,7 @@ export const enum ChangeDetectionStrategy {
     useClass?: Type,
     useValue?: any,
     useFactory?: Function,
-    deps: Object[]
+    deps?: Object[]
   }): [string, Type];
 
   function Directive({selector, legacy}: {

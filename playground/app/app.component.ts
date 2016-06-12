@@ -1,4 +1,5 @@
-import { Component, OnInit } from 'ng-metadata/core';
+import { Component, Inject, OnInit } from 'ng-metadata/core';
+import { DynamicValueToken, NgRxStore, SomeFactoryFnToken, SomeClassToInstantiate } from './index';
 import { TodoAppCmp } from './todo/todo-app.component';
 
 @Component( {
@@ -7,9 +8,20 @@ import { TodoAppCmp } from './todo/todo-app.component';
   templateUrl: './app/app.component.html'
 } )
 export class AppComponent implements OnInit {
-  constructor() { }
+  constructor(
+    private store: NgRxStore,
+    @Inject(SomeFactoryFnToken) private myFactory: ()=>SomeClassToInstantiate,
+    @Inject(DynamicValueToken) private dynamicValue: string
+  ) { }
 
-  ngOnInit() { }
+  ngOnInit() {
+    console.info('===> provider(value) registered within config:',this.dynamicValue);
+    console.info('===> provider(service) registered within config:', this.store, this.store.getState());
+    console.info('factory:',this.myFactory);
+    console.assert(this.myFactory() !== this.myFactory(),'factory must return different instance every time');
+    const someClassInstance = this.myFactory();
+    someClassInstance.greetWithDelay();
+  }
 
   items = ['OOONE','TTTTTWO','THREEEE'];
   removeItem(item){

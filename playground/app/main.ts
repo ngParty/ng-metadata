@@ -4,8 +4,8 @@ import { Title } from 'ng-metadata/platform';
 import {enableProdMode} from 'ng-metadata/core';
 
 import { AppComponent } from './app.component';
-import { AppModule } from './index';
+import { AppModule, configureProviders } from './index';
 
 // enableProdMode();
 
-bootstrap( AppComponent, [ Title, AppModule ] );
+bootstrap( AppComponent, [ Title, AppModule, configureProviders ] );
