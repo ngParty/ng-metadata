@@ -2,7 +2,7 @@
 
 <h3>Todo List remaining: {{ $ctrl.todos | remainingTodos }}</h3>
 
-<add-todo on-add="$ctrl.createTodo(todo)"></add-todo>
+<add-todo on-add="$ctrl.createTodo($event)"></add-todo>
 
 <ul class="demo-list">
   <li ng-repeat="item in $ctrl.todos">

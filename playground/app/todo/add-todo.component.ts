@@ -1,4 +1,4 @@
-import { Component, Output } from 'ng-metadata/core';
+import { Component, Output, EventEmitter } from 'ng-metadata/core';
 import { TodoModel } from './todo-store.service.ts';
 
 @Component({
@@ -7,7 +7,7 @@ import { TodoModel } from './todo-store.service.ts';
 })
 export class AddTodoCmp{
 
-  @Output() onAdd: ( todo: {todo:TodoModel} )=>void;
+  @Output() onAdd = new EventEmitter<TodoModel>();
 
   // set an empty Model for the <input>
   label: string = '';
@@ -27,7 +27,7 @@ export class AddTodoCmp{
         complete: false
       };
 
-      this.onAdd( { todo } );
+      this.onAdd.emit( todo );
       this.label = '';
 
     }

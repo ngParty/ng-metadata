@@ -1,3 +1,6 @@
+// import Subject = require('rxjs/Subject');
+// import Subscription = require('rxjs/Subscription');
+
 declare module ngMetadataPlatform{
 
   // type AppRoot = string | Element | Document;
@@ -904,13 +907,18 @@ export interface DoCheck {
   export function enableProdMode(): void;
 
   export class EventEmitter<T> {
+    private __isAsync;
+    /** @internal */
+    private _ngExpressionBindingCb;
     /**
      * Creates an instance of [EventEmitter], which depending on [isAsync],
      * delivers events synchronously or asynchronously.
      */
     constructor(isAsync?: boolean);
+    /** @internal */
+    wrapNgExpBindingToEmitter(cb: Function): void;
     emit(value: T): void;
-    subscribe(generatorOrNext?: EventHandler<T>, error?: any, complete?: any): Function;
+    subscribe(generatorOrNext?: any, error?: any, complete?: any): {unsubscribe():void};
   }
 
   export interface EventHandler<T> {
