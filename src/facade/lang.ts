@@ -70,6 +70,8 @@ const reIsUint = /^\d+$/;
  */
 const MAX_SAFE_INTEGER = 9007199254740991;
 
+const argsTag = '[object Arguments]';
+
 
 let _devMode: boolean = true;
 /**
@@ -133,6 +135,12 @@ export function isPromise(obj: any): boolean {
 
 export function isJsObject( o: any ): boolean {
   return o !== null && (typeof o === "function" || typeof o === "object");
+}
+
+export function isArguments(value: any): boolean {
+  // Safari 8.1 incorrectly makes `arguments.callee` enumerable in strict mode.
+  return ('lenght' in value) && Object.prototype.hasOwnProperty.call(value, 'callee') &&
+    (!Object.prototype.propertyIsEnumerable.call(value, 'callee') || Object.prototype.toString.call(value) == argsTag);
 }
 
 export function noop() {}
