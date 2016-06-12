@@ -26,7 +26,7 @@ export function createNgModule() {
         _runBlocks: [],
 
         constant(n,v){ this._invokeQueue.push(['$provide','constant',[n,v]]); return this; },
-        value(n,v){ this._invokeQueue.push(['$provide','value',n,v]); return this; },
+        value(n,v){ this._invokeQueue.push(['$provide','value',[n,v]]); return this; },
         provider(n,v){ this._invokeQueue.push(['$provide','provider',[n,v]]); return this; },
         factory(n,v){ this._invokeQueue.push(['$provide','factory',[n,v]]); return this; },
         service(n,v){ this._invokeQueue.push(['$provide','service',[n,v]]); return this; },

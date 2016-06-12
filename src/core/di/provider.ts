@@ -6,26 +6,27 @@ import {
   resolveDirectiveNameFromSelector,
   isPresent,
   stringify,
-  getFuncName, normalizeBool
+  getFuncName,
+  normalizeBool,
+  isArray
 } from '../../facade/lang';
 import { reflector } from '../reflection/reflection';
 import { OpaqueToken } from './opaque_token';
-import { PipeMetadata } from '../pipes/metadata';
 import {
-  DirectiveMetadata,
   OutputMetadata,
   HostBindingMetadata,
   HostListenerMetadata,
-  InputMetadata,
-  ComponentMetadata
+  InputMetadata
 } from '../directives/metadata_directives';
-import { InjectMetadata, InjectableMetadata, SkipSelfMetadata, SelfMetadata, HostMetadata } from './metadata';
+import { InjectMetadata, SkipSelfMetadata, SelfMetadata, HostMetadata } from './metadata';
 import { pipeProvider } from '../pipes/pipe_provider';
 import { directiveProvider } from '../directives/directive_provider';
 import { ListWrapper } from '../../facade/collections';
 import { resolveForwardRef } from './forward_ref';
 import { getErrorMsg } from '../../facade/exceptions';
-import { isArray } from '../../facade/lang';
+import { isPipe, isOpaqueToken, isDirective, isService } from './provider_util';
+import { isComponent } from './provider_util';
+import { isInjectMetadata } from './provider_util';
 
 
 export type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
@@ -220,7 +221,7 @@ class ProviderBuilder{
     { useClass, useValue, useFactory, deps }: ProviderAliasOptions
   ): [string,Type] {
 
-    // ...provide('myFactory',{useFactory: () => { return new Foo(); } })
+    // ...provide('myFactory',{useFactory: () => () => { return new Foo(); } })
     if ( isPresent( useFactory ) ) {
       const factoryToken = getInjectableName(type);
       const injectableDeps = isArray( deps ) ? deps.map(getInjectableName) : [];
@@ -250,13 +251,11 @@ class ProviderBuilder{
       : '';
 
     if ( !isType( injectableType ) ) {
-
       throw new Error( `
       Provider registration: "${stringify( injectableType )}":
       =======================================================
       token ${ stringify( injectableType ) } must be type of Type, You cannot provide none class
       ` );
-
     }
 
     /**
@@ -267,15 +266,11 @@ class ProviderBuilder{
 
     const [rootAnnotation] = annotations;
 
+    // No Annotation === it's config function !!!
+    // NOTE: we are not checking anymore if user annotated the class or not,
+    // we cannot do that anymore at the costs for nic config functions registration
     if ( ListWrapper.isEmpty( annotations ) ) {
-
-      throw new Error( `
-      Provider registration: "${ stringify(injectableType) }":
-      =======================================================
-      cannot create appropriate construct from provided Type.
-       -> Type "${ stringify(injectableType) }" must have one of class decorators: [ @Pipe(), @Component(), @Directive(), @Injectable() ]
-      ` );
-
+      return [ injectableType ] as any;
     }
 
     if ( ListWrapper.size( annotations ) > 1 ) {
@@ -405,7 +400,7 @@ export function _extractToken( metadata: ParamMetaInst[] ): string {
  * @param {ProviderType}  injectable
  * @returns {string}
  */
-export function getInjectableName(injectable: ProviderType): string{
+export function getInjectableName( injectable: ProviderType ): string {
 
   // @Inject('foo') foo
   if ( isString( injectable ) ) {
@@ -457,6 +452,9 @@ export function getInjectableName(injectable: ProviderType): string{
  * @returns {boolean}
  * @private
  * @internal
+ * @deprecated
+ *
+ * @TODO: delete this
  */
 export function _areAllDirectiveInjectionsAtTail( metadata: ParamMetaInst[][] ): boolean {
 
@@ -485,50 +483,5 @@ export function _areAllDirectiveInjectionsAtTail( metadata: ParamMetaInst[][] ):
     return true;
 
   } );
-
-}
-
-export function isOpaqueToken( obj: any ): obj is OpaqueToken {
-  return obj instanceof OpaqueToken;
-}
-export function isDirective( annotation: any ): annotation is DirectiveMetadata {
-  return isString( annotation.selector ) && annotation instanceof DirectiveMetadata;
-}
-export function isComponent( annotation: any ): annotation is ComponentMetadata {
-  const hasTemplate = !isBlank( annotation.template || annotation.templateUrl );
-  return isString( annotation.selector ) && hasTemplate && annotation instanceof ComponentMetadata
-}
-export function isService(annotation: any): annotation is InjectableMetadata{
-  return annotation instanceof InjectableMetadata;
-}
-export function isPipe(annotation: any): annotation is PipeMetadata {
-  return isString(annotation.name) && annotation instanceof PipeMetadata;
-}
-function isInjectMetadata( injectMeta: any ): injectMeta is InjectMetadata {
-  return injectMeta instanceof InjectMetadata;
-}
-
-export function getNgModuleMethodByType( injectable: Type ): string {
-  // only the first class annotations is injectable
-  const [annotation] = reflector.annotations( injectable );
-
-  if ( isBlank( annotation ) ) {
-    throw new Error( `
-        cannot get injectable name token from none decorated class ${ getFuncName( injectable ) }
-        Only decorated classes by one of [ @Injectable,@Directive,@Component,@Pipe ], can be injected by reference
-      ` );
-  }
-
-  if ( isPipe( annotation ) ) {
-    return 'filter';
-  }
-
-  if ( isDirective( annotation ) ) {
-    return 'directive';
-  }
-
-  if ( isService( annotation ) ) {
-    return 'service';
-  }
 
 }
