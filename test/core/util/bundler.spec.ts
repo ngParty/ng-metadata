@@ -8,17 +8,14 @@ import { bundle } from '../../../src/core/util/bundler';
 import { Pipe } from '../../../src/core/pipes/decorators';
 import { Injectable } from '../../../src/core/di/decorators';
 import { OpaqueToken } from '../../../src/core/di/opaque_token';
+import { Directive } from '../../../src/core/directives/decorators';
 
 describe( `util/bundler`, () => {
 
   let sandbox: Sinon.SinonSandbox;
-  global.angular = createNgModule() as any;
   beforeEach( () => {
+    global.angular = createNgModule() as any;
     sandbox = sinon.sandbox.create();
-  } );
-  beforeEach( () => {
-
-
   } );
   afterEach( () => {
     sandbox.restore();
@@ -90,7 +87,7 @@ describe( `util/bundler`, () => {
       selector: 'app',
       directives: [ ChildOneComponent, ChildTwoComponent ],
       providers: [ MySingleton, { provide: 'tokenAsClass', useClass: ViaProviderLiteralService } ],
-      template: `Hello App 
+      template: `Hello App
         <child-one></child-one>
         <child-two></child-two>
       `
@@ -130,16 +127,122 @@ describe( `util/bundler`, () => {
       const actual = _invokeQueueToCompare( actualInvokeQueue, false );
       const expected = _invokeQueueToCompare( expectedInvokeQueue, false );
 
-      // console.log( actual );
+      // console.log( 'actual:',actual );
       // console.log( '========' );
-      // console.log( expected );
+      // console.log( 'expected:',expected );
 
       expect( actual ).to.deep.equal( expected );
       expect( ngModule.requires ).to.deep.equal( [ 'ui.bootstrap.modal','3rdParty' ] );
 
     } );
 
+    it( `should support nested providers and normalize them`, () => {
+
+      const PluginFooDirectives = [ NestedComponent ];
+      const PluginFooProviders = [ MyService, MySingleton ];
+      const PluginFooPipes = [ UpsPipe ];
+
+      @Directive({selector:'[yo]'})
+      class YoDirective {}
+
+      @Component( {
+        selector: 'app-with-plugin',
+        template: 'hello',
+        directives: [ PluginFooDirectives, YoDirective ],
+        providers: [ PluginFooProviders, MyPrivateService ],
+        pipes: [ PluginFooPipes ]
+      } )
+      class AppWithPluginComponent {}
+
+      const ngModule = bundle( AppWithPluginComponent );
+
+      const expectedInvokeQueue = [
+        [ '$compileProvider', 'directive', provide( AppWithPluginComponent ) ],
+        [ '$provide', 'service', provide( MyService ) ],
+        [ '$provide', 'service', provide( MySingleton ) ],
+        [ '$provide', 'service', provide( MyPrivateService ) ],
+        [ '$filterProvider', 'register', provide( UpsPipe ) ],
+        [ '$compileProvider', 'directive', provide( NestedComponent ) ],
+        [ '$compileProvider', 'directive', provide( YoDirective ) ]
+      ];
+      const actualInvokeQueue = (ngModule as any)._invokeQueue;
+      const actual = _invokeQueueToCompare( actualInvokeQueue, false );
+      const expected = _invokeQueueToCompare( expectedInvokeQueue, false );
+
+      // console.log( 'actual:',actual );
+      // console.log( '========' );
+      // console.log( 'expected:',expected );
+
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
+    it( `should allow ngModule.config within otherProviders setup`, () => {
+
+      @Injectable()
+      class MyDynamicService {}
+
+      configPhase.$inject = ['$provide'];
+      function configPhase($provide: ng.auto.IProvideService){
+        $provide.service( ...provide( MyDynamicService ) );
+        $provide.factory(
+          ...provide(
+            'promiseWrapper',
+            { deps: [ '$q' ], useFactory: ( value )=>( $q )=>$q.resolve() }
+          )
+        );
+      }
+
+      @Component( {
+        selector: 'pure-app',
+        template: 'hello'
+      } )
+      class PureAppComponent {}
+
+      const ngModule = bundle( PureAppComponent, [ configPhase ] );
+
+      const expectedInvokeQueue = [
+        [ '$compileProvider', 'directive', provide( PureAppComponent ) ],
+        [ '$provide', 'service', provide( MyDynamicService ) ],
+        [
+          '$provide', 'factory', provide(
+          'promiseWrapper',
+          { deps: [ '$q' ], useFactory: ( value )=>( $q )=>$q.resolve() }
+        )
+        ],
+      ];
+      const expectedConfigBlocks = [
+        [ '$injector', 'invoke', [ configPhase ] ]
+      ];
+
+      const actualConfigBlocks = (ngModule as any)._configBlocks;
+      const actualInvokeQueue = (ngModule as any)._invokeQueue;
+
+      expect( actualConfigBlocks ).to.deep.equal( expectedConfigBlocks );
+
+      _execConfigBlocks(ngModule);
+
+      const actual = _invokeQueueToCompare( actualInvokeQueue, false );
+      const expected = _invokeQueueToCompare( expectedInvokeQueue, false );
+
+      // console.log( 'actual:',actual );
+      // console.log( '========' );
+      // console.log( 'expected:',expected );
+
+      expect( actual ).to.deep.equal( expected );
+
+    } );
+
   } );
+
+  function _execConfigBlocks( ngModule: any ) {
+    const configBlocks = ngModule._configBlocks;
+    configBlocks.forEach( ( config )=> {
+      const registeredFnArr = config[ 2 ];
+      const fn = registeredFnArr[ 0 ];
+      fn(ngModule);
+    } );
+  }
 
   function _invokeQueueToCompare( invokeQueue: any, shouldSort = true ): [string,string,string] {
 
