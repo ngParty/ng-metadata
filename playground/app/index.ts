@@ -1,19 +1,11 @@
 import * as angular from 'angular';
-import { provide } from 'ng-metadata/core';
-import { Title } from 'ng-metadata/platform';
+import { provide, OpaqueToken, Injectable } from 'ng-metadata/core';
 
 import { TabsModule } from './components/tabs/index'
 import { LifecycleHooksModule } from './components/lifecycle/index';
 import { ChangeDetectorModule } from './components/change-detector/index';
 import { TitleHandlerModule } from './components/title/index';
 
-import { TodoAppCmp } from './components/todo-app.component';
-import { TodoItemCmp } from './components/todo-item.component';
-import { AddTodoCmp } from './components/add-todo.component';
-
-import { RemainingTodosPipe } from './pipes/remainingTodos.pipe';
-
-import { TodoStore } from './stores/todoStore.service';
 
 import { ElementReadyDirective } from './directives/element-ready.directive';
 import { MyValidatorDirective } from './directives/my-validator.directive';
@@ -23,21 +15,38 @@ import { MyDirectiveTesterDirective } from './directives/my-directive-tester.dir
 import { TesterAttrDirective } from './directives/my-tester.directive';
 import { GlobalListenerDirective } from './directives/global-listener.directive';
 import { TesterComponent } from './components/tester/tester.component';
+
+export const DynamicValueToken = new OpaqueToken('_dynamicValueToken_');
+
+@Injectable()
+export class NgRxStore {
+  getState(){ console.info('I should get state or so'); return {hello:'world'} }
+}
+
+@Injectable()
+export class Dispatcher{}
+
+export const SomeFactoryFnToken = new OpaqueToken('someFactory');
+
+export class SomeClassToInstantiate{
+  constructor(private $timeout:ng.ITimeoutService, private $log:ng.ILogService){}
+  greetWithDelay(){ this.$timeout(()=>console.info('greetings from SomeClassToInstantiate with delay!'),1000)}
+}
+
+// this is just showcase how to define config for your app or if you are building 3rd party module
+configureProviders.$inject = [ '$provide' ];
+export function configureProviders( $provide ) {
+    $provide.service( ...provide(NgRxStore, {useClass: NgRxStore}) )
+    $provide.value( ...provide(DynamicValueToken, {useValue:'hello'}) );
+    $provide.factory(...provide(SomeFactoryFnToken, { deps: ['$timeout', '$log'], useFactory: ($timeout, $log) => () => new SomeClassToInstantiate($timeout, $log) }));
+}
+
 export const AppModule = angular.module( 'app', [
   TabsModule,
   LifecycleHooksModule,
   ChangeDetectorModule,
   TitleHandlerModule
 ] )
-
-  // we need to register the service manually
-  .service( ...provide( Title ) )
-
-  .directive( ...provide( TodoAppCmp ) )
-  .directive( ...provide( AddTodoCmp ) )
-  .directive( ...provide( TodoItemCmp ) )
-  .filter( ...provide( RemainingTodosPipe ) )
-  .service( ...provide( TodoStore ) )
 
   .directive( ...provide( ElementReadyDirective ) )
 

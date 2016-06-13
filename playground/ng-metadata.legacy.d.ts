@@ -1,10 +1,12 @@
 declare module ngMetadataPlatform{
 
-  type AppRoot = string | Element | Document;
-  function bootstrap(ngModule: string, {element, strictDi}?: {
-    element?: AppRoot;
-    strictDi?: boolean;
-  }): void;
+  // type AppRoot = string | Element | Document;
+  // function bootstrap(ngModule: string, {element, strictDi}?: {
+  //   element?: AppRoot;
+  //   strictDi?: boolean;
+  // }): void;
+
+  function bootstrap(rootComponent: Type, providers: any[]): void;
 
   /**
    * A service that can be used to get and set the title of a current HTML document.
@@ -292,14 +294,19 @@ export const enum ChangeDetectionStrategy {
    * @param type
    * @returns {string}
    */
-  export function provide(type: ProviderType, {useClass, useValue}?: {
-    useClass?: Type;
-    useValue?: any;
+  export function provide(type: ProviderType, {useClass, useValue, useFactory, deps}?: {
+    useClass?: Type,
+    useValue?: any,
+    useFactory?: Function,
+    deps?: Object[]
   }): [string, Type];
 
   function Directive({selector, legacy}: {
     selector: string;
     legacy?: ng.IDirective;
+    inputs?: string[],
+    outputs?: string[],
+    providers?: Function[],
   }): ClassDecorator;
   function Component({selector, template, templateUrl, inputs, attrs, outputs, legacy, changeDetection, directives}: {
     selector: string;
@@ -310,8 +317,10 @@ export const enum ChangeDetectionStrategy {
     attrs?: string[];
     legacy?: ng.IDirective;
     changeDetection?: ChangeDetectionStrategy;
-    directives?: Function[];
-    providers?: Function[];
+    directives?: Function[],
+    providers?: Function[],
+    viewProviders?: Function[],
+    pipes?: Function[]
   }): ClassDecorator;
   function Output(bindingPropertyName?: string): PropertyDecorator;
   function Input(bindingPropertyName?: string): PropertyDecorator;

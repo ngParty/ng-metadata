@@ -191,15 +191,13 @@ describe( `di/provider`, ()=> {
       expect( ()=>(provide as any)( { hello: 'wat' } ) ).to.throw();
 
     } );
-    it( `should throw if registering class which is missing annotation`, ()=> {
-
+    it( `should not throw if registering class or function, cause they are supposed to be config functions`, ()=> {
 
       class MyService {
         constructor( @Inject( '$log' ) private $log ) {}
       }
 
-      expect( ()=>provide( MyService ) ).to.throw();
-
+      expect( ()=>provide( MyService ) ).to.not.throw();
 
     } );
     it( `should throw if class has more than 1 class decorator and those are two aren't @Component and @StateConfig`,

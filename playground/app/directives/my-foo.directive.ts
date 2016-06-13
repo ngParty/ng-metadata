@@ -1,7 +1,7 @@
 import { forwardRef, Directive, Inject, Host, Self, Optional, OnInit, AfterContentInit } from 'ng-metadata/core';
 import { NgModel, NgForm } from 'ng-metadata/common';
 import { MyValidatorDirective } from './my-validator.directive';
-import {TodoStore} from '../stores/todoStore.service';
+import {TodoStore} from '../todo/todo-store.service';
 
 @Directive({selector:'[my-foo]'})
 export class MyFooDirective implements OnInit,AfterContentInit{

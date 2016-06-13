@@ -1,21 +1,23 @@
 import { assertionsEnabled } from '../facade/lang';
+import { bundle } from '../core/util/bundler';
 
 export * from './title';
 export type AppRoot = string | Element | Document;
 
 /**
  * bootstrap angular app
- * @param {string}  ngModuleName
- * @param {string | Element | Document} [element=document]
- * @param {boolean} [strictDi=true]
+ * @param {Type}  rootComponent
+ * @param {Array<any>}  providers
  */
 export function bootstrap(
-  ngModuleName: string,
-  {element=document,strictDi=true}: {
-    element?: AppRoot,
-    strictDi?: boolean
-  }={}
+  rootComponent: Type,
+  providers: any[]
 ) {
+
+  const ngModule = bundle( rootComponent, providers );
+  const ngModuleName = ngModule.name;
+  const strictDi = true;
+  const element = document;
 
   if ( assertionsEnabled() ) {
     console.info(

@@ -1,5 +1,5 @@
 import { forwardRef, Directive, Inject, Host, Self, SkipSelf, Optional, AfterContentInit,OnInit } from 'ng-metadata/core';
-import {TodoStore} from '../stores/todoStore.service';
+import { TodoStore } from '../todo/todo-store.service';
 import { MyFooDirective } from './my-foo.directive';
 
 
