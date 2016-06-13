@@ -72,11 +72,8 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
   // Finally, invoke the constructor using the injection array and the captured locals
   $injector.invoke( controller, instance, StringMapWrapper.assign( locals, _localServices, $requires ) );
 
-  reassignBindingsAndCreteEventEmitters( instance, initialInstanceBindingValues );
-
-  // @TODO use this in 2.0
   // reassign back the initial binding values, just in case if we used default values
-  // StringMapWrapper.assign( instance, initialInstanceBindingValues );
+  StringMapWrapper.assign( instance, initialInstanceBindingValues );
 
 
   /*if ( isFunction( instance.ngOnDestroy ) ) {
@@ -104,11 +101,8 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
 
       $injector.invoke( controller, instance, StringMapWrapper.assign( locals, _localServices, $requires ) );
 
-      reassignBindingsAndCreteEventEmitters( instance, initialInstanceBindingValues );
-
-      // @TODO use this in 2.0
       // reassign back the initial binding values, just in case if we used default values
-      // StringMapWrapper.assign( instance, initialInstanceBindingValues );
+      StringMapWrapper.assign( instance, initialInstanceBindingValues );
     }
 
     if ( isFunction( instance.ngOnInit ) ) {
@@ -151,33 +145,12 @@ function $postDigestWatch( scope: ng.IScope, cb: Function ): Function {
   return removeDoCheckWatcher;
 }
 
-// @TODO this won't be needed in 2.0 because initial output binding will be wrapped with EventEmitter so just Object.assign will do
-function reassignBindingsAndCreteEventEmitters(
-  instance: {[propName: string]: any},
-  initialBindings: {[propName: string]: any}
-): void {
-  StringMapWrapper.forEach( initialBindings, ( bindingVal: any, propName: string )=> {
-
-    // @TODO in ngMetadata 2.0 we will throw error if instance[propName] will be default assigned function instead of EventEmitter
-    // check if after constructor instantiation, user assigned directly @Output to new EventEmitter()
-    if ( instance[propName] instanceof EventEmitter ) {
-      // this will make sure that instance[ propName ] will be instanceof EventEmitter
-      instance[ propName ].wrapNgExpBindingToEmitter( initialBindings[ propName ] )
-    } else {
-      instance[ propName ] = bindingVal;
-    }
-
-  } );
-}
-
 function getInitialBindings( instance ): {[propName: string]: any} {
   const initialBindingValues = {};
   StringMapWrapper.forEach( instance, ( value: any, propName: string ) => {
-
     if ( instance[ propName ] ) {
       initialBindingValues[ propName ] = value;
     }
-
   } );
   return initialBindingValues;
 }

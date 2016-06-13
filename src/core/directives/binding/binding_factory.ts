@@ -186,19 +186,13 @@ export function _createDirectiveBindings(
     // Don't assign noop to ctrl if expression is not valid
     if (parentGet === noop && optional) return;
 
-    // @TODO in ngMetadata 2.0 this will be removed
-    EventEmitter.makeNgExpBindingEmittable( _exprBindingCb );
-
-    // @TODO in ngMetadata 2.0 we will assign this property to EventEmitter directly
-    // const emitter = new EventEmitter();
-    // emitter.wrapNgExpBindingToEmitter( _exprBindingCb );
-    // ctrl[propName] = emitter;
-
-    ctrl[propName] = _exprBindingCb;
-
-    function _exprBindingCb( locals ) {
+    // here we assign property to EventEmitter instance directly
+    const emitter = new EventEmitter<any>();
+    emitter.wrapNgExpBindingToEmitter( function _exprBindingCb( locals ) {
       return parentGet( scope, locals );
-    }
+    } );
+
+    ctrl[propName] = emitter;
 
   }
   function _createAttrBinding( attrName: string, propName: string, optional: boolean ): Function {
