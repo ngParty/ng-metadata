@@ -133,6 +133,14 @@ export function isPromise(obj: any): boolean {
   return obj instanceof (<any>_global).Promise;
 }
 
+export function isPromiseLike( obj: any ): boolean {
+  return Boolean( isPresent( obj ) && obj.then );
+}
+
+export function isObservable( obj: any ): boolean {
+  return Boolean( isPresent( obj ) && obj.subscribe );
+}
+
 export function isJsObject( o: any ): boolean {
   return o !== null && (typeof o === "function" || typeof o === "object");
 }
