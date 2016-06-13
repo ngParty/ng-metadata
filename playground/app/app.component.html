@@ -164,6 +164,18 @@
   </div>
 </section>
 
+<!--ASYNC PIPE EXAMPLE-->
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showAsyncPipeExample=!$ctrl.showAsyncPipeExample">
+    {{ $ctrl.showAsyncPipeExample ? 'hide' : 'show'}} <code>AsyncPipe</code> example
+  </button>
+  <div ng-if="$ctrl.showAsyncPipeExample">
+    <async-example></async-example>
+  </div>
+</section>
+
 <!--Title-->
 <section class="demo-content">
   <button
