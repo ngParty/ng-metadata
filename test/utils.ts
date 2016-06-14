@@ -213,6 +213,8 @@ export class $Scope {
   $$nextSibling = {} as any;
   $$postDigest = ( callback: Function ): void => {};
 
+  $digest() {}
+
   $watch( watchExp: Function|string, watchListener: Function ) {
     this.$$watchers.push( [ watchExp, watchListener ] );
     return function disposable() {}

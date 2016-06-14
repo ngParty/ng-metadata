@@ -25,6 +25,7 @@ import './facade/lang.spec';
 import './facade/primitives.spec';
 import './facade/collections.spec';
 import './facade/async.spec';
+import './common/pipes/async_pipe.spec';
 
 describe( 'ng-metadata', ()=> {
 } );

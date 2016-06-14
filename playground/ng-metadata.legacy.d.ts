@@ -1,5 +1,6 @@
 // import Subject = require('rxjs/Subject');
-// import Subscription = require('rxjs/Subscription');
+declare type Observable<T> = any;
+declare type Subject<T> = any;
 
 declare module ngMetadataPlatform{
 
@@ -986,6 +987,18 @@ declare module ngMetadataCommon {
     removeOption(value: any): void;
     abstract hasOption(value: any): boolean;
     registerOption(optionScope: ng.IScope, optionElement: ng.IAugmentedJQuery, optionAttrs: ng.IAttributes, interpolateValueFn?: Function, interpolateTextFn?: Function): void;
+  }
+
+  export class AsyncPipe {
+    private static nextObjectID;
+    private static values;
+    private static subscriptions;
+    private static TRACK_PROP_NAME;
+    private static objectId(obj);
+    private static isPromiseOrObservable(obj);
+    private static getSubscriptionStrategy(input);
+    private static dispose(inputId);
+    transform(input: Observable<any> | ng.IPromise<any> | ng.IHttpPromise<any>, scope?: ng.IScope): any;
   }
 }
 declare module "ng-metadata/core" {
