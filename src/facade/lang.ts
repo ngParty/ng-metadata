@@ -1,3 +1,6 @@
+import { Subscription } from 'rxjs/Subscription';
+import { Observable } from 'rxjs/Observable';
+
 export interface BrowserNodeGlobal {
   Object: typeof Object,
   Array: typeof Array,
@@ -137,8 +140,20 @@ export function isPromiseLike( obj: any ): boolean {
   return Boolean( isPresent( obj ) && obj.then );
 }
 
-export function isObservable( obj: any ): boolean {
+export function isObservable<T>( obj: any ): obj is Observable<T> {
   return Boolean( isPresent( obj ) && obj.subscribe );
+}
+
+export function isPromiseOrObservable( obj: any ): boolean {
+  return isPromiseLike( obj ) || isObservable( obj );
+}
+
+export function isScope( obj: any ): obj is ng.IScope {
+  return isPresent( obj ) && obj.$digest && obj.$on;
+}
+
+export function isSubscription( obj: any ): obj is Subscription {
+  return isPresent( obj ) && obj.unsubscribe;
 }
 
 export function isJsObject( o: any ): boolean {
