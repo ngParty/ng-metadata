@@ -8,7 +8,7 @@ import { Component, Inject } from 'ng-metadata/core';
 @Component({
   selector: 'async-task',
   template: (
-    `Clock: {{ $ctrl.clock$ | async | date:'M/d/yy h:mm:ss a' }} <br>
+    `Clock: {{ $ctrl.clock$ | async:this | date:'M/d/yy h:mm:ss a' }} <br>
      Timer: {{ $ctrl.timer$ | async:this }} <br>
      Async Stream via scan:
      <ul><li ng-repeat="u in $ctrl.stream$ | async:this">{{ u }}</li></ul>`
