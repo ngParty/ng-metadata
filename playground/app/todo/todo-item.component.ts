@@ -3,7 +3,8 @@ import { TodoModel } from './todo-store.service';
 
 @Component({
   selector: 'todo-item',
-  templateUrl: './app/todo/todo-item.html',
+  moduleId: module.id,
+  templateUrl: './todo-item.html',
   legacy: {
     transclude: true
   }

@@ -312,7 +312,7 @@ export const enum ChangeDetectionStrategy {
     outputs?: string[],
     providers?: Function[],
   }): ClassDecorator;
-  function Component({selector, template, templateUrl, inputs, attrs, outputs, legacy, changeDetection, directives}: {
+  function Component({selector, template, templateUrl, inputs, attrs, outputs, legacy, changeDetection, directives, moduleId}: {
     selector: string;
     template?: string;
     templateUrl?: string;
@@ -324,7 +324,8 @@ export const enum ChangeDetectionStrategy {
     directives?: Function[],
     providers?: Function[],
     viewProviders?: Function[],
-    pipes?: Function[]
+    pipes?: Function[],
+    moduleId?: string
   }): ClassDecorator;
   function Output(bindingPropertyName?: string): PropertyDecorator;
   function Input(bindingPropertyName?: string): PropertyDecorator;

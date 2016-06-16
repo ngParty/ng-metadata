@@ -3,7 +3,8 @@ import { TodoModel } from './todo-store.service.ts';
 
 @Component({
   selector: 'add-todo',
-  templateUrl: './app/todo/add-todo.html'
+  moduleId: module.id,
+  templateUrl: './add-todo.html'
 })
 export class AddTodoCmp{
 

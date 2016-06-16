@@ -6,7 +6,8 @@ import { AsyncExampleComponent } from './components/async-example/async-example.
 @Component( {
   selector: 'my-app',
   directives: [ TodoAppCmp, AsyncExampleComponent ],
-  templateUrl: './app/app.component.html'
+  moduleId: module.id,
+  templateUrl: './app.component.html'
 } )
 export class AppComponent implements OnInit {
   constructor(

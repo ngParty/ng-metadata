@@ -42,7 +42,8 @@ export class OnChangesComponent implements OnChanges {
 
 @Component({
   selector: 'on-changes-parent',
-  templateUrl: 'app/components/lifecycle/on-changes-parent.component.html',
+  moduleId: module.id,
+  templateUrl: './on-changes-parent.component.html',
   directives: [OnChangesComponent]
 })
 export class OnChangesParentComponent {
