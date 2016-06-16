@@ -918,21 +918,21 @@ export class ComponentMetadata extends DirectiveMetadata {
   /**
    * The module id of the module that contains the component.
    * Needed to be able to resolve relative urls for templates and styles.
-   * In Dart, this can be determined automatically and does not need to be set.
-   * In CommonJS, this can always be set to `module.id`.
+   * In CommonJS, this can always be set to `module.id`, similarly SystemJS exposes `__moduleName`
+   * variable within each module.
    *
    * ## Simple Example
    *
    * ```
-   * @Directive({
-   *   selector: 'someDir',
-   *   moduleId: module.id
+   * @Component({
+   *   selector: 'my-hello',
+   *   moduleId: module.id,
+   *   templateUrl: './my-hello.component.ts
    * })
-   * class SomeDir {
-   * }
-   *
+   * class MyHelloComponent {}
    * ```
    */
+  moduleId: string;
 
   templateUrl: string;
   template: string;
@@ -942,7 +942,7 @@ export class ComponentMetadata extends DirectiveMetadata {
   pipes: Array<Type | any[]>;
 
   constructor({
-    selector, inputs, attrs, outputs, host, exportAs, providers, viewProviders,
+    selector, inputs, attrs, outputs, host, exportAs, moduleId, providers, viewProviders,
     changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template,
     styleUrls, styles, directives, pipes, legacy
   }: {
@@ -953,6 +953,7 @@ export class ComponentMetadata extends DirectiveMetadata {
     host?: {[key: string]: string},
     providers?: any[],
     exportAs?: string,
+    moduleId?: string,
     viewProviders?: any[],
     changeDetection?: ChangeDetectionStrategy,
     queries?: {[key: string]: any},
@@ -984,6 +985,7 @@ export class ComponentMetadata extends DirectiveMetadata {
     this.styles = styles;
     this.directives = directives;
     this.pipes = pipes;
+    this.moduleId = moduleId;
   }
 }
 
