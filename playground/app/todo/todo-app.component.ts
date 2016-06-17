@@ -7,7 +7,8 @@ import { RemainingTodosPipe } from './remaining-todos.pipe'
 
 @Component( {
   selector: 'todo-app',
-  templateUrl: './app/todo/todo-app.html',
+  moduleId: module.id,
+  templateUrl: './todo-app.html',
   directives: [ AddTodoCmp, TodoItemCmp ],
   providers: [ TodoStore ],
   pipes: [ RemainingTodosPipe ],

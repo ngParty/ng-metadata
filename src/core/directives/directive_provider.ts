@@ -83,6 +83,7 @@ export class DirectiveProvider {
     // specific DDO augmentation for @Component
     if ( metadata instanceof ComponentMetadata ) {
 
+      const assetsPath = this.directiveResolver.parseAssetUrl( metadata );
       const componentSpecificDDO = {
         scope: {},
         bindToController: {},
@@ -97,7 +98,7 @@ export class DirectiveProvider {
         componentSpecificDDO.template = metadata.template;
       }
       if ( metadata.templateUrl ) {
-        componentSpecificDDO.templateUrl = metadata.templateUrl;
+        componentSpecificDDO.templateUrl = `${assetsPath}${metadata.templateUrl}`;
       }
 
       StringMapWrapper.assign( _ddo, componentSpecificDDO );

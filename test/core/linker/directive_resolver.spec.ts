@@ -391,5 +391,57 @@ describe( `linker/directive_resolver`, ()=> {
 
   } );
 
+  describe( `#componentModuleUrl`, () => {
+
+    const resolver = new DirectiveResolver();
+
+    function getComponentMetadata( modulePath: string ) {
+      @Component( {
+        selector: 'test',
+        moduleId: modulePath,
+        template: '...'
+      } )
+      class TestComponent {
+      }
+
+      return resolver.resolve( TestComponent ) as ComponentMetadata;
+    }
+
+    it( `should properly resolve module path`, () => {
+
+      let metadata = getComponentMetadata( 'app/foo/bar/test.component.js' );
+      let absolutePath = resolver.parseAssetUrl( metadata );
+
+      expect( absolutePath ).to.equal( 'app/foo/bar/' );
+
+      metadata = getComponentMetadata( 'https://foo-bar.com/foo/bar/test.js' );
+      absolutePath = resolver.parseAssetUrl( metadata );
+
+      expect( absolutePath ).to.equal( 'https://foo-bar.com/foo/bar/' );
+
+      metadata = getComponentMetadata( 'test.js' );
+      absolutePath = resolver.parseAssetUrl( metadata );
+
+      expect( absolutePath ).to.equal( '/' );
+
+      metadata = getComponentMetadata( '/test.js' );
+      absolutePath = resolver.parseAssetUrl( metadata );
+
+      expect( absolutePath ).to.equal( '/' );
+
+      metadata = getComponentMetadata( '/app/test.js' );
+      absolutePath = resolver.parseAssetUrl( metadata );
+
+      expect( absolutePath ).to.equal( '/app/' );
+
+      metadata = getComponentMetadata( 'https://foo-bar.com/foo?q=123/bar.js' );
+      absolutePath = resolver.parseAssetUrl( metadata );
+
+      expect( absolutePath ).to.equal( 'https://foo-bar.com/foo?q=123/' );
+
+    } );
+
+  } );
+
 
 } );
