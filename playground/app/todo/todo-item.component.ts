@@ -10,8 +10,8 @@ import { TodoModel } from './todo-store.service';
 })
 export class TodoItemCmp implements OnChanges{
 
-  @Input('<') todo: TodoModel;
-  @Input('<') idx: number;
+  @Input() todo: TodoModel;
+  @Input() idx: number;
   @Output() onDone = new EventEmitter<TodoModel>();
   @Output() emitTest = new EventEmitter<string>();
 
