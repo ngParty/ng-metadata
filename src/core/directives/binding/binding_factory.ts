@@ -10,7 +10,7 @@ import { global, noop, isString, isBoolean, isFunction } from '../../../facade/l
 import { EventEmitter } from '../../../facade/async';
 
 import { ParsedBindingValue, BINDING_MODE } from './constants';
-import { _parseBindings } from './binding_parser';
+import { _parseBindings, _setupInputs, _setupOutputs, _parseFields } from './binding_parser';
 
 /**
  * Create Bindings manually for both Directive/Component
@@ -53,7 +53,10 @@ export function _createDirectiveBindings(
     ? _scope.$parent
     : _scope;
   const { inputs=[], outputs=[], attrs=[] } = metadata;
-  const parsedBindings = _parseBindings( { inputs, outputs, attrs } );
+  // const parsedBindings = _parseBindings( { inputs, outputs, attrs } );
+  const parsedInputs = _setupInputs( _parseFields( inputs ), attributes );
+  const parsedOutputs = _setupOutputs( _parseFields( outputs ), attributes );
+  const parsedBindings = { inputs: parsedInputs.inputs, attrs: parsedInputs.attrs, outputs: parsedOutputs.outputs };
   const _internalWatchers = [];
   const _internalObservers = [];
 
@@ -68,7 +71,7 @@ export function _createDirectiveBindings(
   // setup @Inputs '<' or '='
   // by default '='
   // @TODO starting 2.0 there will be no default, if no explicit type provided it will be determined from template
-  StringMapWrapper.forEach( parsedBindings.inputs, ( config: ParsedBindingValue, propName: string ) => {
+  StringMapWrapper.forEach( parsedBindings.inputs as any, ( config: ParsedBindingValue, propName: string ) => {
 
     const { alias, optional, mode } = config;
     const attrName = alias || propName;
@@ -82,7 +85,7 @@ export function _createDirectiveBindings(
   } );
 
   // setup @Outputs
-  StringMapWrapper.forEach( parsedBindings.outputs, ( config: ParsedBindingValue, propName: string ) => {
+  StringMapWrapper.forEach( parsedBindings.outputs as any, ( config: ParsedBindingValue, propName: string ) => {
 
     const { alias, optional, mode } = config;
     const attrName = alias || propName;
@@ -92,12 +95,12 @@ export function _createDirectiveBindings(
   } );
 
   // setup @Attrs
-  StringMapWrapper.forEach( parsedBindings.attrs, ( config: ParsedBindingValue, propName: string ) => {
+  StringMapWrapper.forEach( parsedBindings.attrs as any, ( config: {mode:string,optional:boolean,exp:string}, propName: string ) => {
 
-    const { alias, optional, mode } = config;
-    const attrName = alias || propName;
+    const { exp, optional, mode } = config;
+    const attrName = exp;
 
-    const removeObserver = _createAttrBinding( attrName, propName, optional );
+    const removeObserver = _createAttrBinding( exp, propName, optional );
     _internalObservers.push( removeObserver );
 
   } );
@@ -195,19 +198,20 @@ export function _createDirectiveBindings(
     ctrl[propName] = emitter;
 
   }
-  function _createAttrBinding( attrName: string, propName: string, optional: boolean ): Function {
+  function _createAttrBinding( expression: string, propName: string, optional: boolean ): Function {
 
     let lastValue;
 
-    if ( !optional && !Object.hasOwnProperty.call( attributes, attrName ) ) {
-      ctrl[ propName ] = attributes[ attrName ] = void 0;
+    if ( !optional && !expression ) {
+      // ctrl[ propName ] = attributes[ expression ] = void 0;
+      ctrl[ propName ] = void 0;
     }
 
     // register watchers for further changes
     // The observer function will be invoked once during the next $digest following compilation.
     // The observer is then invoked whenever the interpolated value changes.
 
-    const _disposeObserver = attributes.$observe( attrName, function ( value ) {
+    const _disposeObserver = attributes.$observe( expression, function ( value ) {
       if ( isString( value ) ) {
         const oldValue = ctrl[ propName ];
         recordChanges( propName, value, oldValue );
@@ -215,8 +219,8 @@ export function _createDirectiveBindings(
       }
     } );
 
-    (attributes as any).$$observers[ attrName ].$$scope = scope;
-    lastValue = attributes[ attrName ];
+    (attributes as any).$$observers[ expression ].$$scope = scope;
+    lastValue = attributes[ expression ];
     if ( isString( lastValue ) ) {
       // If the attribute has been provided then we trigger an interpolation to ensure
       // the value is there for use in the link fn

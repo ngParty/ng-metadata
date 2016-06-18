@@ -1,6 +1,98 @@
 import { StringMapWrapper } from '../../../facade/collections';
 import { ParsedBindings, BINDING_MODE, ParsedBindingsMap, INPUT_MODE_REGEX } from './constants';
 
+export interface AttrProp {
+  prop: string;
+  attr: string;
+  bracketAttr: string;
+  bracketParenAttr: string;
+  parenAttr: string;
+}
+
+export interface ComponentInfo {
+  inputs: AttrProp[];
+  outputs: AttrProp[];
+}
+
+export function setupFields( $attrs: ng.IAttributes, inputs = [], outputs = [], attrs = [] ) {
+
+}
+
+export function getComponentInfo( { inputs = [], outputs = [] }={} ): ComponentInfo {
+  return {
+    inputs: _parseFields( inputs ),
+    outputs: _parseFields( outputs )
+  };
+}
+
+export function _parseFields(names: string[]): AttrProp[] {
+  const attrProps: AttrProp[] = [];
+  if ( !names ) {
+    return attrProps;
+  }
+
+  for ( var i = 0; i < names.length; i++ ) {
+    const parts = names[ i ].split( ':' );
+    const prop = parts[ 0 ].trim();
+    const attr = (parts[ 1 ] || parts[ 0 ]).trim();
+    attrProps.push( {
+      prop: prop,
+      attr: attr,
+      bracketAttr: `[${attr}]`,
+      parenAttr: `(${attr})`,
+      bracketParenAttr: `[(${attr})]`
+    } );
+  }
+  return attrProps;
+}
+
+export function _setupInputs( inputs: AttrProp[], $attrs: ng.IAttributes ) {
+  const _attrs = {};
+  const _inputs = {};
+
+  for (var i = 0; i < inputs.length; i++) {
+    const input = inputs[i];
+
+    if ( input.attr.charAt( 0 ) === '@' || input.attr.charAt( 0 ) === '<' || input.attr.charAt( 0 ) === '=' ) {
+      _attrs[input.prop] = { mode: input.attr.charAt( 0 ), exp: $attrs[input.attr], optional: true };
+      return;
+    }
+
+    if ($attrs.hasOwnProperty(input.attr)) {
+      // @
+      _attrs[input.prop] = { mode: '@', exp: $attrs[input.attr], optional: true };
+    } else if ($attrs.hasOwnProperty(input.bracketAttr)) {
+      // <
+      _inputs[input.prop] = { mode: '<', exp: $attrs[input.bracketAttr], optional: true };
+    } else if ($attrs.hasOwnProperty(input.bracketParenAttr)) {
+      // =
+      _inputs[input.prop] = { mode: '=', exp: $attrs[input.bracketParenAttr], optional: true };
+    }
+  }
+
+  return {
+    inputs: _inputs,
+    attrs: _attrs
+  };
+
+}
+
+export function _setupOutputs( outputs: AttrProp[], $attrs: ng.IAttributes ) {
+  const _outputs = {};
+  for (var i = 0; i < outputs.length; i++) {
+    const output = outputs[ i ];
+
+    // & via event
+    if ($attrs.hasOwnProperty(output.attr)) {
+      _outputs[output.prop] = { mode: '&', exp: $attrs[output.attr], optional: true };
+    }
+    // & via (event)
+    else if ($attrs.hasOwnProperty(output.parenAttr)) {
+      _outputs[output.prop] = { mode: '&', exp: $attrs[output.parenAttr], optional: true };
+    }
+  }
+  return {outputs: _outputs};
+}
 /**
  * parses input/output/attrs string arrays from metadata fro further processing
  * @param inputs
@@ -10,7 +102,7 @@ import { ParsedBindings, BINDING_MODE, ParsedBindingsMap, INPUT_MODE_REGEX } fro
  * @private
  */
 export function _parseBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindings {
-  
+
   const SPLIT_BY = ':';
 
   return {

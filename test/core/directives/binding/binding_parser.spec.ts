@@ -1,9 +1,44 @@
 import { expect } from 'chai';
-import { _parseBindings } from '../../../../src/core/directives/binding/binding_parser';
+import { _parseBindings, _setupInputs } from '../../../../src/core/directives/binding/binding_parser';
+import { _parseFields } from '../../../../src/core/directives/binding/binding_parser';
 
-describe( `directives/binding/binding_parser`, () => {
+describe.only( `directives/binding/binding_parser`, () => {
 
   describe( `Binding parser`, () => {
+
+
+    describe( '#_parseFields', () => {
+      it( 'should process nulls', () => { expect( _parseFields( null ) ).to.deep.equal( [] ); } );
+
+      it( 'should process values', () => {
+        expect( _parseFields( [ ' name ', ' prop :  attr ' ] ) ).to.deep.equal( [
+          {
+            prop: 'name',
+            attr: 'name',
+            bracketAttr: '[name]',
+            parenAttr: '(name)',
+            bracketParenAttr: '[(name)]'
+          },
+          {
+            prop: 'prop',
+            attr: 'attr',
+            bracketAttr: '[attr]',
+            parenAttr: '(attr)',
+            bracketParenAttr: '[(attr)]'
+          }
+        ] );
+      } );
+    } );
+
+    describe( `#_setupInput`, () => {
+      it( `should setup proper inputs`, () => {
+        const $attrs = {} as ng.IAttributes;
+        const parsedFields = _parseFields( [ 'name', 'prop : attr' ] );
+        const actual = _setupInputs( parsedFields, $attrs );
+
+
+      } );
+    } );
 
     describe( `#_parseBindings`, () => {
 
@@ -25,7 +60,7 @@ describe( `directives/binding/binding_parser`, () => {
           'onMoo: onMooAlias'
         ];
 
-        const actual = _parseBindings( {inputs, attrs, outputs} );
+        const actual = _parseBindings( { inputs, attrs, outputs } );
         const expected = {
           inputs: {
             one: { mode: '=', alias: '', optional: true },
