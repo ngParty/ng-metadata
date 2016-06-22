@@ -9,8 +9,8 @@ import { StringMapWrapper } from '../../../facade/collections';
 import { global, noop, isString, isBoolean, isFunction } from '../../../facade/lang';
 import { EventEmitter } from '../../../facade/async';
 
-import { ParsedBindingValue, BINDING_MODE } from './constants';
-import { _parseBindings, _setupInputs, _setupOutputs, _parseFields } from './binding_parser';
+import { BINDING_MODE } from './constants';
+import { _setupInputs, _setupOutputs, _parseFields } from './binding_parser';
 
 /**
  * Create Bindings manually for both Directive/Component
@@ -53,7 +53,6 @@ export function _createDirectiveBindings(
     ? ngScope.$parent
     : ngScope;
   const { inputs=[], outputs=[], attrs=[] } = metadata;
-  // const parsedBindings = _parseBindings( { inputs, outputs, attrs } );
 
   const parsedInputs = _setupInputs( _parseFields( inputs ), ngAttrs );
   const parsedOutputs = _setupOutputs( _parseFields( outputs ), ngAttrs );

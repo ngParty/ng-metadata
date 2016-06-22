@@ -90,7 +90,7 @@ export function _setupInputs( inputs: AttrProp[], $attrs: ng.IAttributes ) {
 
 export function _setupOutputs( outputs: AttrProp[], ngAttrs: ng.IAttributes ) {
 
-  const parsedOutputs = {} as {[propName:string]:SetupAttrFields};;
+  const parsedOutputs = {} as {[propName:string]:SetupAttrFields};
 
   for (let i = 0; i < outputs.length; i++) {
     const output = outputs[ i ];

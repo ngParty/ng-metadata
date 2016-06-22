@@ -94,13 +94,11 @@ describe( `directives/binding/binding_factory`, () => {
 
     } );
 
-    it( `should create array of attrs.$observe disposable callbacks for @Attr`, ()=> {
+    it( `should create array of attrs.$observe disposable callbacks for @Input('@')`, ()=> {
 
       const metadata = {
-        attrs: [
-          'foo: @'
-        ],
         inputs: [
+          'foo: @',
           'one: @oneAlias'
         ]
       } as DirectiveMetadata;
