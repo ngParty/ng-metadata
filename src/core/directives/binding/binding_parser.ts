@@ -37,7 +37,7 @@ export function _parseFields(names: string[]): AttrProp[] {
     return attrProps;
   }
 
-  for ( var i = 0; i < names.length; i++ ) {
+  for ( let i = 0; i < names.length; i = i + 1 ) {
     const parts = names[ i ].split( ':' );
     const prop = parts[ 0 ].trim();
     const attr = (parts[ 1 ] || parts[ 0 ]).trim();

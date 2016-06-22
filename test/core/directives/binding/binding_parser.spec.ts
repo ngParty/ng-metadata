@@ -8,10 +8,20 @@ describe.only( `directives/binding/binding_parser`, () => {
 
 
     describe( '#_parseFields', () => {
-      it( 'should process nulls', () => { expect( _parseFields( null ) ).to.deep.equal( [] ); } );
+      it( 'should process nulls', () => {
+        expect( _parseFields( null ) ).to.deep.equal( [] );
+      } );
 
       it( 'should process values', () => {
-        expect( _parseFields( [ ' name ', ' prop :  attr ' ] ) ).to.deep.equal( [
+
+        const inputs = [
+          ' name ',
+          ' prop :  attr ',
+          'oldOW: <',
+          'oldOWA: <aliased'
+        ];
+        const actual = _parseFields( inputs );
+        const expected = [
           {
             prop: 'name',
             attr: 'name',
@@ -25,8 +35,24 @@ describe.only( `directives/binding/binding_parser`, () => {
             bracketAttr: '[attr]',
             parenAttr: '(attr)',
             bracketParenAttr: '[(attr)]'
+          },
+          {
+            prop: 'oldOW',
+            attr: '<',
+            bracketAttr: '[<]',
+            parenAttr: '(<)',
+            bracketParenAttr: '[(<)]'
+          },
+          {
+            prop: 'oldOWA',
+            attr: '<aliased',
+            bracketAttr: '[<aliased]',
+            parenAttr: '(<aliased)',
+            bracketParenAttr: '[(<aliased)]'
           }
-        ] );
+        ];
+
+        expect( actual ).to.deep.equal( expected );
       } );
     } );
 
