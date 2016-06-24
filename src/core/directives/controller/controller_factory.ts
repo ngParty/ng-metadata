@@ -162,7 +162,7 @@ function reassignBindingsAndCreteEventEmitters(
     // check if after constructor instantiation, user assigned directly @Output to new EventEmitter()
     if ( instance[propName] instanceof EventEmitter ) {
       // this will make sure that instance[ propName ] will be instanceof EventEmitter
-      instance[ propName ].wrapNgExpBindingToEmitter( initialBindings[ propName ] )
+      instance[ propName ] = initialBindings[ propName ];
     } else {
       instance[ propName ] = bindingVal;
     }
