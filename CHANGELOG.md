@@ -1,3 +1,13 @@
+<a name="1.12.3"></a>
+## [1.12.3](https://github.com/ngParty/ng-metadata/compare/1.12.2...v1.12.3) (2016-06-24)
+
+
+### Bug Fixes
+
+* **core/directives:** fix wrong rebound output when directive has requires (#107) ([1b008a8](https://github.com/ngParty/ng-metadata/commit/1b008a8)), closes [(#107](https://github.com/(/issues/107) [#106](https://github.com/ngParty/ng-metadata/issues/106)
+
+
+
 <a name="1.12.2"></a>
 ## [1.12.2](https://github.com/ngParty/ng-metadata/compare/1.12.1...v1.12.2) (2016-06-03)
 
