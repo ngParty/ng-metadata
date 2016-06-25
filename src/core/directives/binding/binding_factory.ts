@@ -10,16 +10,10 @@ import { global, noop, isString, isBoolean, isFunction } from '../../../facade/l
 import { EventEmitter } from '../../../facade/async';
 
 import { BINDING_MODE } from './constants';
-import { _setupInputs, _setupOutputs, _parseFields } from './binding_parser';
+import { setupFields, SetupAttrField } from './binding_parser';
 
 /**
  * Create Bindings manually for both Directive/Component
- * @param hasIsolateScope
- * @param _scope
- * @param attributes
- * @param ctrl
- * @param metadata
- * @param {{$interpolate,$parse,$rootScope}}
  * @returns {{watchers: Array, observers: Array}}
  * @internal
  * @private
@@ -52,15 +46,8 @@ export function _createDirectiveBindings(
   const scope = hasIsolateScope
     ? ngScope.$parent
     : ngScope;
-  const { inputs=[], outputs=[], attrs=[] } = metadata;
-
-  const parsedInputs = _setupInputs( _parseFields( inputs ), ngAttrs );
-  const parsedOutputs = _setupOutputs( _parseFields( outputs ), ngAttrs );
-  const parsedBindings = {
-    inputs: parsedInputs.inputs,
-    attrs: parsedInputs.attrs,
-    outputs: parsedOutputs.outputs
-  };
+  const { inputs=[], outputs=[] } = metadata;
+  const parsedBindings = setupFields( ngAttrs, inputs, outputs );
 
   const _internalWatchers = [];
   const _internalObservers = [];
@@ -74,12 +61,10 @@ export function _createDirectiveBindings(
   changesQueueService.buildFlushOnChanges( $rootScope );
 
   // setup @Inputs '<' or '='
-  // by default '='
-  // @TODO starting 2.0 there will be no default, if no explicit type provided it will be determined from template
-  StringMapWrapper.forEach( parsedBindings.inputs as any, ( config/*: ParsedBindingValue*/, propName: string ) => {
+  StringMapWrapper.forEach( parsedBindings.inputs as any, ( config: SetupAttrField, propName: string ) => {
 
     const { exp, attrName, optional, mode } = config;
-    // const attrName = alias || propName;
+    // support for TWO_WAY only for components
     const hasTwoWayBinding = hasIsolateScope && mode === BINDING_MODE.twoWay;
 
     const removeWatch = hasTwoWayBinding
@@ -89,23 +74,22 @@ export function _createDirectiveBindings(
 
   } );
 
-  // setup @Outputs
-  StringMapWrapper.forEach( parsedBindings.outputs as any, ( config/*: ParsedBindingValue*/, propName: string ) => {
-
-    const { exp, attrName, optional, mode } = config;
-    // const attrName = alias || propName;
-
-    _createOutputBinding( propName, attrName, exp, optional );
-
-  } );
-
-  // setup @Attrs
-  StringMapWrapper.forEach( parsedBindings.attrs as any, ( config, propName: string ) => {
+  // setup @Input('@')
+  StringMapWrapper.forEach( parsedBindings.attrs as any, ( config: SetupAttrField, propName: string ) => {
 
     const { attrName, exp, optional, mode } = config;
 
     const removeObserver = _createAttrBinding( propName, attrName, exp, optional );
     _internalObservers.push( removeObserver );
+
+  } );
+
+  // setup @Outputs
+  StringMapWrapper.forEach( parsedBindings.outputs as any, ( config: SetupAttrField, propName: string ) => {
+
+    const { exp, attrName, optional, mode } = config;
+
+    _createOutputBinding( propName, attrName, exp, optional );
 
   } );
 
@@ -278,7 +262,7 @@ export function _createDirectiveBindings(
 
   function removeWatches(): void {
     const removeWatchCollection = [ ..._internalWatchers, ..._internalObservers ];
-    for ( var i = 0, ii = removeWatchCollection.length; i < ii; ++i ) {
+    for ( let i = 0, ii = removeWatchCollection.length; i < ii; ++i ) {
       if (removeWatchCollection[ i ] && isFunction(removeWatchCollection[ i ])) {
         removeWatchCollection[ i ]();
       }

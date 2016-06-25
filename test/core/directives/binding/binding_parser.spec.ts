@@ -27,28 +27,36 @@ describe( `directives/binding/binding_parser`, () => {
             attr: 'name',
             bracketAttr: '[name]',
             parenAttr: '(name)',
-            bracketParenAttr: '[(name)]'
+            bracketParenAttr: '[(name)]',
+            type: '',
+            typeByTemplate: true,
           },
           {
             prop: 'prop',
             attr: 'attr',
             bracketAttr: '[attr]',
             parenAttr: '(attr)',
-            bracketParenAttr: '[(attr)]'
+            bracketParenAttr: '[(attr)]',
+            type: '',
+            typeByTemplate: true,
           },
           {
             prop: 'oldOW',
-            attr: '<',
-            bracketAttr: '[<]',
-            parenAttr: '(<)',
-            bracketParenAttr: '[(<)]'
+            attr: 'oldOW',
+            bracketAttr: '[oldOW]',
+            parenAttr: '(oldOW)',
+            bracketParenAttr: '[(oldOW)]',
+            type: '<',
+            typeByTemplate: false,
           },
           {
             prop: 'oldOWA',
-            attr: '<aliased',
-            bracketAttr: '[<aliased]',
-            parenAttr: '(<aliased)',
-            bracketParenAttr: '[(<aliased)]'
+            attr: 'aliased',
+            bracketAttr: '[aliased]',
+            parenAttr: '(aliased)',
+            bracketParenAttr: '[(aliased)]',
+            type: '<',
+            typeByTemplate: false,
           }
         ];
 

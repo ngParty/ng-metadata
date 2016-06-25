@@ -1,33 +1,48 @@
-import { StringMapWrapper } from '../../../facade/collections';
+import { StringMapWrapper, ListWrapper } from '../../../facade/collections';
 import { ParsedBindings, BINDING_MODE, ParsedBindingsMap, INPUT_MODE_REGEX } from './constants';
 
 export interface AttrProp {
+  /**
+   * instance property
+   */
   prop: string;
+  /**
+   * attr name in template ( equals prop if not aliased )
+   */
   attr: string;
   bracketAttr: string;
   bracketParenAttr: string;
   parenAttr: string;
+  /**
+   * this is determined only for declaration time types @Input('@'),@Input('<'),@Input('=')
+   */
+  type: string,
+  typeByTemplate: boolean
 }
 
-export interface SetupAttrFields {
+export interface SetupAttrField {
   mode: string,
-  exp: string | void,
+  exp: string,
   attrName: string,
   optional: boolean
 }
-export interface ComponentInfo {
-  inputs: AttrProp[];
-  outputs: AttrProp[];
+export interface ProcessedBindings {
+  inputs: {[key: string]: SetupAttrField},
+  attrs: {[key: string]: SetupAttrField},
+  outputs: {[key: string]: SetupAttrField}
 }
 
-export function setupFields( $attrs: ng.IAttributes, inputs = [], outputs = [], attrs = [] ) {
-
-}
-
-export function getComponentInfo( { inputs = [], outputs = [] }={} ): ComponentInfo {
+export function setupFields(
+  ngAttrs: ng.IAttributes,
+  rawInputs: string[] = [],
+  rawOutputs: string[] = []
+): ProcessedBindings {
+  const { inputs, attrs } = _setupInputs( _parseFields( rawInputs ), ngAttrs );
+  const { outputs } = _setupOutputs( _parseFields( rawOutputs ), ngAttrs );
   return {
-    inputs: _parseFields( inputs ),
-    outputs: _parseFields( outputs )
+    inputs,
+    attrs,
+    outputs
   };
 }
 
@@ -37,47 +52,99 @@ export function _parseFields(names: string[]): AttrProp[] {
     return attrProps;
   }
 
-  for ( let i = 0; i < names.length; i = i + 1 ) {
-    const parts = names[ i ].split( ':' );
+  for ( const name of names ) {
+
+    const parts = name.split( ':' );
     const prop = parts[ 0 ].trim();
     const attr = (parts[ 1 ] || parts[ 0 ]).trim();
+
+    const isTypeByDeclaration = _isTypeByDeclaration( attr );
+    const attrName = _getNormalizedAttrName( attr, prop, isTypeByDeclaration );
+    const type = _getBindingType(attr,isTypeByDeclaration);
+
     attrProps.push( {
       prop: prop,
-      attr: attr,
-      bracketAttr: `[${attr}]`,
-      parenAttr: `(${attr})`,
-      bracketParenAttr: `[(${attr})]`
+      attr: attrName,
+      bracketAttr: `[${attrName}]`,
+      parenAttr: `(${attrName})`,
+      bracketParenAttr: `[(${attrName})]`,
+      type: type,
+      typeByTemplate: !isTypeByDeclaration
     } );
   }
+
   return attrProps;
 }
 
-export function _setupInputs( inputs: AttrProp[], $attrs: ng.IAttributes ) {
+function _getBindingType( originalAttr: string, isTypeByDeclaration: boolean ): string {
+  return isTypeByDeclaration
+    ? originalAttr.charAt( 0 )
+    : '';
+}
+function _isTypeByDeclaration( attr: string ): boolean {
+  return ListWrapper.contains( [
+    BINDING_MODE.attr, BINDING_MODE.oneWay, BINDING_MODE.twoWay
+  ], attr.charAt( 0 ) );
+}
+function _getNormalizedAttrName( originalAttr: string, propName: string, isTypeByDeclaration: boolean ): string {
+  if ( !isTypeByDeclaration ) {
+    return originalAttr;
+  }
+  return originalAttr.length > 1
+    ? originalAttr.substring( 1 )
+    : propName;
+}
 
-  const parsedAttrs: {[propName:string]:SetupAttrFields} = {};
-  const parsedInputs: {[propName:string]:SetupAttrFields} = {};
+export function _setupInputs(
+  inputs: AttrProp[],
+  ngAttrs: ng.IAttributes
+): {inputs: {[propName: string]: SetupAttrField},attrs: {[propName: string]: SetupAttrField}} {
 
-  for (let i = 0; i < inputs.length; i++) {
-    const input = inputs[i];
+  const parsedAttrs: {[propName:string]:SetupAttrField} = {};
+  const parsedInputs: {[propName:string]:SetupAttrField} = {};
 
-    if ( (input.attr.charAt( 0 ) === '@' || input.attr.charAt( 0 ) === '<' || input.attr.charAt( 0 ) === '=')) {
-      const _attrName = input.attr.length > 1 ? input.attr.substring(1) : input.prop;
-      if( $attrs.hasOwnProperty(_attrName)){
-        if(input.attr.charAt( 0 ) === '@'){
-          parsedAttrs[input.prop] = { mode: input.attr.charAt( 0 ), exp: $attrs[_attrName], attrName: _attrName, optional: true };
-        }else{
-          parsedInputs[input.prop] = { mode: input.attr.charAt( 0 ), exp: $attrs[_attrName], attrName: _attrName, optional: true };
+
+  for ( const input of inputs ) {
+
+    if ( input.typeByTemplate ) {
+
+      if ( ngAttrs.hasOwnProperty( input.attr ) ) {
+        // @
+        parsedAttrs[ input.prop ] = {
+          mode: BINDING_MODE.attr,
+          exp: ngAttrs[ input.attr ],
+          attrName: input.attr,
+          optional: true
+        };
+      } else if ( ngAttrs.hasOwnProperty( input.bracketAttr ) ) {
+        // <
+        parsedInputs[ input.prop ] = {
+          mode: BINDING_MODE.oneWay,
+          exp: ngAttrs[ input.bracketAttr ],
+          attrName: input.bracketAttr,
+          optional: true
+        };
+      } else if ( ngAttrs.hasOwnProperty( input.bracketParenAttr ) ) {
+        // =
+        parsedInputs[ input.prop ] = {
+          mode: BINDING_MODE.twoWay,
+          exp: ngAttrs[ input.bracketParenAttr ],
+          attrName: input.bracketParenAttr,
+          optional: true
+        };
+      }
+
+    } else {
+
+      if ( ngAttrs.hasOwnProperty( input.attr ) ) {
+        const attrMetadata = { mode: input.type, exp: ngAttrs[ input.attr ], attrName: input.attr, optional: true };
+        if ( input.type === BINDING_MODE.attr ) {
+          parsedAttrs[ input.prop ] = attrMetadata;
+        } else {
+          parsedInputs[ input.prop ] = attrMetadata;
         }
       }
-    } else if ($attrs.hasOwnProperty(input.attr)) {
-      // @
-      parsedAttrs[input.prop] = { mode: '@', exp: $attrs[input.attr], attrName: input.attr, optional: true };
-    } else if ($attrs.hasOwnProperty(input.bracketAttr)) {
-      // <
-      parsedInputs[input.prop] = { mode: '<', exp: $attrs[input.bracketAttr], attrName: input.bracketAttr, optional: true };
-    } else if ($attrs.hasOwnProperty(input.bracketParenAttr)) {
-      // =
-      parsedInputs[input.prop] = { mode: '=', exp: $attrs[input.bracketParenAttr], attrName: input.bracketParenAttr, optional: true };
+
     }
   }
 
@@ -88,26 +155,40 @@ export function _setupInputs( inputs: AttrProp[], $attrs: ng.IAttributes ) {
 
 }
 
-export function _setupOutputs( outputs: AttrProp[], ngAttrs: ng.IAttributes ) {
+export function _setupOutputs(
+  outputs: AttrProp[],
+  ngAttrs: ng.IAttributes
+): {outputs: {[propName: string]: SetupAttrField}} {
 
-  const parsedOutputs = {} as {[propName:string]:SetupAttrFields};
+  const parsedOutputs = {} as {[propName:string]:SetupAttrField};
 
-  for (let i = 0; i < outputs.length; i++) {
+  for ( let i = 0; i < outputs.length; i = i + 1 ) {
+
     const output = outputs[ i ];
-    const baseParsedAttrField = { mode: '&', optional: true, exp: undefined, attrName:''};
+    const baseParsedAttrField = { mode: BINDING_MODE.output, optional: true, exp: undefined, attrName:''};
 
     // & via event
-    if (ngAttrs.hasOwnProperty(output.attr)) {
-      parsedOutputs[output.prop] = StringMapWrapper.assign({}, baseParsedAttrField, { exp: ngAttrs[output.attr], attrName: output.attr });
+    if ( ngAttrs.hasOwnProperty( output.attr ) ) {
+      parsedOutputs[ output.prop ] = StringMapWrapper.assign(
+        {},
+        baseParsedAttrField,
+        { exp: ngAttrs[ output.attr ], attrName: output.attr }
+      );
     }
     // & via (event)
-    else if (ngAttrs.hasOwnProperty(output.parenAttr)) {
-      parsedOutputs[output.prop] = StringMapWrapper.assign({}, baseParsedAttrField, { exp: ngAttrs[output.parenAttr], attrName: output.parenAttr });
+    else if ( ngAttrs.hasOwnProperty( output.parenAttr ) ) {
+      parsedOutputs[ output.prop ] = StringMapWrapper.assign(
+        {},
+        baseParsedAttrField,
+        { exp: ngAttrs[ output.parenAttr ], attrName: output.parenAttr }
+      );
     }
+
   }
 
-  return {outputs: parsedOutputs};
+  return { outputs: parsedOutputs };
 }
+
 /**
  * parses input/output/attrs string arrays from metadata fro further processing
  * @param inputs
@@ -115,6 +196,7 @@ export function _setupOutputs( outputs: AttrProp[], ngAttrs: ng.IAttributes ) {
  * @param attrs
  * @returns {{inputs: ParsedBindingsMap, outputs: ParsedBindingsMap, attrs: ParsedBindingsMap}}
  * @private
+ * @deprecated
  */
 export function _parseBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindings {
 
