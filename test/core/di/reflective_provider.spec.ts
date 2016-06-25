@@ -1,4 +1,5 @@
 import { expect } from 'chai';
+import * as sinon from 'sinon';
 
 import { global } from '../../../src/facade/lang';
 import { Component, Directive } from '../../../src/core/directives/decorators';
@@ -12,11 +13,18 @@ import { OpaqueToken } from '../../../src/core/di/opaque_token';
 import { _isTypeRegistered } from '../../../src/core/di/reflective_provider';
 import { provide } from '../../../src/core/di/provider';
 import { _normalizeProviders } from '../../../src/core/di/reflective_provider';
+import { _registerTypeProvider } from '../../../src/core/di/reflective_provider';
+import { noop } from 'rxjs/util/noop';
 
 describe( `di/reflective_provider`, () => {
 
+  const sandbox = sinon.sandbox.create();
+
   beforeEach( () => {
     global.angular = createNgModule() as any;
+  } );
+  afterEach( () => {
+    sandbox.restore();
   } );
 
   describe( `#resolveReflectiveProvider`, () => {
@@ -312,5 +320,62 @@ describe( `di/reflective_provider`, () => {
     });
 
   });
+  describe( `#_registerTypeProvider`, () => {
+
+    @Component({selector:'foo',template:'hello'})
+    class FooComponent{}
+
+    @Directive({selector:'[fooAttr]'})
+    class FooDirective{}
+
+    @Injectable()
+    class MyService{}
+
+    @Pipe({name:'ups'})
+    class UpsPipe{}
+
+    class JustClass{}
+
+    let ngModule: ng.IModule;
+
+    beforeEach( () => {
+      ngModule = global.angular.module( 'myApp', [] );
+    } );
+
+    it( `should do nothing if Class doesn't have annotation`, () => {
+
+      _registerTypeProvider( ngModule, JustClass, { moduleMethod: 'service', name: '', value: noop } );
+      expect( (ngModule as any)._invokeQueue ).to.deep.equal( [] );
+
+    } );
+    it( `should register component/pipe/service via its name`, () => {
+
+      sandbox.spy(ngModule,'service');
+      sandbox.spy(ngModule,'filter');
+      sandbox.spy(ngModule,'directive');
+
+      _registerTypeProvider( ngModule, MyService, { moduleMethod: 'service', name: 'myService#1', value: noop } );
+      _registerTypeProvider( ngModule, UpsPipe, { moduleMethod: 'filter', name: 'ups', value: noop } );
+      _registerTypeProvider( ngModule, FooComponent, { moduleMethod: 'directive', name: 'foo', value: noop } );
+
+      expect( (ngModule.service as Sinon.SinonSpy).calledOnce ).to.equal( true );
+      expect( (ngModule.filter as Sinon.SinonSpy).calledOnce ).to.equal( true );
+      expect( (ngModule.directive as Sinon.SinonSpy).calledOnce ).to.equal( true );
+
+    } );
+    it( `should register directive via 3 types of template usage (name),[name],name`, () => {
+
+      sandbox.spy( ngModule, 'directive' );
+      const spy = ngModule.directive as Sinon.SinonSpy;
+
+      _registerTypeProvider( ngModule, FooDirective, { moduleMethod: 'directive', name: 'foo', value: noop } );
+
+      expect( spy.calledThrice ).to.equal( true );
+      expect( spy.calledWith( 'foo', noop ) ).to.equal( true );
+      expect( spy.calledWith( '[foo]', noop ) ).to.equal( true );
+      expect( spy.calledWith( '(foo)', noop ) ).to.equal( true );
+
+    } );
+  } );
 
 } );
