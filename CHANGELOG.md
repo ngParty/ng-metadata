@@ -1,3 +1,13 @@
+<a name="1.12.4"></a>
+## [1.12.4](https://github.com/ngParty/ng-metadata/compare/1.12.3...v1.12.4) (2016-06-25)
+
+
+### Bug Fixes
+
+* **core/directives/host:** correctly handle return value in @HostListener for calling preventDefault (#109) ([fe33427](https://github.com/ngParty/ng-metadata/commit/fe33427)), closes [#108](https://github.com/ngParty/ng-metadata/issues/108)
+
+
+
 <a name="1.12.3"></a>
 ## [1.12.3](https://github.com/ngParty/ng-metadata/compare/1.12.2...v1.12.3) (2016-06-24)
 
