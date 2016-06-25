@@ -1,6 +1,6 @@
 {
   "name": "ng-metadata",
-  "version": "1.12.3",
+  "version": "1.12.4",
   "description": "Angular 2 decorators and utils for Angular 1.x",
   "scripts": {
     "typings": "typings",
