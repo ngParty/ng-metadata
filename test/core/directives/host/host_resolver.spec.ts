@@ -101,9 +101,9 @@ describe( `directives/host/host_resolver`, () => {
       'document: click': [ 'onDocumentClick' ]
     } as {[key:string]:string[]};
     let ctrl = {
-      onClick: sandbox.spy( ( evt )=> {} ),
-      onMove: sandbox.spy( ( x, y )=> {} ),
-      onOut: sandbox.spy( ()=>true ),
+      onClick: sandbox.spy( ( evt ) => { return false } ),
+      onMove: sandbox.spy( ( x, y ) => {} ),
+      onOut: sandbox.spy( () => {} ),
       onDocumentClick: sandbox.spy( ( evt ) => ({}) )
     };
     let event = {
@@ -163,7 +163,7 @@ describe( `directives/host/host_resolver`, () => {
 
     } );
 
-    it( `should call event.preventDefault if ctrl method call returns falsy value`, ()=> {
+    it( `should call event.preventDefault if ctrl method call returns false`, ()=> {
 
       const [{cb:clickCb}] = $element._eventListeners;
 
@@ -175,7 +175,7 @@ describe( `directives/host/host_resolver`, () => {
 
     } );
 
-    it( `should not call event.preventDefault if ctrl method call returns truthy value`, ()=> {
+    it( `should not call event.preventDefault if ctrl method call doesn't return false`, ()=> {
 
       const [,,{cb:outCb}] = $element._eventListeners;
 

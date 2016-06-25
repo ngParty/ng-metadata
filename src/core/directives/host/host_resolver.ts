@@ -117,9 +117,8 @@ export function _setHostListeners(
 
         const noPreventDefault = ctrl[ methodName ]( ...cbParams );
 
-        // HostListener preventDefault if method name returns false,
-        // which is default if you don't explicitly return truthy value
-        if ( !noPreventDefault ) {
+        // HostListener event.preventDefault if method returns false
+        if ( noPreventDefault === false ) {
           evt.preventDefault();
         }
 
