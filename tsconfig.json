@@ -11,6 +11,7 @@
     "preserveConstEnums": true
   },
   "exclude": [
+    "_book",
     "playground",
     "node_modules"
   ]
