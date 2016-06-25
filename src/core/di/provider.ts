@@ -24,7 +24,7 @@ import { directiveProvider } from '../directives/directive_provider';
 import { ListWrapper } from '../../facade/collections';
 import { resolveForwardRef } from './forward_ref';
 import { getErrorMsg } from '../../facade/exceptions';
-import { isPipe, isOpaqueToken, isDirective, isService } from './provider_util';
+import { isPipe, isOpaqueToken, isDirectiveLike, isService } from './provider_util';
 import { isComponent } from './provider_util';
 import { isInjectMetadata } from './provider_util';
 
@@ -277,7 +277,7 @@ class ProviderBuilder{
 
       const hasComponentAnnotation = annotations.some( meta=>isComponent( meta ) );
       const hasNotAllowedSecondAnnotation = annotations.some( meta=> {
-        return isDirective( meta ) || isService( meta ) || isPipe( meta );
+        return isDirectiveLike( meta ) || isService( meta ) || isPipe( meta );
       } );
 
       if ( !hasComponentAnnotation || (hasNotAllowedSecondAnnotation && hasComponentAnnotation) ) {
@@ -298,7 +298,7 @@ class ProviderBuilder{
       return pipeProvider.createFromType( injectableType );
     }
 
-    if ( isDirective( rootAnnotation ) ) {
+    if ( isDirectiveLike( rootAnnotation ) ) {
       return directiveProvider.createFromType( injectableType );
     }
 
@@ -434,7 +434,7 @@ export function getInjectableName( injectable: ProviderType ): string {
       return annotation.name;
     }
 
-    if ( isDirective( annotation ) ) {
+    if ( isDirectiveLike( annotation ) ) {
       return resolveDirectiveNameFromSelector( annotation.selector );
     }
 

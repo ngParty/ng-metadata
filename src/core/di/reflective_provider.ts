@@ -3,7 +3,8 @@ import { isType, isArray, isString, getFuncName, isBlank } from '../../facade/la
 import { reflector } from '../reflection/reflection';
 
 import { Provider, provide } from './provider';
-import { isPipe, isDirective, isService, isProviderLiteral, createProvider, ProviderLiteral } from './provider_util';
+import { isPipe, isDirectiveLike, isService, isProviderLiteral, createProvider, ProviderLiteral } from './provider_util';
+import { isDirective } from './provider_util';
 
 /**
  * process provider literals and return map for ngModule consumption
@@ -76,7 +77,7 @@ export function _getNgModuleMetadataByType( injectable: Type ): { providerName: 
     }
   }
 
-  if ( isDirective( annotation ) ) {
+  if ( isDirectiveLike( annotation ) ) {
     return {
       providerName: '$compileProvider',
       providerMethod: 'directive',
@@ -116,7 +117,7 @@ export function _normalizeProviders(
       return;
     }
 
-    // this works only value,factory,aliased services
+    // this works only for value,factory,aliased services
     // you cannot register directive/pipe within provider literal
     if ( isProviderLiteral( providerType ) ) {
       const provider = createProvider( providerType );
@@ -141,6 +142,8 @@ export function _normalizeProviders(
       }
 
       if ( !_isTypeRegistered( name, ngModule, providerName, providerMethod ) ) {
+        // @TODO register via this once requires are resolved for 3 types of attr directive from template
+        // _registerTypeProvider( ngModule, providerType, { moduleMethod, name, value } );
         ngModule[ moduleMethod ]( name, value );
       }
       return;
@@ -185,4 +188,31 @@ export function _isTypeRegistered(
   return types.some( ( [typeName,typeFn] )=> {
     return findRegisteredType === typeName;
   } )
+}
+
+
+/**
+ * we need to register 3 types of attribute directives, if we are registering directive,
+ * because we need to allow all 3 types of binding on the defined directive [name],(name),name
+ * @private
+ */
+export function _registerTypeProvider(
+  ngModule: ng.IModule,
+  provider: Type,
+  { moduleMethod, name, value }: { moduleMethod: string,name: string,value: Function }
+): void {
+
+  // only the first class annotations is injectable
+  const [annotation] = reflector.annotations( provider );
+  if ( isBlank( annotation ) ) { return }
+
+  // we need to register attr directives for all possible binding types
+  if ( isDirective( annotation ) ) {
+    ngModule[ moduleMethod ]( name, value );
+    ngModule[ moduleMethod ]( `[${name}]`, value );
+    ngModule[ moduleMethod ]( `(${name})`, value );
+  } else {
+    ngModule[ moduleMethod ]( name, value )
+  }
+
 }

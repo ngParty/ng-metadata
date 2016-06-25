@@ -2,7 +2,10 @@ import { global } from '../../facade/lang';
 import { reflector } from '../reflection/reflection';
 import { ComponentMetadata } from '../directives/metadata_directives';
 import { getInjectableName, provide } from '../di/provider';
-import { _isTypeRegistered, _normalizeProviders, _getNgModuleMetadataByType } from '../di/reflective_provider';
+import {
+  _isTypeRegistered, _normalizeProviders, _getNgModuleMetadataByType,
+  _registerTypeProvider
+} from '../di/reflective_provider';
 import { ListWrapper } from '../../facade/collections';
 
 export function bundle( ComponentClass: Type, otherProviders: any[] = [], NgModule?: ng.IModule ): ng.IModule {
@@ -21,6 +24,8 @@ export function bundle( ComponentClass: Type, otherProviders: any[] = [], NgModu
     return ngModule;
   }
 
+  // @TODO register via this once requires are resolved for 3 types of attr directive from template
+  // _registerTypeProvider( ngModule, ComponentClass, { moduleMethod, name: cmpName, value: cmpFactoryFn } );
   ngModule[moduleMethod]( cmpName, cmpFactoryFn );
 
   // 1. process component/directive decorator providers/viewProviders/pipes

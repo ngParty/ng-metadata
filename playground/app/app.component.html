@@ -187,3 +187,15 @@
     <my-title-handler></my-title-handler>
   </div>
 </section>
+
+<!--Attribute Directive-->
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showAttrDirective=!$ctrl.showAttrDirective">
+    {{ $ctrl.showAttrDirective? 'hide' : 'show'}} <code>Attribute Directive</code> example
+  </button>
+  <div ng-if="$ctrl.showAttrDirective">
+    <my-attribute-directive-example></my-attribute-directive-example>
+  </div>
+</section>

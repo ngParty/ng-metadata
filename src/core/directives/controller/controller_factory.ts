@@ -84,6 +84,8 @@ export function directiveControllerFactory<T extends DirectiveCtrl,U extends Typ
    ddo.ngAfterViewInitBound = instance.ngAfterViewInit.bind(instance);
    }*/
 
+  // https://github.com/angular/angular.js/commit/0ad2b70862d49ecc4355a16d767c0ca9358ecc3e
+  // onChanges is called before onInit
   if ( isFunction( instance.ngOnChanges ) ) {
     instance.ngOnChanges( initialChanges );
   }
