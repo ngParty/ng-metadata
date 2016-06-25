@@ -1,4 +1,4 @@
-import { isString, isBlank } from '../../facade/lang';
+import { isString, isPresent } from '../../facade/lang';
 import { DirectiveMetadata, ComponentMetadata } from '../directives/metadata_directives';
 import { PipeMetadata } from '../pipes/metadata';
 
@@ -27,13 +27,20 @@ export function createProvider( obj: ProviderLiteral ): Provider {
 export function isOpaqueToken( obj: any ): obj is OpaqueToken {
   return obj instanceof OpaqueToken;
 }
-export function isDirective( annotation: any ): annotation is DirectiveMetadata {
+
+export function isDirectiveLike( annotation: any ): annotation is DirectiveMetadata|ComponentMetadata {
   return isString( annotation.selector ) && annotation instanceof DirectiveMetadata;
 }
-export function isComponent( annotation: any ): annotation is ComponentMetadata {
-  const hasTemplate = !isBlank( annotation.template || annotation.templateUrl );
-  return isString( annotation.selector ) && hasTemplate && annotation instanceof ComponentMetadata
+export function isDirective( annotation: any ): annotation is DirectiveMetadata {
+  return isDirectiveLike( annotation ) && !_hasTemplate( annotation );
 }
+export function isComponent( annotation: any ): annotation is ComponentMetadata {
+  return isString( annotation.selector ) && _hasTemplate(annotation) && annotation instanceof ComponentMetadata
+}
+function _hasTemplate( annotation: any ): boolean {
+  return isPresent( annotation.template || annotation.templateUrl );
+}
+
 export function isService(annotation: any): annotation is InjectableMetadata {
   return annotation instanceof InjectableMetadata;
 }

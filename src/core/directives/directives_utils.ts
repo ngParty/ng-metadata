@@ -1,9 +1,16 @@
 import { DirectiveMetadata, ComponentMetadata } from './metadata_directives';
 
-
+/**
+ * use #isDirective instead
+ * @deprecated
+ */
 export function isAttrDirective( metadata: any ): metadata is DirectiveMetadata {
   return metadata instanceof DirectiveMetadata && !(metadata instanceof ComponentMetadata);
 }
+/**
+ * use #isComponent instead
+ * @deprecated
+ */
 export function isComponentDirective( metadata: any ): metadata is ComponentMetadata{
   return metadata instanceof ComponentMetadata;
 }
