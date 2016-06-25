@@ -6,7 +6,6 @@ describe( `directives/binding/binding_parser`, () => {
 
   describe( `Binding parser`, () => {
 
-
     describe( '#_parseFields', () => {
       it( 'should process nulls', () => {
         expect( _parseFields( null ) ).to.deep.equal( [] );
@@ -119,30 +118,30 @@ describe( `directives/binding/binding_parser`, () => {
         const expected = {
           inputs: {
             name: {
-              mode: '<', exp: '$ctrl.name', attrName: '[name]', optional: true
+              mode: '<', exp: '$ctrl.name', attrName: '[name]'
             },
             prop: {
-              mode: '<', exp: '$ctrl.someValue', attrName: '[attr]', optional: true
+              mode: '<', exp: '$ctrl.someValue', attrName: '[attr]'
             },
             twoWay: {
-              mode: '=', exp: '$ctrl.trouble', attrName: '[(twoWay)]', optional: true
+              mode: '=', exp: '$ctrl.trouble', attrName: '[(twoWay)]'
             },
             oldTwoWay: {
-              mode: '=', exp: '$ctrl.troubleAgain', attrName: 'oldTwoWay', optional: true
+              mode: '=', exp: '$ctrl.troubleAgain', attrName: 'oldTwoWay'
             },
             oldOW: {
-              mode: '<', exp: '$ctrl.someValueOld', attrName: 'oldOW', optional: true
+              mode: '<', exp: '$ctrl.someValueOld', attrName: 'oldOW'
             },
             oldOWA: {
-              mode: '<', exp: '$ctrl.someValueAliased', attrName: 'aliased', optional: true
+              mode: '<', exp: '$ctrl.someValueAliased', attrName: 'aliased'
             }
           },
           attrs: {
             interpo: {
-              mode: '@', exp: '{{ $ctrl.wat }}', attrName: 'interpo', optional: true
+              mode: '@', exp: '{{ $ctrl.wat }}', attrName: 'interpo'
             },
             oldOWInterpo: {
-              mode: '@', exp: '{{ $ctrl.watOld }}', attrName: 'oldOWInterpo', optional: true
+              mode: '@', exp: '{{ $ctrl.watOld }}', attrName: 'oldOWInterpo'
             }
           }
         };
@@ -199,16 +198,16 @@ describe( `directives/binding/binding_parser`, () => {
         const expected = {
           outputs:{
             onName: {
-              mode: '&', exp: '$ctrl.changeName()', attrName: '(onName)', optional: true
+              mode: '&', exp: '$ctrl.changeName()', attrName: '(onName)'
             },
             onHello: {
-              mode: '&', exp: '$ctrl.changeNameWhoopie()', attrName: '(onAliased)', optional: true
+              mode: '&', exp: '$ctrl.changeNameWhoopie()', attrName: '(onAliased)'
             },
             onGreet: {
-              mode: '&', exp: '$ctrl.greetMe()', attrName: 'onGreet', optional: true
+              mode: '&', exp: '$ctrl.greetMe()', attrName: 'onGreet'
             },
             aliased: {
-              mode: '&', exp: '$ctrl.whoopie()', attrName: 'aliasedOnGreet', optional: true
+              mode: '&', exp: '$ctrl.whoopie()', attrName: 'aliasedOnGreet'
             }
           }
         };

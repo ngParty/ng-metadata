@@ -23,8 +23,7 @@ export interface AttrProp {
 export interface SetupAttrField {
   mode: string,
   exp: string,
-  attrName: string,
-  optional: boolean
+  attrName: string
 }
 export interface ProcessedBindings {
   inputs: {[key: string]: SetupAttrField},
@@ -113,31 +112,28 @@ export function _setupInputs(
         parsedAttrs[ input.prop ] = {
           mode: BINDING_MODE.attr,
           exp: ngAttrs[ input.attr ],
-          attrName: input.attr,
-          optional: true
+          attrName: input.attr
         };
       } else if ( ngAttrs.hasOwnProperty( input.bracketAttr ) ) {
         // <
         parsedInputs[ input.prop ] = {
           mode: BINDING_MODE.oneWay,
           exp: ngAttrs[ input.bracketAttr ],
-          attrName: input.bracketAttr,
-          optional: true
+          attrName: input.bracketAttr
         };
       } else if ( ngAttrs.hasOwnProperty( input.bracketParenAttr ) ) {
         // =
         parsedInputs[ input.prop ] = {
           mode: BINDING_MODE.twoWay,
           exp: ngAttrs[ input.bracketParenAttr ],
-          attrName: input.bracketParenAttr,
-          optional: true
+          attrName: input.bracketParenAttr
         };
       }
 
     } else {
 
       if ( ngAttrs.hasOwnProperty( input.attr ) ) {
-        const attrMetadata = { mode: input.type, exp: ngAttrs[ input.attr ], attrName: input.attr, optional: true };
+        const attrMetadata = { mode: input.type, exp: ngAttrs[ input.attr ], attrName: input.attr };
         if ( input.type === BINDING_MODE.attr ) {
           parsedAttrs[ input.prop ] = attrMetadata;
         } else {
@@ -165,7 +161,7 @@ export function _setupOutputs(
   for ( let i = 0; i < outputs.length; i = i + 1 ) {
 
     const output = outputs[ i ];
-    const baseParsedAttrField = { mode: BINDING_MODE.output, optional: true, exp: undefined, attrName:''};
+    const baseParsedAttrField = { mode: BINDING_MODE.output, exp: undefined, attrName:''};
 
     // & via event
     if ( ngAttrs.hasOwnProperty( output.attr ) ) {

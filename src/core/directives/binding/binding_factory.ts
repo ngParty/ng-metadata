@@ -63,13 +63,13 @@ export function _createDirectiveBindings(
   // setup @Inputs '<' or '='
   StringMapWrapper.forEach( parsedBindings.inputs as any, ( config: SetupAttrField, propName: string ) => {
 
-    const { exp, attrName, optional, mode } = config;
+    const { exp, attrName, mode } = config;
     // support for TWO_WAY only for components
     const hasTwoWayBinding = hasIsolateScope && mode === BINDING_MODE.twoWay;
 
     const removeWatch = hasTwoWayBinding
-      ? _createTwoWayBinding( propName, attrName, exp, optional )
-      : _createOneWayBinding( propName, attrName, exp, optional, isBindingImmutable );
+      ? _createTwoWayBinding( propName, attrName, exp )
+      : _createOneWayBinding( propName, attrName, exp, isBindingImmutable );
     _internalWatchers.push( removeWatch );
 
   } );
@@ -77,9 +77,9 @@ export function _createDirectiveBindings(
   // setup @Input('@')
   StringMapWrapper.forEach( parsedBindings.attrs as any, ( config: SetupAttrField, propName: string ) => {
 
-    const { attrName, exp, optional, mode } = config;
+    const { attrName, exp, mode } = config;
 
-    const removeObserver = _createAttrBinding( propName, attrName, exp, optional );
+    const removeObserver = _createAttrBinding( propName, attrName, exp );
     _internalObservers.push( removeObserver );
 
   } );
@@ -87,13 +87,13 @@ export function _createDirectiveBindings(
   // setup @Outputs
   StringMapWrapper.forEach( parsedBindings.outputs as any, ( config: SetupAttrField, propName: string ) => {
 
-    const { exp, attrName, optional, mode } = config;
+    const { exp, attrName, mode } = config;
 
-    _createOutputBinding( propName, attrName, exp, optional );
+    _createOutputBinding( propName, attrName, exp );
 
   } );
 
-  function _createOneWayBinding( propName: string, attrName: string, exp: string, optional: boolean = true, isImmutable: boolean = false ): Function {
+  function _createOneWayBinding( propName: string, attrName: string, exp: string, isImmutable: boolean = false ): Function {
 
     // if ( !exp ) {
     // if ( !Object.hasOwnProperty.call( ngAttrs, attrName ) ) {
@@ -101,7 +101,7 @@ export function _createDirectiveBindings(
       // ngAttrs[ attrName ] = void 0;
     // }
     // if ( optional && !ngAttrs[ attrName ] ) return;
-    if ( optional && !exp ) return;
+    if ( !exp ) return;
 
     // const parentGet = $parse( ngAttrs[ attrName ] );
     const parentGet = $parse( exp );
@@ -116,34 +116,21 @@ export function _createDirectiveBindings(
     }, parentGet.literal );
 
   }
-  function _createTwoWayBinding( propName: string, attrName: string, exp: string, optional: boolean ): Function {
+  function _createTwoWayBinding( propName: string, attrName: string, exp: string ): Function {
 
-    let lastValue;
+    if ( !exp ) return;
 
-    // if ( !Object.hasOwnProperty.call( ngAttrs, attrName ) ) {
-    //   if ( optional ) return;
-    //   ngAttrs[ attrName ] = void 0;
-    // }
-    // if ( optional && !ngAttrs[ attrName ] ) return;
-    if ( optional && !exp ) return;
-
-    let compare: Function;
-    // const parentGet = $parse( ngAttrs[ attrName ] );
+    let lastValue: any;
     const parentGet = $parse( exp );
-    if (parentGet.literal) {
-      compare = global.angular.equals;
-    } else {
-      compare = function simpleCompare(a, b) { return a === b || (a !== a && b !== b); };
-    }
-    const parentSet = parentGet.assign || function() {
+    const parentSet = parentGet.assign || function () {
         // reset the change, or we will throw this exception on every $digest
-        lastValue = ctrl[propName] = parentGet(scope);
+        lastValue = ctrl[ propName ] = parentGet( scope );
         throw new Error(
           `nonassign,
           Expression '${ngAttrs[ attrName ]}' in attribute '${attrName}' used with directive '{2}' is non-assignable!`
         );
       };
-    lastValue = ctrl[propName] = parentGet(scope);
+    const compare: Function = parentGet.literal ? global.angular.equals : simpleCompare;
     const parentValueWatch = function parentValueWatch(parentValue) {
       if (!compare(parentValue, ctrl[propName])) {
         // we are out of sync and need to copy
@@ -158,6 +145,8 @@ export function _createDirectiveBindings(
       return lastValue = parentValue;
     };
     (parentValueWatch as any).$stateful = true;
+
+    lastValue = ctrl[propName] = parentGet(scope);
     // NOTE: we don't support collection watch, it's not good for performance
     // if (definition.collection) {
     //   removeWatch = scope.$watchCollection(attributes[attrName], parentValueWatch);
@@ -172,19 +161,18 @@ export function _createDirectiveBindings(
       parentGet.literal
     );
 
+    function simpleCompare(a, b) { return a === b || (a !== a && b !== b); }
+
   }
-  function _createOutputBinding( propName: string, attrName: string, exp: string, optional: boolean = true ): void {
+  function _createOutputBinding( propName: string, attrName: string, exp: string ): void {
 
     // Don't assign Object.prototype method to scope
-    // const parentGet: Function = ngAttrs.hasOwnProperty( attrName )
-    //   ? $parse( ngAttrs[ attrName ] )
-    //   : noop;
     const parentGet: Function = exp
       ? $parse( exp )
       : noop;
 
     // Don't assign noop to ctrl if expression is not valid
-    if (parentGet === noop && optional) return;
+    if ( parentGet === noop ) return;
 
     // here we assign property to EventEmitter instance directly
     const emitter = new EventEmitter<any>();
@@ -195,14 +183,9 @@ export function _createDirectiveBindings(
     ctrl[propName] = emitter;
 
   }
-  function _createAttrBinding( propName: string, attrName: string, exp: string, optional: boolean = true ): Function {
+  function _createAttrBinding( propName: string, attrName: string, exp: string ): Function {
 
     let lastValue = exp;
-
-    // optional is always true with ngMetadata
-    // if ( !optional && !Object.hasOwnProperty.call( ngAttrs, attrName ) ) {
-      // ctrl[ propName ] = ngAttrs[ attrName ] = void 0;
-    // }
 
     // register watchers for further changes
     // The observer function will be invoked once during the next $digest following compilation.
@@ -217,7 +200,7 @@ export function _createDirectiveBindings(
     } );
 
     (ngAttrs as any).$$observers[ attrName ].$$scope = scope;
-    // lastValue = ngAttrs[ attrName ];
+
     if ( isString( lastValue ) ) {
       // If the attribute has been provided then we trigger an interpolation to ensure
       // the value is there for use in the link fn
