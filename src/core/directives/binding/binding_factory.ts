@@ -95,24 +95,22 @@ export function _createDirectiveBindings(
 
   function _createOneWayBinding( propName: string, attrName: string, exp: string, isImmutable: boolean = false ): Function {
 
-    // if ( !exp ) {
-    // if ( !Object.hasOwnProperty.call( ngAttrs, attrName ) ) {
-      // if ( optional ) return;
-      // ngAttrs[ attrName ] = void 0;
-    // }
-    // if ( optional && !ngAttrs[ attrName ] ) return;
     if ( !exp ) return;
 
-    // const parentGet = $parse( ngAttrs[ attrName ] );
     const parentGet = $parse( exp );
+    const initialValue = ctrl[propName] = parentGet(scope);
 
-    ctrl[ propName ] = parentGet( scope );
     initialChanges[ propName ] = ChangeDetectionUtil.simpleChange( ChangeDetectionUtil.uninitialized, ctrl[ propName ] );
 
-    return scope.$watch( parentGet, function parentValueWatchAction( newParentValue ) {
-      const oldValue = ctrl[ propName ];
-      recordChanges( propName, newParentValue, oldValue );
-      ctrl[ propName ] = isImmutable ? angular.copy(newParentValue) : newParentValue;
+    return scope.$watch( parentGet, function parentValueWatchAction( newValue, oldValue ) {
+      // https://github.com/angular/angular.js/commit/d9448dcb9f901ceb04deda1d5f3d5aac8442a718
+      // https://github.com/angular/angular.js/commit/304796471292f9805b9cf77e51aacc9cfbb09921
+      if ( oldValue === newValue ) {
+        if ( oldValue === initialValue ) return;
+        oldValue = initialValue;
+      }
+      recordChanges( propName, newValue, oldValue );
+      ctrl[ propName ] = isImmutable ? angular.copy(newValue) : newValue;
     }, parentGet.literal );
 
   }
@@ -191,8 +189,9 @@ export function _createDirectiveBindings(
     // The observer function will be invoked once during the next $digest following compilation.
     // The observer is then invoked whenever the interpolated value changes.
 
-    const _disposeObserver = ngAttrs.$observe( attrName, function ( value ) {
-      if ( isString( value ) ) {
+    const _disposeObserver = ngAttrs.$observe( attrName, function ( value: string|boolean ) {
+      // https://github.com/angular/angular.js/commit/499e1b2adf27f32d671123f8dceadb3df2ad84a9
+      if ( isString( value ) || isBoolean( value ) ) {
         const oldValue = ctrl[ propName ];
         recordChanges( propName, value, oldValue );
         ctrl[ propName ] = value;
