@@ -14,6 +14,7 @@ npm-debug.log
 !playground/ng-metadata.legacy.d.ts
 typings
 test/__uglifyTest.js
+_book
 
 #################
 ## JetBrains
