@@ -1,4 +1,4 @@
-# <a href='https://github.com/ngParty/ng-metadata' style="display:flex;align-items:center;justify-content:center"><img src='https://github.com/ngParty/ng-metadata/blob/master/assets/logo/ngMetadata.png?raw=true' height='150'>ng-metadata</a>
+# <a href='https://hotell.gitbooks.io/ng-metadata' style="display:flex;align-items:center;justify-content:center"><img src='https://github.com/ngParty/ng-metadata/blob/master/assets/logo/ngMetadata.png?raw=true' height='150'>ng-metadata</a>
  
 > Angular 2 decorators for Angular 1.x 
 
@@ -35,9 +35,9 @@ Behind the scenes it uses ES.next decorators extended by Typescript( which adds 
 
 ## Quick start
 
-- [Plunkr](https://plnkr.co/edit/s2lYnI?p=preview) - try it out in your browser
-- [Playground](https://github.com/ngParty/ng-metadata/tree/master/playground) - live docs examples and mandatory TODO app example
-- [Production ready starter kit](https://github.com/ngParty/Angular1-scaffold) - Starter Kit ready for production by ngParty team powered by Webpack
+- [Plunkr][plunker-2.x] - try it out in your browser
+- [Playground][playground] - live docs examples and mandatory TODO app example
+- [Production ready starter kit][ngParty-Angular-1-scaffold] - Starter Kit ready for production by ngParty team powered by Webpack
 
 ## Learn
 
@@ -339,3 +339,9 @@ found it and there's an ongoing discussion. If not, submit an [issue](https://gi
 We want help! Please take a look at the [Contribution Guide](CONTRIBUTING.md) for guidelines and jump in the Slack 
 team to discuss how you can help: http://ngparty.slack.com... 
 if you aren't a member just join us [ngParty slack](https://ngparty.herokuapp.com)
+
+
+[plunker-1.x]: https://plnkr.co/edit/s2lYnI
+[plunker-2.x]: https://plnkr.co/edit/7Fr7oO
+[playground]: https://github.com/ngParty/ng-metadata/tree/master/playground
+[ngParty-Angular-1-scaffold]: https://github.com/ngParty/Angular1-scaffold
