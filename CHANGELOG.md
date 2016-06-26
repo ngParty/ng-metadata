@@ -1,3 +1,92 @@
+<a name="2.0.0"></a>
+# [2.0.0](https://github.com/ngParty/ng-metadata/compare/1.12.4...v2.0.0) (2016-06-26)
+
+
+### Bug Fixes
+
+* **playground/async-example:** add this to async observable ([5ad67ec](https://github.com/ngParty/ng-metadata/commit/5ad67ec))
+
+### Features
+
+* **common/pipes/async_pipe:** implement async pipe for $q and RxJS 5 observables ([ca7a84c](https://github.com/ngParty/ng-metadata/commit/ca7a84c)), closes [#98](https://github.com/ngParty/ng-metadata/issues/98)
+* **core/di:** add support for useFactory and reflective provider with utils for supporting pro ([253a986](https://github.com/ngParty/ng-metadata/commit/253a986))
+* **core/di:** make resolving component tree code DRY and add support for registering config ph ([272e22a](https://github.com/ngParty/ng-metadata/commit/272e22a))
+* **core/di/reflective_provider:** add helper method for registering annotated Types ([03d9f52](https://github.com/ngParty/ng-metadata/commit/03d9f52))
+* **core/directives:** add moduleId support for ComponentMetadata ([f438de6](https://github.com/ngParty/ng-metadata/commit/f438de6)), closes [#96](https://github.com/ngParty/ng-metadata/issues/96)
+* **core/directives:** apply fixes/changes from latest angular1.x $compile ([7fd66c5](https://github.com/ngParty/ng-metadata/commit/7fd66c5))
+* **core/directives/binding:** implement binding determined by template ([6071a5f](https://github.com/ngParty/ng-metadata/commit/6071a5f))
+* **core/directives/binding|controller:** allow @Output only as instance of EventEmitter ([4fad19a](https://github.com/ngParty/ng-metadata/commit/4fad19a))
+* **core/util:** add bundler helper for collecting DI Tree via components ([ea6ce56](https://github.com/ngParty/ng-metadata/commit/ea6ce56))
+* **core/util/bundler:** clean code and support nested arrays resolution ([80608ed](https://github.com/ngParty/ng-metadata/commit/80608ed))
+* **facade:** add flatten capabilities to ListWrapper ([ac5e5e4](https://github.com/ngParty/ng-metadata/commit/ac5e5e4))
+* **facade/async:** make EventEmitter real emitter - superclass of Rx/Subject ([3550eff](https://github.com/ngParty/ng-metadata/commit/3550eff))
+* **platform:** rename platform to platform-browser-dynamic to follow Angular 2 module namespace ([95e209c](https://github.com/ngParty/ng-metadata/commit/95e209c))
+* **platform/browser:** use bundler for bootstrap ([88479a5](https://github.com/ngParty/ng-metadata/commit/88479a5))
+* **playground:** add async pipe example ([ffd35bf](https://github.com/ngParty/ng-metadata/commit/ffd35bf))
+* **playground:** add attribute directive example ([bf8409f](https://github.com/ngParty/ng-metadata/commit/bf8409f))
+* **playground:** add config function, factory, dynamic providers registration via config example ([916118e](https://github.com/ngParty/ng-metadata/commit/916118e))
+* **playground:** use new bootstrap and move todo to feature folder ([b3da28b](https://github.com/ngParty/ng-metadata/commit/b3da28b))
+* **playground:** use new ng2 like template binding syntax instead of using @Input string type ([225fb2e](https://github.com/ngParty/ng-metadata/commit/225fb2e))
+* **playground:** use relative paths with moduleId where templateUrl is used ([afe32d0](https://github.com/ngParty/ng-metadata/commit/afe32d0))
+
+
+### BREAKING CHANGES
+
+* platform: before you imported bootstrap and Title from `ng-metadata/platform`.
+now the endpoint has changed to `ng-metadata/platform-browser-dynamic`
+* core/directives/binding|controller: S:
+
+before:
+
+in 1.x you could use just function callback or instance of event emitter fo @Output bindings.
+
+```typescript
+@Component({selector:'clicker',template:'..'})
+class ClickerComponent{
+  @Output() clickMe: ()=>void = angular.noop;
+  doSomething(){
+    this.clickMe();
+  }
+}
+```
+
+after:
+
+now you have to explicitly use instance of event emitter otherwise it won't work
+```typescript
+@Component({selector:'clicker',template:'..'})
+class ClickerComponent{
+  @Output() clickMe = new EventEmitter<void>();
+  doSomething(){
+     this.clickMe.emit();
+  }
+}
+```
+
+* platform/browser: S:
+
+You have to bootstrap your app via root component like Angular 2 does.
+This is because we use now tree resolving algorithm for building Angular.module
+
+before:
+```typescript
+import {bootstrap} from 'ng-metadata/platform';
+import {AppModule} from './index'; // string
+
+bootstrap(AppModule);
+```
+
+after:
+```typescript
+import {bootstrap} from 'ng-metadata/platform';
+import {LegacyModule} from './index'; // string
+import {AppComponent} from './index'; // class with @Component decorator
+
+bootstrap(AppComponent, [LegacyModule]);
+```
+
+
+
 <a name="1.12.4"></a>
 ## [1.12.4](https://github.com/ngParty/ng-metadata/compare/1.12.3...v1.12.4) (2016-06-25)
 
