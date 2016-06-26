@@ -62,9 +62,10 @@ import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
 import { getInjectableName } from 'ng-metadata/core';
 import { ROUTER_PRIMARY_COMPONENT } from 'ng-metadata/router-deprecated';
 
-import { AppCompoennt } from './app.component';
+import { AppComponent } from './app.component';
 
-bootstrap( AppCompoennt, [
+bootstrap( AppComponent, [
+  'ngComponentRouter',
   { provide: ROUTER_PRIMARY_COMPONENT, useValue: getInjectableName( AppComponent ) }
 ] );
 ```

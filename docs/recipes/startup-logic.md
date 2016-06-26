@@ -2,7 +2,7 @@
 
 ## Configuration/Routing
 
-> try to not to use `config` api, because there is no equivalent in Angular 2
+> try not to use `config` api, because there is no equivalent in Angular 2
 > use it only for routes/states definition
 
 **ES5**
