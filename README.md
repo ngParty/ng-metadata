@@ -14,19 +14,48 @@ someone on the Internet:
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/ngParty/ng-metadata/master/LICENSE)
 
 **ng-metadata** this is a viable solution for people,
-who want to gradually update **existing** ng1 codebase to **Typescript** using Angular 2 conventions and styles that 
-runs today on Angular 1.4+.
+who want to gradually update **existing** ng1 codebase to **Typescript/ES2015** using Angular 2 conventions and styles that runs today on Angular 1.4+.
+
+Upgrading your codebase is really easy and highly flexible, you can apply 3 strategies:
+- per file upgrade with registration via `angular.module`
+- per file upgrade with registration on root app component `@Component` metadata via `providers`/`directive`/`pipes`
+- hybrid approach where you can combine both types
+
+Advantages of `ng-metadata`:
+
+- clean Angular 2 DI with Angular 1
+- write your apps in Angular 2 style today and be more productive! 
+- removes the overhead of Angular 1 API's like link function, $scope, $element and what not and other strange angular 1 api syntax
+- no abstractions, just pure Angular 1.x under the hood and power of ES.next decorators
+- leads you, to to write **clean and component driven** code without complicated DDO definition APIs
+- "forces" you think about your app as a component tree and in Angular 2 terms
+
+Behind the scenes it uses ES.next decorators extended by Typescript( which adds method parameter decorators etc...)
+> parameter decorators are now at stage-0 in TC39, so probably it will be soon available in **Babel** so you can use all this goodness with ES2015 if you prefer pure JS
+
+## Quick start
+
+- [Plunkr](https://plnkr.co/edit/s2lYnI?p=preview) - try it out in your browser
+- [Playground](https://github.com/ngParty/ng-metadata/tree/master/playground) - live docs examples and mandatory TODO app example
+- [Production ready starter kit](https://github.com/ngParty/Angular1-scaffold) - Starter Kit ready for production by ngParty team powered by Webpack
+
+## Learn
+
+- Before doing anything, read the [bootstrapping guide for broad overview how to do things](docs/recipes/bootstrap.md)
+- Browse the [API Reference](docs/api/REAMDE.md)
+- How to migrate es5 to Typescript+ngMetadata [Design Patterns/Recipes](docs/recipes/README.md)
+- check [FAQ](docs/FAQ.md) for more explanation why this exist
 
 ## The Gist
 
 So what's the difference between old school ES5 angular 1 app and ngMetadata modern app?
 
-I'm glad you've asked! Here is comparison app:
+I'm glad you've asked! Here is a small comparison app:
 
 **Angular 1.x with ES5:**
 
 ```js
-// bootstrap.js
+// main.js
 angular.element(document).ready(function(){
   angular.bootstrap(document,['hero']);
 });
@@ -74,7 +103,7 @@ function HeroController($log, heroSvc){
 **ngMetadata and Typescript:**
 
 ```typescript
-// bootstrap.ts
+// main.ts
 import { bootstrap } from 'ng-metadata/platform';
 import { AppComponent } from './app.component';
 
@@ -137,48 +166,105 @@ export class HeroComponent implements OnInit {
 }
 ```
 
-with `ngMetadata`, magic strings for DI are gone, no link function, no $scope, no $element and what not and no more strange angular 1 api syntax.
- 
-> Write your apps in Angular 2 style today and be more productive! 
-> There are no abstractions, just pure Angular 1.x and power of Decorators.
-> Treat yourself well and use that power! :)
-
-**TL;DR**
-
-It leads you, to to write **clean and component driven** style code without complicated DDO definition API.
-
-Behind the scenes it uses ES7 decorators extended by Typescript( which adds method parameter decorators etc...)
-> parameter decorators are now at stage-0 in TC39, so probably it will be soon available in **Babel** so you can use 
-all this goodness with ES6 if you prefer pure JS
-
 ## Installation
 
-`npm i --save ng-metadata`
+**Prerequisite: Node.js**
 
-You have to allow nodeJS module resolution style in your `tsconfig.json`
+> Verify that you are running at least node v5.x.x and npm 3.x.x by running `node -v` and `npm -v` in a terminal/console window. Older versions may produce errors.
+
+### Dependencies
+
+Angular applications with ng-metadata depend upon features and functionality provided by a variety of third-party packages (including ng-metadata itself). 
+These packages are maintained and installed with the Node Package Manager (npm).
+
+All those dependencies will be stored in `package.json`.
+
+There are three package categories in the dependencies section of the application package.json:
+
+- **Features** - Feature packages provide our application with framework and utility capabilities.
+
+- **Polyfills** - Polyfills plug gaps in the browser's JavaScript implementation.
+
+- **Other** - Other libraries that support the application such as bootstrap for HTML widgets and styling etc...
+
+##### Feature Packages
+
+**angular** - There will be no life without Angular, right? :D
+
+**angular-mocks** - You are testing your code right? right?
+
+**ng-metadata** - Critical runtime parts of ng-metadata needed by every application. Includes all metadata decorators, Component, Directive, dependency injection, and the component lifecycle hooks. 
+Includes 4 modules:
+- [`ng-metadata/core`](docs/api/core/README.md),
+- [`ng-metadata/platform-browser-dynamic`](docs/api/platform-browser-dynamic/README.md),
+- [`ng-metadata/common`](docs/api/common/README.md),
+- [`ng-metadata/testing`](docs/api/testing/README.md)
+
+Install core dependencies by running:
+
+`npm i --save angular angular-mocks ng-metadata`
+
+##### Polyfill Packages
+
+ng-metadata requires certain polyfills in the application environment. We install these polyfills with very specific npm packages that ng-metadata lists in the peerDependencies section of its package.json.
+
+Install peer dependencies by running:
+
+`npm i --save reflect-metadata core-js rxjs@5.0.0-beta.6`
+
+**core-js** - monkey patches the global context (window) with essential features of ES2015 (ES6). Developers may substitute an alternative polyfill that provides the same core APIs. This dependency should go away once these APIs are implemented by all supported ever-green browsers.
+
+**reflect-metadata** - a dependency shared between ng-metadata and the TypeScript compiler. Developers should be able to update a TypeScript package without upgrading ng-metadata, which is why this is a dependency of the application and not a dependency of ng-metadata.
+
+**rxjs** - a polyfill for the Observables specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of rxjs (within a compatible version range) without waiting for ng-metadata updates.
+
+
+### Configure your project
+
+TypeScript is a primary language for Angular application development with ng-metadata.
+
+Browsers can't execute TypeScript directly. It has to be "transpiled" into JavaScript with the tsc compiler and that effort requires some configuration.
+
+We need 3 things:
+
+- tsconfig.json - TypeScript compiler configuration.
+- typings - TypesScript declaration files.
+- module loader/bundler - ES2015 modules are not natively in the browser so we need a tool for that 
+
+#### [tsconfig.json](http://www.typescriptlang.org/docs/handbook/tsconfig-json.html)
+
+> TypeScript compiler configuration
+
+We typically add a TypeScript configuration file (`tsconfig.json`) to our project to guide the compiler as it generates JavaScript files.
 
 ```json
 {
   "compilerOptions": {
-    "module": "commonjs", // you can use arbitrary module compilation type, depends on your module bundler, we prefer commonjs with webpack
     "target": "es5",
+    "module": "commonjs",
     "moduleResolution": "node",
+    "sourceMap": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "emitDecoratorMetadata": true,
+    "removeComments": false,
+    "noImplicitAny": false
   }
 }
 ```
 
-You need to install peer dependencies as well. you need obviously `angularjs` :) and `reflect-metadata` so we have
-nice DI via Type injections provided by Typescript type annotations
+* `module` - you can use arbitrary module compilation type, depends on your module bundler, we prefer `commonjs` with `webpack`
 
-install peer dependencies by running:
+#### TypeScript Typings
 
-`npm i --save angular angular-mocks reflect-metadata core-js rxjs@5.0.0-beta.6`
+> TypesScript declaration files.
 
-It is also recommended to install angular 1 type definitions, so you get Angular 1 API type checking, via [typings](https://github.com/typings/typings)
+Many JavaScript libraries such as jQuery, the Jasmine testing library, and Angular itself, extend the JavaScript environment with features and syntax that the TypeScript compiler doesn't recognize natively. When the compiler doesn't recognize something, it throws an error.
 
-We install typings type definition manager:
+We use TypeScript type definition files — *d.ts files* — to tell the compiler about the libraries we load.
+
+> Many libraries include their definition files in their npm packages where both the TypeScript compiler and editors can find them. **ng-metadata** is one such library.
+
+For getting type definitions, we need to install a type definition manager tool, called [typings](https://github.com/typings/typings/blob/master/README.md):
 
 `npm i --save-dev typings`
 
@@ -187,25 +273,30 @@ Let's also add run scripts for the the typings tool to package.json:
 ```json
 {
   "scripts": {
-    "typings": "typings"
+    "typings": "typings",
+    "postinstall": "typings install"
   }
 }
 ```
+- postinstall: will run after `npm install`, so we can be sure that we got all type definitions installed
 
-We can now use Typings to install the type definitions for Angular 1
+Now we can install type definitions for our project, which will references will be saved to `typings.json` and saved to `/typings` folder
 
 - `npm run typings install dt~core-js -- --save --global` // core-js's ES2015/ES6 shim which monkey patches the global context (window) with essential features of ES2015 (ES6)
 - `npm run typings install dt~node -- --save --global` // for code that references objects in the nodejs environment
 - `npm run typings install dt~jquery -- --save --global` // we need this to have proper typing support for angular jqLite
-- `npm run typings install dt~angular -- --save --global`
+- `npm run typings install dt~angular -- --save --global` // angular 1 type definitions, so you get Angular 1 API type checking
 - `npm run typings install dt~angular-mocks -- --save --global` // typings support for unit tests
 
-That's it! You are good to go! Now just start importing from 4 various modules:
-- [`ng-metadata/core`](docs/API.md#component),
-- [`ng-metadata/platform`](docs/API.md#bootstrap),
-- [`ng-metadata/common`](docs/API.md#ngmodel),
-- [`ng-metadata/testing`](docs/API.md#renderfactory)
+#### Module loader / bundler
 
+We prefer `webpack` but you can also go with `SystemJS`, which reminds me of RequireJS configuration hell, but yeah it's up to you ;) 
+
+- For Webpack configuration see our [Angular 1 Starter](https://github.com/ngParty/Angular1-scaffold)
+- For SystemJS configuration see [Plnkr Quickstart](https://plnkr.co/edit/s2lYnI?p=preview)
+
+
+That's it! You are good to go!
 
 ## Why
 
@@ -230,13 +321,6 @@ so those are just few reasons why I made **ng-metadata**.
 - uses only pure angular 1 API under the hood
 - templates are the same as in angular 1 + optionally binding type determined by template ( ng2 like ) 
 - supports all kind of angular 1 api like creating providers/configuration/runBlocks and much more
-
-## Learn
-
-- Browse the [API Reference](docs/API.md)
-- How to migrate es5 to typescript+ngMetadata [Design Patterns](docs/DESIGN-PATTERNS.md)
-- explore the [TODO app](playground)
-- check [FAQ](docs/FAQ.md) for more explanation why this exist
 
 ## Support
 

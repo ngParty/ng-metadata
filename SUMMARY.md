@@ -32,7 +32,7 @@
       * [Function](/docs/api/testing/function.md)
     * [ng-metadata/router-deprecated](/docs/api/router-deprecated/README.md)
       * [Class](/docs/api/router-deprecated/class.md)
-      * [Interface](/docs/api/router-deprecated/function.md)
+      * [Interface](/docs/api/router-deprecated/interface.md)
     * [angular 1 specific api](/docs/api/ng-1-misc/README.md)
 4.  [Contributing](/CONTRIBUTING.md)
 5.  [Change log](/CHANGELOG.md)

@@ -7,7 +7,7 @@ In general, if it's going to take a long time to review a PR, we'll likely reque
 
 # Contributing to ngMetadata
 
-We'd love for you to contribute to our source code and to make AngularJS even better than it is
+We'd love for you to contribute to our source code and to make ngMetadata even better than it is
 today! Here are the guidelines we'd like you to follow:
 
  - [Question or Problem?](#question)
@@ -26,7 +26,7 @@ ngMetadata channel or [StackOverflow][stackoverflow] or just ping us on [twitter
 ## <a name="issue"></a> Found an Issue?
 If you find a bug in the source code or a mistake in the documentation, you can help us by
 submitting an issue to our [GitHub Repository][github]. Even better you can submit a Pull Request
-with a fix.
+with a fix. We would appreciate if you provide a [Plunker][plunker] with simulated bug that you've found
 
 
 **Please see the Submission Guidelines below**.
@@ -67,8 +67,7 @@ chances of your issue being dealt with quickly:
 * **Motivation for or Use Case** - explain why this is a bug for you
 * **Angular/ngMetadata/Typescript Version(s)** - is it a regression?
 * **Browsers and Operating System** - is this a problem with all browsers or only IE8?
-* **Reproduce the Error** - provide a live example (using [Plunker][plunker] or
-  [JSFiddle][jsfiddle]) or an unambiguous set of steps.
+* **Reproduce the Error** - provide a live example (using [Plunker][plunker] or an unambiguous set of steps.
 * **Related Issues** - has a similar issue been reported before?
 * **Suggest a Fix** - if you can't fix the bug yourself, perhaps you can point to what might be
   causing the problem (line of code or commit)
@@ -246,7 +245,7 @@ You can find out more detailed information about contributing in the
 [jsfiddle]: http://jsfiddle.net/
 [list]: https://groups.google.com/forum/?fromgroups#!forum/angular
 [ngDocs]: https://github.com/angular/angular.js/wiki/Writing-AngularJS-Documentation
-[plunker]: http://plnkr.co/edit
+[plunker]: https://plnkr.co/edit/s2lYnI?p=preview
 [stackoverflow]: http://stackoverflow.com/questions/tagged/ngmetadata
 [unit-testing]: https://docs.angularjs.org/guide/unit-testing
 
