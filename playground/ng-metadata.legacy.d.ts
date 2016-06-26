@@ -1005,7 +1005,7 @@ declare module ngMetadataCommon {
 declare module "ng-metadata/core" {
   export = ngMetadataCore;
 }
-declare module "ng-metadata/platform" {
+declare module "ng-metadata/platform-browser-dynamic" {
   export = ngMetadataPlatform;
 }
 
