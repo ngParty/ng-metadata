@@ -42,9 +42,9 @@ Behind the scenes it uses ES.next decorators extended by Typescript( which adds 
 ## Learn
 
 - Before doing anything, read the [bootstrapping guide for broad overview how to do things](docs/recipes/bootstrap.md)
-- Browse the [API Reference](docs/api/REAMDE.md)
+- Browse the [documentation](https://hotell.gitbooks.io/ng-metadata/content/)
 - How to migrate es5 to Typescript+ngMetadata [Design Patterns/Recipes](docs/recipes/README.md)
-- check [FAQ](docs/FAQ.md) for more explanation why this exist
+- Check [FAQ](docs/FAQ.md) for more explanation why this exist
 
 ## The Gist
 
