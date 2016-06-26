@@ -24,6 +24,7 @@
       * [Enum](/docs/api/core/enum.md)
     * [ng-metadata/common](/docs/api/common/README.md)
       * [directive](/docs/api/common/directive.md)
+      * [pipe](/docs/api/common/pipe.md)
     * [ng-metadata/platform-browser-dynamic](/docs/api/platform-browser-dynamic/README.md)
       * [Class](/docs/api/platform-browser-dynamic/class.md)
       * [Function](/docs/api/platform-browser-dynamic/function.md)
