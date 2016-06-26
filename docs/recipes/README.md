@@ -1,5 +1,6 @@
 # Recipes
 
+Before digging into any particular recipe, it is highly advised to first read [general overview how to do things in your app](bootstrap.md)
 
 Here we will demonstrate how to migrate from existing code base, to Typescript with ng-metadata.
 

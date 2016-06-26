@@ -1,6 +1,6 @@
 # Service
 
-Service is just pure `ES6 class` with `@Injectable()` decorator, registered via `angular.service`.
+Service is just pure `ES2015 class` with `@Injectable()` decorator, registered via `@Component/@Directive` `providers/viewProviders` metadata  or legacy `angular.service`(deprecated).
 
 **ES5**
 
@@ -34,13 +34,52 @@ function User($http){
 angular.module('user',[]);
 ```
 
-
 **TS + ng-metadata**
 
 ```typescript
 // user.service.ts
+import { Inject, Injectable } from 'ng-metadata/core';
 
-import {Inject, Injectable} from 'ng-metadata/core';
+@Injectable()
+export class UserService{
+
+  hobbies: string[] = [];
+
+  constructor( @Inject('$http') private $http: ng.IHttpService ){}
+
+  addHobby(name: string){
+     this.hobbies.push(name);
+  }
+
+  getInfo(){
+    return this.$http.get('/foo/bar/info')
+      .then((response)=>response.data);
+  }
+
+}
+```
+
+```typescript
+// user.component.ts
+import { Component } from 'ng-metadata/core';
+
+import { UserService } from './user.service';
+
+@Component({
+  selector:'my-user',
+  providers: [ UserService ],
+  template: `...`
+})
+export class UserComponent{}
+```
+
+---
+
+**(DEPRECATED) TS + ng-metadata**
+
+```typescript
+// user.service.ts
+import { Inject, Injectable } from 'ng-metadata/core';
 
 @Injectable()
 export class UserSvc{
@@ -63,7 +102,6 @@ export class UserSvc{
 
 ```typescript
 // user.ts
-
 import * as angular from 'angular';
 import {provide} from 'ng-metadata/core';
 import {UserSvc} from './user.service';

@@ -1,8 +1,11 @@
 # Provider
 
-Provider is just pure `ES6 class` registered with`angular.provider` which has `$get` method, which returns new instance of service class.
+Provider is just pure `ES2015 class` registered with `angular.provider` which has `$get` method, which returns new instance of service class.
 
 > NOTE: you should use providers sparingly, because they don't exist in angular 2
+> It is highly recommended to not use this Angular 1 obscure API construct because you have to use angular.module and deprecated provide to make it work
+
+If you need to configure things, prefer creating configProvider functions, to set things up
 
 **ES5**
 
@@ -51,7 +54,7 @@ angular.module('droid',[]);
 ```typescript
 // droid.provider.ts
 
-import {Inject} from 'ng-metadata/core';
+import { Inject } from 'ng-metadata/core';
 
 let droidName = 'bb-8';
 

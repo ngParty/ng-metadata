@@ -16,7 +16,7 @@ import 'angular';
 // here we are loading ngComponentRouter
 import '@angular/router/angular1/angular_1_router';
 
-import 'ng-metadata/platform';
+import 'ng-metadata/platform-browser-dynamic';
 import 'ng-metadata/core';
 import 'ng-metadata/common';
 // typings and providers for ngComponentRouter
@@ -26,8 +26,7 @@ import 'ng-metadata/router-deprecated';
 Use it within your app like following
 
 ```typescript
-// /app/app.component.ts
-
+//app.component.ts
 import { Component, OnInit, Inject } from 'ng-metadata/core';
 
 @Component({
@@ -58,25 +57,14 @@ export class AppComponent implements OnInit {
 
 }
 
-// /app/index.ts
-import * as angular from 'angular';
-import { provide, getInjectableName } from 'ng-metadata/core';
+//main.ts
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
+import { getInjectableName } from 'ng-metadata/core';
 import { ROUTER_PRIMARY_COMPONENT } from 'ng-metadata/router-deprecated';
 
-import { AppComponent } from './app.component.ts';
+import { AppCompoennt } from './app.component';
 
-export const AppModule = angular.module( 'app', [
-  'ngComponentRouter'
-] )
-  .value( ...provide( ROUTER_PRIMARY_COMPONENT, { useValue: getInjectableName( AppComponent ) } ) )
-  .directive( ...provide( AppComponent ) )
-  .name;
-
-
-// /main.ts
-import { bootstrap } from 'ng-metadata/platform';
-
-import { AppModule } from './app';
-
-bootstrap( AppModule );
+bootstrap( AppCompoennt, [
+  { provide: ROUTER_PRIMARY_COMPONENT, useValue: getInjectableName( AppComponent ) }
+] );
 ```
