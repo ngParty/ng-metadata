@@ -24,22 +24,10 @@ Use by directives and components to emit custom Events via `@Output` binding.
 | members       | Type                            | Description                                  |
 | ------------- | ------------------------------- |--------------------------------------------- |
 | **emit**      | `(value: T): void`              | emits defined event to parent with provided value, this value is encapsulated in `$event` from within template |
-| **subscribe** | `(next?: Function) : Function`  | abstraction of real observable `subscription`, just works as pubSub and returns dispose callback, Do not use this! |
+| **subscribe** | `(generatorOrNext?: any, error?: any, complete?: any) : Subscription`  | subscribe to emitter. When emit is triggered all subscriptions will be notified |
 
 **Note:**
-This is not Rx `Subject`, it's just an abstraction
-  
-**Note 2:**
-Never call emitter instance methods within constructor, because the `&` binding is wrapped within EventEmitter during class instantiation.
-Instead use `OnInit` phase which you should use anyway for all startup logic.
-- This will be resolved in ngMetadata `2.0` where it will be already emitter instance
-
-**Pure Interface usage:**
-- if you don't preffer to assign `@Output` to new EventEmitter, isntead you can use just interface like `@Output() callUser: EventEmitter<UserModel>`
--- this is here for migration reasons from traditional callbacks. 
--- Under the hood we add proper `emit` to angular `&` binding, but preferabble is assigning `new EventEmitter`
--- so this way you can call `@Output() callUser: EventEmitter<UserModel>` later in code like `doSomething(){ this.callUser.emit({name:'martin'}) }`
-or traditionaly with confusing angular locals `doSomething(){ this.callUser({user:{name:'martin'}}) }`
+This is real RxJS `Subject`
 
 *example:*
 
@@ -47,12 +35,12 @@ In the following example, Zippy alternatively emits open and close events when i
 
 ```typescript
 // app.component.ts
-import {Component} from 'ng-metadata/core';
+import { Component } from 'ng-metadata/core';
 
 @Component({
-  selector:'app',
-  template:`<zippy open="$ctrl.onOpen($event)" "$ctrl.onClose($event)"></zippy>`,
-  directives: [ZippyComponent]
+  selector: 'my-app',
+  template:`<zippy (open)="$ctrl.onOpen($event)" "$ctrl.onClose($event)">My visibility will be toggled! wooot!</zippy>`,
+  directives: [ ZippyComponent ]
 })
 class AppComponent {
 
@@ -65,7 +53,7 @@ class AppComponent {
 }
 
 // zipy.component.ts
-import {Component, Output, EventEmitter} from 'ng-metadata/core';
+import { Component, Output, EventEmitter } from 'ng-metadata/core';
 
 @Component({
   selector: 'zippy',
@@ -94,15 +82,10 @@ export class ZippyComponent {
 }
 
 // index.ts
-import * as angular from 'angular';
-import {provide} from 'ng-metadata/core';
-import {AppComponent} from './app.component';
-import {ZippyComponent} from './zippy.component';
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
+import { AppComponent } from './app.component';
 
-export ngModule = angular.module('myApp',[])
-  .directive(...provide(AppComponent))
-  .directive(...provide(ZippyComponent))
-  .name;
+bootstrap( AppComponent );
 ```
 
 
@@ -115,20 +98,27 @@ Using an OpaqueToken is preferable to using strings as tokens because of possibl
 *example:*
 
 ```typescript
-import * as angular from 'angular';
-import {OpaqueToken, provide, getInjectableName} from 'ng-metadata/core';
+import {Component, OpaqueToken, getInjectableName} from 'ng-metadata/core';
 
-const key = new OpaqueToken("value");
-const someConstant = 'Dont change me DI!';
+const SomeValueToken = new OpaqueToken("value");
+const someValue = 'Dont change me DI!';
 
-angular.module('myApp',[])
-  .constant(...provide(key,{useValue:someConstant}));
+@Component({
+  selector: 'my-app',
+  template: `...`,
+  providers: [{ provide: SomeValueToken, useValue: someValue }]
+})
+class AppComponent{}
 
 // test.ts
-import {expect} from 'chai';
-var $injector = angular.injector(['ng','myApp']);
+import { expect } from 'chai';
+import { bundle } from 'ng-metadata/core';
+import { AppComponent } from './app.component';
 
-expect($injector.get(getInjectableName(key))).to.equal('Dont change me DI!');
+const ngModule = bundle( AppComponent ); 
+const $injector = angular.injector([ngModule.name]);
+
+expect($injector.get(getInjectableName(SomeValueToken))).to.equal(someValue);
 ```
 
 ---
@@ -156,16 +146,14 @@ This example showcases `markForCheck`. We are using window.setInterval which won
 With ChangeDetectorRef, we can mitigate this problem pretty easily:
 
 ```typescript
-import * as angular from 'angular';
 import {
-  provide,
   Component,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   OnInit,
   Input
 } from 'ng-metadata/core';
-import { bootstrap } from 'ng-metadata/platform';
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
 
 @Component( {
   selector: 'mark-for-check',
@@ -190,24 +178,19 @@ export class MarkForCheckComponent implements OnInit {
 }
 
 @Component( {
-  selector: 'app',
+  selector: 'my-app',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     Number of ticks inside parent: {{ $ctrl.numberOfTicks }}
-    <mark-for-check ticks="$ctrl.numberOfTicks"></mark-for-check>
+    <mark-for-check [ticks]="$ctrl.numberOfTicks"></mark-for-check>
   `,
   directives: [ MarkForCheckComponent ]
 } )
 export class AppComponent {
   numberOfTicks = 0;
 }
-
-const AppModule = angular.module('myApp',[])
-  .directive(...provide(AppComponent))
-  .directive(...provide(MarkForCheckComponent))
-  .name;
   
-bootstrap(AppModule);
+bootstrap( AppComponent );
 ```
 
 *example:*
@@ -219,15 +202,13 @@ we want to check and update the list every five seconds. We can do that by detac
 the component's change detector and doing a local check every five seconds.
    
 ```typescript
-import * as angular from 'angular';
 import {
-  provide,
   Component,
   Injectable,
   ChangeDetectionStrategy,
   ChangeDetectorRef
 } from 'ng-metadata/core';
-import { bootstrap } from 'ng-metadata/platform';
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
 
 @Injectable()
 export class DataProvider {
@@ -272,13 +253,8 @@ export class DetachComponent {
 } )
 export class AppComponent {}
 
-const AppModule = angular.module('myApp',[])
-  .directive(...provide(AppComponent))
-  .directive(...provide(DetachComponent))
-  .service(...provide(DataProvider))
-  .name;
   
-bootstrap(AppModule);
+bootstrap( AppComponent );
 ```
 
 *example:*
@@ -288,15 +264,16 @@ its change detector from the main change detector tree when the component's live
 is set to false.
 
 ```typescript
-import * as angular from 'angular';
 import {
-  provide,
   Component,
   Injectable,
   ChangeDetectionStrategy,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  OnChanges,
+  SimpleChange,
+  Input
 } from 'ng-metadata/core';
-import { bootstrap } from 'ng-metadata/platform';
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
 
 @Injectable()
 export class DataProvider {
@@ -315,7 +292,7 @@ export class DataProvider {
 } )
 export class ReattachComponent implements OnChanges {
 
-  @Input( '<' ) live: boolean;
+  @Input() live: boolean;
 
   constructor( private ref: ChangeDetectorRef, private dataProvider: DataProvider ) {}
 
@@ -337,7 +314,7 @@ export class ReattachComponent implements OnChanges {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `   
     Live Update: <input type="checkbox" ng-model="$ctrl.live">
-    <reattach live="$ctrl.live"></reattach>
+    <reattach [live]="$ctrl.live"></reattach>
   `,
   providers: [ DataProvider ],
   directives: [ ReattachComponent ]
@@ -345,12 +322,6 @@ export class ReattachComponent implements OnChanges {
 export class AppComponent {
   live = true;
 }
-
-const AppModule = angular.module('myApp',[])
-  .directive(...provide(AppComponent))
-  .directive(...provide(ReattachComponent))
-  .service(...provide(DataProvider))
-  .name;
   
-bootstrap(AppModule);
+bootstrap( AppComponent );
 ```

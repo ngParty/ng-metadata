@@ -1,13 +1,13 @@
 # Function
 
 - [enableProdMode](#enableprodmode)
-
+- [forwardRef](#forwardref)
 
 **Angular 1 container registration helper Methods**
 
 - [provide](#provide) `@deprecated`
 - [getInjectableName](#getinjectablename)
-- [forwardRef](#forwardref)
+- [bundle](#bundle)
 
 ---
 
@@ -22,19 +22,16 @@ Behind the scenes we are setting :
 
 *example:*
 ```typescript
-// app.ts
-export const AppModule = angular
-  .module('myApp',[])
-  .name;
   
 // main.ts
-import {bootstrap} from 'ng-metadata/platform';
-import {enableProdMode} from 'ng-metadata/core';
-import {AppModule} from './app';
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
+import { enableProdMode } from 'ng-metadata/core';
+
+import { AppComponent } from './app.component';
 
 enableProdMode();
 
-bootstrap( AppModule );
+bootstrap( AppComponent );
 ```
 
 ###### Parameters
@@ -43,10 +40,61 @@ none
 returns `undefined`
 
 
+## forwardRef
+
+Allows to refer to references which are not yet defined.
+
+For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of DI is declared,
+but not yet defined. It is also used when the `token` which we use when creating a query is not yet defined.
+
+###### Parameters
+
+| Parameter         | Type                  | Description                               |
+| ----------------- | ----------------------|------------------------------------------ |
+| **forwardRefFn**  | `ForwardRefFn`        | callback function which returns demanded Injectable |
+
+> ForwardRefFn:
+>   An interface that a function passed into forwardRef has to implement. `const ref = forwardRef(() => Lock);`
+ 
+*example:*
+
+```typescript
+import * as angular from 'angular';
+import { Component, Injectable, Inject, forwardRef, getInjectableName } from 'ng-metadata/core';
+
+@Injectable()
+class Door {
+  lock: Lock;
+  constructor(@Inject(forwardRef(() => Lock)) lock: Lock) { 
+    this.lock = lock; 
+  }
+}
+
+// Only at this point Lock is defined.
+@Injectable()
+class Lock {}
+
+@Component({
+  selector: 'my-app',
+  providers: [Lock, Door]
+})
+class AppComponent{}
+
+
+//test.ts
+import { expect } from 'chai';
+
+const $injector = angular.injector(['ng','myApp']);
+
+const door = $injector.get(getInjectableName(Door));
+expect(door instanceof Door).to.equal(true);
+expect(door.lock instanceof Lock).to.equal(true);
+```
+
 
 ## provide 
 
-> @deprecated, use component tree composition and provide map literal instead
+> @deprecated, [use component tree composition and provide map literal instead](/docs/recipes/bootstrap.md)
 
 Returns tuple`[name:string,Type:any]` `name` and appropriate `Type` by used decorator.
 It's smart ( it knows if argument is Component or Directive or Pipe or Service ).
@@ -188,50 +236,18 @@ expect(getInjectableName(MyComponent)).to.equal('myCmp');
 expect(getInjectableName(MyPipe)).to.equal('kebabCase');
 ```
 
+## bundle
 
-## forwardRef
+Manually bundle component with all it's dependencies registered via `@Component` providers/viewProviders/pipes/directives property metadata.
 
-Allows to refer to references which are not yet defined.
+You may need this when migrating from previous ng-metadata 1.x to Angular 2 component bundling style.
 
-For instance, `forwardRef` is used when the `token` which we need to refer to for the purposes of DI is declared,
-but not yet defined. It is also used when the `token` which we use when creating a query is not yet defined.
+It returns new instance of `ngModule` which can be then registered to other ngModules or provided to `angular.bootstrap`
 
-###### Parameters
+returns new created `ngModule` instance (if you don't provide existing one as 3rd argument) 
 
-| Parameter         | Type                  | Description                               |
-| ----------------- | ----------------------|------------------------------------------ |
-| **forwardRefFn**  | `ForwardRefFn`        | callback function which returns demanded Injectable |
-
-> ForwardRefFn:
->   An interface that a function passed into forwardRef has to implement. `const ref = forwardRef(() => Lock);`
- 
-*example:*
-
-```typescript
-import * as angular from 'angular';
-import {Injectable, Inject, forwardRef, provide, getInjectableName} from 'ng-metadata/core';
-
-@Injectable()
-class Door {
-  lock: Lock;
-  constructor(@Inject(forwardRef(() => Lock)) lock: Lock) { this.lock = lock; }
-}
-
-// Only at this point Lock is defined.
-@Injectable()
-class Lock {}
-
-angular.module('myApp',[])
-  .service(...provide(Lock))
-  .service(...provide(Door));
-
-
-//test.ts
-import { expect } from 'chai';
-
-const $injector = angular.injector(['ng','myApp']);
-
-const door = $injector.get(getInjectableName(Door));
-expect(door instanceof Door).to.equal(true);
-expect(door.lock instanceof Lock).to.equal(true);
-```
+| Parameter          | Type                  | Description                               |
+| -------------------| ----------------------|------------------------------------------ |
+| **ComponentClass** | `Type`                | Component class which is decorated by `@Component` |
+| **otherProviders?**| `Array<Type,Function,string>` | you can optionally add other providers manual way ( also function for config phase ) |
+| **ngModule?**| `ng.IModule` | you can provide existing ngModule instance, and if you do everything will be registered to this module instead of creating new one |

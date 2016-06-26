@@ -81,7 +81,7 @@ If `$routerOnActivate` returns a promise, the route change will wait until the p
 
 Implemented component class method signature:
 
-```typescript
+```
 $routerOnActivate(
   nextInstruction: ComponentInstruction,
   prevInstruction: ComponentInstruction
@@ -141,7 +141,7 @@ If `$routerCanReuse`:
 
 Implemented component class method signature:
 
-```typescript
+```
 $routerCanReuse(
     nextInstruction: ComponentInstruction,
     prevInstruction: ComponentInstruction
@@ -158,7 +158,7 @@ The `$routerOnReuse` hook is called with two `ComponentInstructions` as paramete
 
 Implemented component class method signature:
 
-```typescript
+```
 $routerOnReuse(
     nextInstruction: ComponentInstruction,
     prevInstruction: ComponentInstruction
@@ -177,7 +177,7 @@ If `$routerCanDeactivate`:
 
 Implemented component class method signature:
 
-```typescript
+```
 $routerCanDeactivate(
   nextInstruction: ComponentInstruction,
   prevInstruction: ComponentInstruction
@@ -194,7 +194,7 @@ If `$routerOnDeactivate` returns a promise, the route change will wait until the
 
 Implemented component class method signature:
 
-```typescript
+```
 $routerCanDeactivate(
   nextInstruction: ComponentInstruction,
   prevInstruction: ComponentInstruction

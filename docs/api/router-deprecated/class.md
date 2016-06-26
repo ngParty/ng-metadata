@@ -42,30 +42,24 @@ We define the top level Root Component by providing a value for the ROUTER_PRIMA
  > Under the hood the opaque token description is [$routerRootComponent](https://docs.angularjs.org/api/ngComponentRouter/service/$routerRootComponent)
  
 ```typescript
-// index.ts
-import * as angular from 'angular';
-import { provide, getInjectableName } from 'ng-metadata/core';
+
+// main.ts
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
+import { getInjectableName } from 'ng-metadata/core';
 import { ROUTER_PRIMARY_COMPONENT } from 'ng-metadata/router-deprecated';
 
-import { AppComponent } from './app.component.ts';
+import { AppComponent } from './app.component';
 
-export const AppModule = angular.module( 'app', [ 'ngComponentRouter' ] )
+bootstrap( AppCompoennt, [
+  // we need to register 3rd party old angular module
+  'ngComponentRouter',
   // Here we have specified that the Root Component is the AppCmponent.
-  // We need to get component string name because Angular 1 works with string....
-  .value( ...provide( ROUTER_PRIMARY_COMPONENT, { useValue: getInjectableName( AppComponent ) } ) )
-  .directive( ...provide( AppComponent ) )
-  .name;
-  
-// main.ts
-import { bootstrap } from 'ng-metadata/platform';
-import { AppModule } from './app';
-
-bootstrap( AppModule );
+    // We need to get component string name because Angular 1 works with string....
+  { provide: ROUTER_PRIMARY_COMPONENT, useValue: getInjectableName( AppComponent ) }
+] );
 ```
 
 ## RootRouter
-
-> **module** `ng-metadata/router-deprecated`
 
 The singleton instance of the `RootRouter` type, which is associated with the top level `$routerRootComponent`.
 [Angular 1 docs](https://docs.angularjs.org/api/ngComponentRouter/service/$routerRootComponent).
@@ -110,8 +104,6 @@ export class CrisisDetailComponent implements OnInit {
 
 ## Router
 
-> **module** `ng-metadata/router-deprecated`
-
 A Router is responsible for mapping URLs to components.
 [Angular 1 docs](https://docs.angularjs.org/api/ngComponentRouter/type/Router).
 
@@ -125,7 +117,7 @@ We can only inject the `RootRouter`. Instead we use the fact that the `ng-outlet
 So we can "inject it" via `@Input('<') $router: ChildRouter` binding to our component class.
 The binding is available once the component has been activated, and the `$routerOnActivate` hook is called.
 
-It is highly recommeded to use this local `Router` for imperative navigation handling via `navigate()` and related methods
+It is highly recommended to use this local `Router` for imperative navigation handling via `navigate()` and related methods
 
 ###### members
 > it has quite huge API: [`Router`](https://github.com/ngParty/ng-metadata/tree/master/src/router-deprecated/router.ts).
@@ -143,8 +135,8 @@ It is highly recommeded to use this local `Router` for imperative navigation han
 **example**
 
 ```typescript
-import { Component } from 'ng-metadata/core';
-import { ChildRouter } from 'ng-metadata/router-deprecated';
+import { Component, OnInit, Input } from 'ng-metadata/core';
+import { ChildRouter, OnActivate, CanDeactivate } from 'ng-metadata/router-deprecated';
 
 @Component({
   selector: 'crisis-detail',
@@ -155,6 +147,7 @@ import { ChildRouter } from 'ng-metadata/router-deprecated';
 })
 export class CrisisDetailComponent implements OnInit, OnActivate, CanDeactivate {
 
+  // here we need to set binding type by declaration because $router is created by 3rd party
   @Input( '<' ) $router: ChildRouter;
   
   get navigationInProggess(): boolean { return this.$router.navigating }
@@ -181,8 +174,6 @@ export class CrisisDetailComponent implements OnInit, OnActivate, CanDeactivate 
 
 ## RouteParams
 
-> **module** `ng-metadata/router-deprecated`
-
 A map of parameters for a given route, passed as part of the `ComponentInstruction` to the Lifecycle Hooks, 
 such as `$routerOnActivate` and `$routerOnDeactivate`
 
@@ -194,8 +185,8 @@ We obtain `RouteParams` via Lifecycle Hooks:
 **example:**
 
 ```typescript
-import { Component, OnInit } from 'ng-metadata/core';
-import { ComponentInstruction, OnActivate } from 'ng-metadata/router-deprecated';
+import { Component, OnInit, Input } from 'ng-metadata/core';
+import { ComponentInstruction, OnActivate, Router } from 'ng-metadata/router-deprecated';
 
 // we need to tell explicitly to typescript which keys should our route have
 type CustomRouteParams = {
@@ -213,6 +204,7 @@ type CustomRouteParams = {
 } )
 export class HeroDetailComponent implements OnInit, OnActivate {
 
+  // here we need to set binding type by declaration because $router is created by 3rd party
   @Input( '<' ) $router: Router;
   hero: Hero = null;
 
@@ -241,8 +233,6 @@ export class HeroDetailComponent implements OnInit, OnActivate {
 
 
 ## RouteData
-
-> **module** `ng-metadata/router-deprecated`
 
 An immutable map of additional data you can configure in your Route, passed as part of the `ComponentInstruction` to the Lifecycle Hooks, 
 such as `$routerOnActivate` and `$routerOnDeactivate`
@@ -293,6 +283,7 @@ export class HeroDetailComponent implements OnInit, OnActivate {
 ```
 
 ---
+
 
 ## RouteDefinition
 

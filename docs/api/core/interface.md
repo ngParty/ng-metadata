@@ -11,6 +11,8 @@
 - [AfterViewChecked](#afterviewchecked)
 - [OnDestroy](#ondestroy)
 
+---
+
 ## OnInit
 
 Implement this interface to execute custom initialization logic after your directive's data-bound properties have been initialized.
@@ -60,8 +62,8 @@ so you are safe with ngMetadata ;)
 _Example:_
 
 ```typescript
-import { bootstrap } from 'ng-metadata/platform';
-import { Component, Input, Attr, OnChanges, SimpleChanges, provide } from 'ng-metadata/core';
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
+import { Component, Input, OnChanges, SimpleChanges } from 'ng-metadata/core';
 
 @Component({
   selector: 'my-cmp',
@@ -71,8 +73,8 @@ import { Component, Input, Attr, OnChanges, SimpleChanges, provide } from 'ng-me
   `
 })
 class MyComponent implements OnChanges {
-  @Attr() myAttr: string;
-  @Input('<') myProp: any;
+  @Input() myAttr: string;
+  @Input() myProp: any;
 
   ngOnChanges(changes: SimpleChanges) {
     console.log('ngOnChanges - myProp = ' + changes['myProp'].currentValue);
@@ -85,21 +87,16 @@ class MyComponent implements OnChanges {
   template: `
    <button ng-click="value = value + 1">Change MyComponent</button>
    <button ng-click="str = str + 'world'">Change MyComponent attr</button>
-   <my-cmp my-prop="value" my-attr="{{str}}"></my-cmp>
+   <my-cmp [my-prop]="$ctrl.value" my-attr="{{$ctrl.str}}"></my-cmp>
   `,
   directives: [MyComponent]
 })
-export class App {
+export class AppComponent {
   value = 0;
   str = 'hello';
 }
 
-const AppModule = angular.module('myApp',[])
-  .directive(...provide(MyComponent))
-  .directive(...provide(App))
-  .name;
-
-bootstrap(AppModule);
+bootstrap( AppComponent );
 ```
 
 ###### Members
@@ -170,7 +167,7 @@ import { Component, Input, DoCheck, IterableDiffers } from 'ng-metadata/core';
    template: `
     <button ng-click="$ctrl.list.push($ctrl.list.length)">Push</button>
     <button ng-click="$ctrl.list.pop()">Pop</button>
-    <custom-check list="$ctrl.list"></custom-check>`,
+    <custom-check [list]="$ctrl.list"></custom-check>`,
    directives: [ CustomCheckComponent ]
  })
  export class AppComponent {
@@ -295,7 +292,7 @@ Implement this interface to get notified when your directive is destroyed.
 `ngOnDestroy` callback is typically used for any custom cleanup that needs to occur when the
 instance(directive) is destroyed.
 
-In anglualr 1 terms, it's invoked when `$scope.$destroy()` is called.
+In angular 1 terms, it's invoked when `$scope.$destroy()` is called.
 
 _Example:_
 

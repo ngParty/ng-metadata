@@ -1,30 +1,31 @@
 # Decorator
 
+**Class Decorators**
 - [@Component](#component)
 - [@Directive](#directive)
+- [@Pipe](#pipe)
+- [@Injectable](#injectable)
+
+**Property Decorators**
 - [@Input](#input)
 - [@Output](#output)
-- [@Attr](#output)
 - [@HostBinding](#hostbinding)
 - [@HostListener](#hostlistener)
 - [@ViewChild](#viewchild)
 - [@ViewChildren](#viewchildren)
 - [@ContentChild](#contentchild)
 - [@ContentChildren](#contentchildren)
-- [@Pipe](#pipe)
+
+**Parameter Decorators**
 - [@Inject](#inject)
-- [@Injectable](#injectable)
 - [@Host](#host)
 - [@Optional](#optional)
 - [@Self](#self)
 - [@SkipSelf](#skipself)
 
-
-**Decorators:**
+---
 
 ## @Component
-
-> **module:** `ng-metadata/core`
 
 A decorator for adding component metadata to a class. 
 Components are essentially angular 1 directives with both a template, controller and isolate scope. 
@@ -33,7 +34,7 @@ If you are looking to only modify the host element in some way, you should use @
 *Example:*
 
 ```typescript
-import { provide, Component } from 'ng-metadata/core';
+import { Component } from 'ng-metadata/core';
 
 @Component({ 
   selector: 'greeter', 
@@ -42,10 +43,14 @@ import { provide, Component } from 'ng-metadata/core';
   inputs: ['user'],
   outputs: ['onNameChange'] 
 })
-class Greeter {}
+class GreeterComponent {}
 
-const AppModule = angular.module('app', [])
-  .directive( ...provide(Greeter) );
+@Component({
+  selector: 'my-app',
+  template: `...`,
+  directives: [ GreeterComponent ]
+})
+class AppComponent{}
 ```
 
 ###### Parameters
@@ -56,13 +61,14 @@ const AppModule = angular.module('app', [])
 | **template**  | `string` |  The template string for the component. You can bind to class instance properties by prepending your bindings with the selector in camel-case form, e.g. `<h1>My Component's Name is: {{ctrl.name}}</h1>`  |
 | **templateUrl**  | `string` |  Path to an external html template file. Either template or templateUrl must be provided  |
 | **changeDetection**  | `ChangeDetectionStrategy` |  Defines the used change detection strategy. When a component is instantiated with one way bindings via inputs `@Input('<')`, we can tell it explicitly how to propagate those bindings. The changeDetection property defines, whether the change detection will be checked every time or only when the component tells it to do so. |
-| **attrs?**      | `Array<string>` |  String Array of names which you want to expose in bindToController via attribute `@` binding. *Example:* `attrs: ['foo']` will connect the class property `foo` to the attribute `foo`. You can also rename the attrs, *example* `attr:['foo: theFoo']` connects `foo` to the attribute `the-foo`.  |
 | **inputs?**     | `Array<string>` |  same as `attrs` but binds via `=` two way binding to bindToController  |
 | **outputs?**    | `Array<string>` |  same as `attrs` but binds via `&` expression binding to bindToController |
 | **host?**       | `{[key: string]: string}` |  Specify the events, actions, properties and attributes related to the [host element](#host). |
-| **providers?**  | `Array<Injectables|string>` | Any providers that this component or any of it's children depends on. This isn't doing anything for now, just for visual experience and mirroring ng2 api |
-| **directives?** | `Array<Directive|Component|string>` | Any directives or components that this component or any of it's children depends on. This isn't doing anything, just for visual experience and mirroring ng2 api |
-| **pipes?**      | `Array<Pipes|string>` | Any pipes that this component or any of it's children depends on. This isn't doing anything for now, just for visual experience and mirroring ng2 api |
+| **providers?**  | `Array<Injectables|string>` | Any providers that this component or any of it's children depends on. If you provide string it has to be Angular 1 module name |
+| **viewProviders?**  | `Array<Injectables|string>` | Any providers that this component or any of it's children depends on. In Angular 2 it defines the set of injectable objects that are visible to its view DOM children. In ng1 it will register it to global Injector, but it's good visual indication to register here just providers which should be used only within this component view. If you provide string it has to be Angular 1 module name |
+| **directives?** | `Array<Directive|Component>` | Any directives or components that this component or any of it's children depends on. |
+| **pipes?**      | `Array<Pipes|string>` | Any pipes that this component or any of it's children depends on. |
+| **moduleId?**   | `string` | The module id of the module that contains the component. Needed to be able to resolve relative urls for templates and styles. In CommonJS, this can always be set to `module.id`, similarly SystemJS exposes `__moduleName` variable within each module. |
 | **legacy?**     | `Object<`[DirectiveDefinitionObject](#directivedefinitionobject)`>`  |  striped angular 1 ddo, use it if you wanna use angular 1 specific API  |
 
 ###### host
@@ -91,7 +97,7 @@ When writing a directive event binding, you can also refer to the `$event` local
 > notice the `$event.targer` and `btn` parameter in `onClick` method. Yes the target is the button :)
 
 ```typescript
-import {Directive,Component} from 'ng-metadata/core';
+import { Directive, Component } from 'ng-metadata/core';
 
 @Directive({
   selector: '[counting]',
@@ -108,7 +114,7 @@ class CountClicks {
 @Component({
   selector: 'app',
   template: `<button counting>Increment</button>`,
-  directives: [CountClicks]
+  directives: [ CountClicks ]
 })
 ```
 
@@ -129,26 +135,28 @@ You can bind to various host properties:
 > The following example creates a directive that sets the valid and invalid classes on the DOM element that has ngModel directive on it.
 
 ```typescript
-import {Directive,Component, Inject} from 'ng-metadata/core';
-import {FORM_DIRECTIVES} from 'ng-metadata/common'
+import { Directive, Component, Self } from 'ng-metadata/core';
+import { NgModel } from 'ng-metadata/common'
 
 @Directive({
-  selector: '[validator-sign]',
+  selector: '[validatorSign]',
   host: {
     '[class.valid]': 'valid',
     '[class.invalid]': 'invalid'
   }
 })
-class NgModelStatus {
-  constructor(@Inject('ngModel') public ngModel: ng.INgModelController) {}
+class NgModelStatusDirective {
+  constructor(@Self() public ngModel: NgModel) {}
   get valid() { return this.ngModel.$valid; }
   get invalid() { return this.ngModel.$invalid; }
 }
+
 @Component({
-  selector: 'app',
+  selector: 'my-app',
   template: `<input ng-model="prop" validator-sign >`,
-  directives: [FORM_DIRECTIVES]
+  directives: [NgModelStatusDirective]
 })
+class AppComponent{}
 ```
 
 **Attributes**
@@ -160,12 +168,12 @@ Specifies static attributes that should be propagated to a host element.
 import {Directive} from 'ng-metadata/core';
 
 @Directive({
-  selector: '[my-button]',
+  selector: '[myButton]',
   host: {
     'role': 'button'
   }
 })
-class MyButton {
+class MyButtonDirective {
 }
 ```
 ```html
@@ -191,6 +199,7 @@ class MyButton {
     - `templateUrl`: any;
     - `terminal`: boolean;
     - `transclude`: any;
+    - `$routeConfig`: RouteConfig ( router-deprecated config )
 
     
 > How to require other directives? Angular 2 uses DI for everything and now you can too!
@@ -208,21 +217,25 @@ So you used to use require property on your DDO
 
 now you do it this way:
 ```typescript
-import {Directive,Component, Inject, Host, AfterContentInit} from 'ng-metadata/core';
+import { Directive, Component, Host, AfterViewInit, OnInit } from 'ng-metadata/core';
+import { NgModel } from 'ng-metadata/common';
 
-  @Directive({selector:'[some-foo]'})
+  @Directive({selector:'[someFoo]'})
   class SomeFooDirective{}
   
   @Component({ 
     selector:'foo',
     template:`<div>hello</div>`    
   })
-  class Foo implements AfterContentInit{
+  class FooComponent implements AfterViewInit, OnInit {
     constructor(
-      @Inject('ngModel') @Host() private ngModel: ng.INgModelController,
-      @Inject(SomeFooDirective) @Host() private someFoo: SomeFooDirective
+      @Host() private ngModel: NgModel,
+      @Host() private someFoo: SomeFooDirective
     ){
       // this.ngModel and this.someFoo are not yet available, they are undefined
+    }
+    ngOnInit(){
+      // this.ngModel and this.someFoo are available because this method is called from preLink
     }
     ngAfterViewInit(){
       // this.ngModel and this.someFoo are available because this method is called from postLink
@@ -234,12 +247,10 @@ import {Directive,Component, Inject, Host, AfterContentInit} from 'ng-metadata/c
 - `priority?`  [angular priority](https://docs.angularjs.org/api/ng/service/$compile)
 - `controllerAs?`  The controller name used in the template. By default we use **$ctrl** like `angular.component` does
 
-> There is a better way for using attrs/inputs/outputs via property decorators `@Attr`,`@Input`,`@Output`
+> There is a better way for using inputs/outputs via property decorators `@Input`, `@Output`
 
 
 ## @Directive
-
-> **module:** `ng-metadata/core`
 
 A decorator for adding directive metadata to a class. 
 Directives differ from Components in that they don't have templates; they only modify the host element or add behaviour to it.
@@ -247,12 +258,12 @@ Directives differ from Components in that they don't have templates; they only m
 *Example:*
 
 ```typescript
-import { Directive, Inject, AfterContentInit, provide } from 'ng-metadata/core';
+import { Component, Directive, Inject, AfterViewInit } from 'ng-metadata/core';
 
 @Directive({ 
-  selector: '[class-adder]'
+  selector: '[classAdder]'
 })
-class ClassAdder implements AfterContentInit{
+class ClassAdderDirective implements AfterViewInit {
   
    constructor( @Inject('$element') private $element: ng.IAugmentedJQuery) {}
    
@@ -263,36 +274,167 @@ class ClassAdder implements AfterContentInit{
     
 }
 
-const AppModule = angular.module('app', [])
-  .directive(...provide(ClassAdder));
+@Component({
+  selector: 'my-app',
+  template: `<div class-adder></div>`,
+  directives: [ClassAdderDirective]
+})
+class AppComponent{}
 ```
 
 ###### Parameters
 
 | Parameter     | Type     | Description                               |
 | ------------- | ---------|------------------------------------------ |
-| **selector**  | `string` |  The directive's selector. It must be a css attribute selector, for example '[my-thing]' is valid, but 'my-component' or '.my-class' are invalid. |
-| **attrs?**  | `Array<string>` |  String Array of names which you want to expose to controller via attribute received within `$attrs.$observe` fn. *Example:* `attrs: ['foo']` will connect the class property `foo` to the attribute `foo`. You can also rename the attrs, *example* `attr:['foo: theFoo']` connects `foo` to the attribute `the-foo`.  |
+| **selector**  | `string` |  The directive's selector. It must be a css attribute selector, for example '[myThing]' is valid, but 'my-component' or '.my-class' are invalid. |
 | **inputs?**     | `Array<string>` |  same as `attrs` but binds via `$scope.$eval` to controller  |
 | **outputs?**    | `Array<string>` |  same as `attrs` but binds via `$scope.$evalAsync` to parent expression binding to controller |
 | **host?**       | `{[key: string]: string}` |  Specify the events, actions, properties and attributes related to the [host element](#host). |
-| **providers?**  | `Array<Injectables|string>` | Any providers that this component or any of it's children depends on. This isn't doing anything for now, just for visual experience and mirroring ng2 api |
+| **providers?**  | `Array<Injectables|string>` | Any providers that this component or any of it's children depends on. |
 | **legacy?**     | `Object<`[DirectiveDefinitionObject](#directivedefinitionobject)`>`  |  striped angular 1 ddo, use it if you wanna use angular 1 specific API  |
 Note:
 
-- It is best to exec all logic within `ngAfterContentInit` method, because we are 100% sure, that host and children DOM is ready ( compiled ) 
+- It is best to exec all logic within `ngAfterContentInit`/`ngAfterViewInit` method, because we are 100% sure, that host and children DOM is ready ( compiled ) 
+
+
+## @Pipe
+
+A decorator for adding pipe metadata to a class. Pipes are essentially the same as angular 1 filters.
+
+*Example:*
+
+```typescript
+import { Pipe } from 'ng-metadata/core';
+
+@Pipe({name:'firstLetter'})
+class FirstLetter {
+  
+  // Optional
+  constructor(){}
+
+  // Mandatory
+  transform(input, changeTo) {
+    input[0] = changeTo;
+    return input;
+  }
+  
+  // Optional
+  someHelper(){}
+  
+}
+```
+
+###### Parameters
+
+| Parameter     | Type     | Description                               |
+| ------------- | ---------|------------------------------------------ |
+| **name**      | `string` | under what name should be the filter exposed in angular container/ view |
+| **pure?**     | `boolean`[true] | If pipe is pure. If we wanna make pipe $stateful we set pure to `false` |
+
+Note:
+- every Pipe needs to implement `transform` method which contains pipe logic which will be transformed to filter factory
+- as a convenience your pipe class can implement `PipeTransform` interface to get better dev experience
+
+
+## @Injectable
+
+A decorator that marks a class as injectable. It can then be injected into other annotated classes via the `@Inject` decorator.
+This decorator is mandatory for all services because we are creating string name from DI manually
+
+_Example:_
+
+```typescript
+// shared.ts
+import { Injectable } from 'ng-metadata/core';
+
+@Injectable()
+export class MyService {
+  getData() {}
+}
+
+@Injectable()
+export class GoodService {
+  getData() {}
+}
+
+@Injectable()
+export class MyOtherService {
+
+  data: any;
+  
+  constructor(
+    myService: MyService,
+    goodService: GoodService
+  ) {
+    this.data = myService.getData();
+  }
+}
+
+// app.component
+import { Component } from 'ng-metadata/core';
+import {MyService, GoodService, MyOtherService} from './shared';
+
+@Component({
+  selector: 'my-app',
+  template: `...`,
+  providers: [MyService, GoodService, MyOtherService]
+})
+class AppComponent{}
+
+// test.ts
+import * as angular from 'angular';
+import {expect} from 'chai';
+import {getInjectableName,bundle} from 'ng-metadata/core';
+import { AppComponent } from './app.component';
+
+const ngModule = bundle( AppComponent )
+
+const $injector = angular.injector(ngModule.name);
+
+expect($injector.get('myService#1') instanceof MyService).to.equal(true)
+expect($injector.get(getInjectableName(MyService)) instanceof MyService).to.equal(true)
+
+expect($injector.get('fooSvc#2') instanceof GoodService).to.equal(true)
+expect($injector.get(getInjectableName(GoodService)) instanceof GoodService).to.equal(true)
+
+expect($injector.get('myOtherService#3') instanceof MyOtherService).to.equal(true)
+expect($injector.get(getInjectableName(MyOtherService)) instanceof MyOtherService).to.equal(true)
+```
+
+###### Parameters
+
+| Parameter     | Type     | Description                               |
+| ------------- | ---------|------------------------------------------ |
+
+###### Behind the scenes:
+
+We internally create unique name string token on InjectableMetadata, from class.name or we stringify it to get the 
+name if JS engine doesn't implements ES6 name property
+
+
+---
 
 
 ## @Input
 
-> **module:** `ng-metadata/core`
-
 An alternative and more declarative way to using the `inputs` property on `@Component`/`@Directive`.
 
-Binds to Component via two way binding `=` by default or via one way binding on Directive by default.
-Since 1.5 it allows you to bind to an interpolation which was previously handled by `@Attr` via `@Input('@')`
+Binds to Component/Directive via on of binding types `=`/`<`/`@`.
 
-If you wanna use one way binding on Component use `@Input('<') yourProperty`
+Binding type is determined by template or if you wanna keep template as is you have to provide on of these types within @Input(`BINDING_TYPE`)
+
+Template bindings equivalent vs declaration bindings:
+
+| Template       | Declaration @Input('TYPE') |
+| -------------- | -------------------------- |
+| `[(property)]` | `=`                        |
+| `[property]`   | `<`                        |
+| `property`     | `@`                        |
+
+
+For example:
+- If you wanna use one way binding on Component with no template change use `@Input('<') yourProperty`
+- If you wanna use one way binding on Component with template syntax use `@Input() yourProperty` and in your template `<cmp [your-property]="$ctrl.someValue"></cmp>`
 
 *Example:*
 
@@ -301,37 +443,37 @@ import { Component, Input } from 'ng-metadata/core';
 
 @Component({ ... })
 class MenuDropdown {
-  @Input() options;
-  @Input('<') oneWay;
+  @Input() twoWay;
+  @Input() oneWay;
   @Input('aliasMe') value;
-  @Input('@') interpolatedValue: string;
+  @Input() interpolatedValue: string;
 }
 ```
 ```html
-<menu-dropdown one-way="ctrl.someValue" options="ctrl.options" alias-me="ctrl.foo" interpolated-value="{{ $ctrl.someValToInterpolate }}"></menu-dropdown>
+<menu-dropdown 
+  [one-way]="ctrl.someValue"
+  [alias-me]="ctrl.foo" 
+  [(two-way)]="ctrl.options" 
+  interpolated-value="{{ $ctrl.someValToInterpolate }}"
+></menu-dropdown>
 ```
 
 ###### Parameters
 
 | Parameter        | Type     | Description                               |
 | ---------------- | ---------|------------------------------------------ |
-| **exposedName**  | `string` | If provided, then it will be the name of the input when setting on the html element. It supports oneWay binding via `<' sign + followed by optional alias |
+| **exposedName**  | `string` | If provided, then it will be the name of the input when setting on the html element. It supports binding type override `TYPE` sign + followed by optional alias |
 
 
 ## @Output
 
-> **module:** `ng-metadata/core`
-
 An alternative and more declarative way to using the `outputs` property on `@Component`/`@Directive`.
 Via `@Output` and `EventEmitter` you can emit custom events to parent component
-
-**Deprecated behaviour: (will be removed in 2.0)**
-- binds to controller via `&` binding or executes expression on directive via `$scope.$eval`
 
 *Example:*
 
 ```typescript
-import { Component, Output } from 'ng-metadata/core';
+import { Component, Output, EventEmitter } from 'ng-metadata/core';
 
 @Component({ ... })
 class MenuDropdown {
@@ -344,7 +486,10 @@ class MenuDropdown {
 }
 ```
 ```html
-<menu-dropdown on-option-select="$ctrl.optionSelected()" on-alias="$ctrl.onFoo()"></menu-dropdown>
+<menu-dropdown 
+  (on-option-select)="$ctrl.optionSelected()" 
+  (on-alias)="$ctrl.onFoo()"
+></menu-dropdown>
 ```
 
 ###### Parameters
@@ -354,42 +499,8 @@ class MenuDropdown {
 | **exposedName**  | `string` | If provided, then it will be the name of the attribute when setting on the html element via angular expression. |
 
 
-## @Attrs
-
-> **module:** `ng-metadata/core`
-
-**DEPRECATED** will be removed in 2.0. Instead use `@Input('@)`
-
-An alternative and more declarative way to using the `attrs` property on `@Component`/`@Directive`.
-
-Binds to controller via `@` binding or observes attirbute on directive via `$attrs.observe` and sets $ctrl instance 
-value
-
-*Example:*
-
-```typescript
-import { Component, Attr } from 'ng-metadata/core';
-
-@Component({ ... })
-class Colors {
-    @Attr() primary: string;
-    @Attr('otherOne') secondary: string;
-}
-```
-```html
-<colors primary="{{ctrl.colorRed}}" other-one="blue"></colors>
-```
-
-###### Parameters
-
-| Parameter     | Type     | Description                               |
-| ------------- | ---------|------------------------------------------ |
-| **exposedName**  | `string` | If provided, then it will be the name of the attribute when setting on the html element. |
-
 
 ## @HostBinding
-
-> **module:** `ng-metadata/core`
 
 - property decorator
 
@@ -433,8 +544,6 @@ just creates `$scope.$watch` on provided controller property and changes the DOM
 
 ## @HostListener
 
-> **module:** `ng-metadata/core`
-
 - property decorator
 
 Declares a host listener.
@@ -475,7 +584,7 @@ class CountClicks {
 import { Component, Directive, HostListener } from 'ng-metadata/core';
 
 @Directive({
-  selector: '[resize-handler]'
+  selector: '[resizeHandler]'
 })
 class ResizeHandlerDirective {
   
@@ -504,8 +613,6 @@ manually registers event listeners on host element via `.on(eventName)` and exec
 
 
 ## @ViewChild
-
-> **module:** `ng-metadata/core`
 
 - property decorator
 
@@ -574,8 +681,6 @@ to get queried component/directive. If not found returns `null`
 
 ## @ViewChildren
 
-> **module:** `ng-metadata/core`
-
 - property decorator
 
 Similar to [@ViewChild](#viewchild), but querying for all occurrences not just one
@@ -635,8 +740,6 @@ to get queried component/directive. If not found returns `null`
 
 
 ## @ContentChild
-
-> **module:** `ng-metadata/core`
 
 - property decorator
 
@@ -719,8 +822,6 @@ to get queried component/directive. If not found returns `null`
 
 ## @ContentChildren
 
-> **module:** `ng-metadata/core`
-
 - property decorator
 
 Similar to [@ContentChild](#contentchild), but querying for all ocurrences not just one
@@ -790,45 +891,7 @@ extracts the selector from Type, queries the DOM within `ng-transclude` for all 
 to get queried component/directive. If not found returns `null`
 
 
-## @Pipe
-
-> **module:** `ng-metadata/core`
-
-A decorator for adding pipe metadata to a class. Pipes are essentially the same as angular 1 filters.
-
-*Example:*
-
-```typescript
-import { Pipe } from 'ng-metadata/core';
-
-@Pipe({name:'firstLetter'})
-class FirstLetter {
-  
-  // Optional
-  constructor(){}
-
-  // Mandatory
-  transform(input, changeTo) {
-    input[0] = changeTo;
-    return input;
-  }
-  
-  // Optional
-  someHelper(){}
-  
-}
-```
-
-###### Parameters
-
-| Parameter     | Type     | Description                               |
-| ------------- | ---------|------------------------------------------ |
-| **name**      | `string` | under what name should be the filter exposed in angular container/ view |
-| **pure?**     | `boolean`[true] | If pipe is pure. If we wanna make pipe $stateful we set pure to `false` |
-
-Note:
-- every Pipe needs to implement `transform` method which contains pipe logic which will be transformed to filter factory
-- as a convenience your pipe class can implement `PipeTransform` interface to get better dev experience 
+---
 
 
 ## @Inject
@@ -899,7 +962,7 @@ class HostCmp{
     // Argument name doesn't have to match to directive name, which is extracted via @Inject from decorated FooDirective
     // use whatever property name you want, we create instance via $injector.invoke with proper locals behind the scenes
     // - this will add require: ['?^foo'] to DDO and bind the local instance within controller to property foo
-    @Inject(FooDirective) @Host() @Optional() private foo: FooDirective
+    @Host() @Optional() private foo: FooDirective
   ){}
 }
 ```
@@ -911,6 +974,7 @@ because parent class won't be available during module loading
 *Example:*
 
 This will throw `Reference error`
+
 ```typescript
 // index.ts
 import {AService} from './fileA';
@@ -918,11 +982,11 @@ import {BService} from './fileB';
 
 // fileA.ts
 import {BService} from './fileB';
-import { Inject, Injectable } from 'ng-metadata/core';
+import { Injectable } from 'ng-metadata/core';
 
 Injectable()
 class AService{
-  constructor(@Inject(BService) private bSvc: BService){}
+  constructor(private bSvc: BService){}
 }
 
 // fileB.ts
@@ -932,11 +996,12 @@ import { Inject, Injectable } from 'ng-metadata/core';
 
 Injectable()
 class BService{
-  constructor(@Inject(AService) private aSvc: AService){}
+  constructor(private aSvc: AService){}
 }
 ```
 
 This will work thanks to `forwardRef`
+
 ```typescript
 // index.ts
 import {AService} from './fileA';
@@ -944,11 +1009,11 @@ import {BService} from './fileB';
 
 // fileA.ts
 import {BService} from './fileB';
-import { Inject, Injectable,forwardRef } from 'ng-metadata/core';
+import { Inject, Injectable, forwardRef } from 'ng-metadata/core';
 
 Injectable()
 class AService{
-  constructor(@Inject(BService) private bSvc: BService){}
+  constructor(private bSvc: BService){}
 }
 
 // fileB.ts
@@ -970,8 +1035,10 @@ class BService{
 | **injectables**  | `string` or `class` or `OpaqueToken` | use string for angular 1 and 3rd party module injectables, use class reference for custom ones |
 
 Note for Injectables:
+
 - If string, then it's considered a core angular service such as $q or $http.
 It could also be a special `local`, for example component's can inject $element, $attrs, $scope or $transclude
+- It can be also an `OpaqueToken` instance
 - If it's class it needs to be decorated by:
   - @Injectable for services
   - @Directive/@Component
@@ -1123,66 +1190,3 @@ const ddo = { require: ['validator','^^ngModel'] };
 ###### Behind the Scenes
 
 just adds `^^` sign prefix to `require`d directive on host ( default `^` is removed )
-
-
-## @Injectable
-
-> **module:** `ng-metadata/core`
-
-A decorator that marks a class as injectable. It can then be injected into other annotated classes via the `@Inject` decorator.
-This decorator is mandatory for all services because we are creating string name from DI manually
-
-_Example:_
-
-```typescript
-import { Injectable, Inject } from 'ng-metadata/core';
-
-@Injectable()
-class MyService {
-  getData() {}
-}
-
-@Injectable()
-class GoodService {
-  getData() {}
-}
-
-@Injectable()
-class MyOtherService {
-
-  data: any;
-  
-  constructor(
-    @Inject(MyService) myService: MyService,
-    @Inject(GoodService) goodService: GoodService
-  ) {
-    this.data = myService.getData();
-  }
-}
-
-// test.ts
-import * as angular from 'angular';
-import {expect} from 'chai';
-import {getInjectableName} from 'ng-metadata/core';
-
-const $injector = angular.injector(['ng','myApp']);
-
-expect($injector.get('myService#1') instanceof MyService).to.equal(true)
-expect($injector.get(getInjectableName(MyService)) instanceof MyService).to.equal(true)
-
-expect($injector.get('fooSvc#2') instanceof GoodService).to.equal(true)
-expect($injector.get(getInjectableName(GoodService)) instanceof GoodService).to.equal(true)
-
-expect($injector.get('myOtherService#3') instanceof MyOtherService).to.equal(true)
-expect($injector.get(getInjectableName(MyOtherService)) instanceof MyOtherService).to.equal(true)
-```
-
-###### Parameters
-
-| Parameter     | Type     | Description                               |
-| ------------- | ---------|------------------------------------------ |
-
-###### Behind the scenes:
-
-We internally create unique name string token on InjectableMetadata, from class.name or we stringify it to get the 
-name if JS engine doesn't implements ES6 name property

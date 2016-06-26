@@ -21,9 +21,6 @@ Instead, this service can be used to set and get the current title value.
 **NOTE:**
 you need to import this service and register within root component ( root module in Angular 1 terms )
 
-###### members
-> it extends [`Router`](https://github.com/ngParty/ng-metadata/tree/master/src/router-deprecated/router.ts) base class, which has quite huge API.
-
 | members           | Type       | Description                                  |
 | ----------------- | ---------- |--------------------------------------------- |
 | **setTitle(newTitle:string):void**  | `Function` | Set the title of the current HTML document. |
@@ -35,9 +32,11 @@ you need to import this service and register within root component ( root module
 
 ```typescript
 // app.component.ts
+import { Component } from 'ng-metadata/core';
+import { Title } from 'ng-metadata/platform-browser-dynamic';
 
 @Component({
-  selector: 'app',
+  selector: 'my-app',
   template: `
   <p>Document title is: {{ $ctrl.title }}</p>
   <p>
@@ -60,15 +59,9 @@ export class AppComponent {
   }
 }
 
-// index.ts
-import * as angular from 'angular';
-import { provide } from 'ng-metadata/core';
-import { Title } from 'ng-metadata/platform';
+// main.ts
+import { bootstrap, Title } from 'ng-metadata/platform-browser-dynamic';
+import { AppComponent } from './app.component';
 
-import { AppComponent} from './app';
-
-export AppModule = angular.module('myApp',[])
-  // we need to register the service manually
-  .service( ...provide( Title ) )
-  .directive( ...provide( AppComponent ))
+bootstrap( AppComponent, [ Title ] );
 ```
