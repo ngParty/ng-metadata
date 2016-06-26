@@ -1,6 +1,6 @@
 // Import the native Angular services.
 import { Component } from 'ng-metadata/core';
-import { Title }     from 'ng-metadata/platform';
+import { Title }     from 'ng-metadata/platform-browser-dynamic';
 
 @Component({
   selector: 'my-title-handler',

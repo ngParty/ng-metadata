@@ -9,25 +9,19 @@ import { StringMapWrapper } from '../../../facade/collections';
 import { global, noop, isString, isBoolean, isFunction } from '../../../facade/lang';
 import { EventEmitter } from '../../../facade/async';
 
-import { ParsedBindingValue, BINDING_MODE } from './constants';
-import { _parseBindings } from './binding_parser';
+import { BINDING_MODE } from './constants';
+import { setupFields, SetupAttrField } from './binding_parser';
 
 /**
  * Create Bindings manually for both Directive/Component
- * @param hasIsolateScope
- * @param _scope
- * @param attributes
- * @param ctrl
- * @param metadata
- * @param {{$interpolate,$parse,$rootScope}}
  * @returns {{watchers: Array, observers: Array}}
  * @internal
  * @private
  */
 export function _createDirectiveBindings(
   hasIsolateScope: boolean,
-  _scope: ng.IScope,
-  attributes: ng.IAttributes,
+  ngScope: ng.IScope,
+  ngAttrs: ng.IAttributes,
   ctrl: any,
   metadata: ComponentMetadata|DirectiveMetadata,
   { $interpolate, $parse, $rootScope }: {
@@ -50,10 +44,11 @@ export function _createDirectiveBindings(
 
   const isBindingImmutable = isComponentDirective( metadata ) && ChangeDetectionUtil.isOnPushChangeDetectionStrategy( metadata.changeDetection );
   const scope = hasIsolateScope
-    ? _scope.$parent
-    : _scope;
-  const { inputs=[], outputs=[], attrs=[] } = metadata;
-  const parsedBindings = _parseBindings( { inputs, outputs, attrs } );
+    ? ngScope.$parent
+    : ngScope;
+  const { inputs=[], outputs=[] } = metadata;
+  const parsedBindings = setupFields( ngAttrs, inputs, outputs );
+
   const _internalWatchers = [];
   const _internalObservers = [];
 
@@ -66,88 +61,74 @@ export function _createDirectiveBindings(
   changesQueueService.buildFlushOnChanges( $rootScope );
 
   // setup @Inputs '<' or '='
-  // by default '='
-  // @TODO starting 2.0 there will be no default, if no explicit type provided it will be determined from template
-  StringMapWrapper.forEach( parsedBindings.inputs, ( config: ParsedBindingValue, propName: string ) => {
+  StringMapWrapper.forEach( parsedBindings.inputs as any, ( config: SetupAttrField, propName: string ) => {
 
-    const { alias, optional, mode } = config;
-    const attrName = alias || propName;
+    const { exp, attrName, mode } = config;
+    // support for TWO_WAY only for components
     const hasTwoWayBinding = hasIsolateScope && mode === BINDING_MODE.twoWay;
 
     const removeWatch = hasTwoWayBinding
-      ? _createTwoWayBinding( propName, attrName, optional )
-      : _createOneWayBinding( propName, attrName, optional, isBindingImmutable );
+      ? _createTwoWayBinding( propName, attrName, exp )
+      : _createOneWayBinding( propName, attrName, exp, isBindingImmutable );
     _internalWatchers.push( removeWatch );
 
   } );
 
-  // setup @Outputs
-  StringMapWrapper.forEach( parsedBindings.outputs, ( config: ParsedBindingValue, propName: string ) => {
+  // setup @Input('@')
+  StringMapWrapper.forEach( parsedBindings.attrs as any, ( config: SetupAttrField, propName: string ) => {
 
-    const { alias, optional, mode } = config;
-    const attrName = alias || propName;
+    const { attrName, exp, mode } = config;
 
-    _createOutputBinding( propName, attrName, optional );
-
-  } );
-
-  // setup @Attrs
-  StringMapWrapper.forEach( parsedBindings.attrs, ( config: ParsedBindingValue, propName: string ) => {
-
-    const { alias, optional, mode } = config;
-    const attrName = alias || propName;
-
-    const removeObserver = _createAttrBinding( attrName, propName, optional );
+    const removeObserver = _createAttrBinding( propName, attrName, exp );
     _internalObservers.push( removeObserver );
 
   } );
 
-  function _createOneWayBinding( propName: string, attrName: string, optional: boolean, isImmutable: boolean = false ): Function {
+  // setup @Outputs
+  StringMapWrapper.forEach( parsedBindings.outputs as any, ( config: SetupAttrField, propName: string ) => {
 
-    if ( !Object.hasOwnProperty.call( attributes, attrName ) ) {
-      if ( optional ) return;
-      attributes[ attrName ] = void 0;
-    }
-    if ( optional && !attributes[ attrName ] ) return;
+    const { exp, attrName, mode } = config;
 
-    const parentGet = $parse( attributes[ attrName ] );
+    _createOutputBinding( propName, attrName, exp );
 
-    ctrl[ propName ] = parentGet( scope );
+  } );
+
+  function _createOneWayBinding( propName: string, attrName: string, exp: string, isImmutable: boolean = false ): Function {
+
+    if ( !exp ) return;
+
+    const parentGet = $parse( exp );
+    const initialValue = ctrl[propName] = parentGet(scope);
+
     initialChanges[ propName ] = ChangeDetectionUtil.simpleChange( ChangeDetectionUtil.uninitialized, ctrl[ propName ] );
 
-    return scope.$watch( parentGet, function parentValueWatchAction( newParentValue ) {
-      const oldValue = ctrl[ propName ];
-      recordChanges( propName, newParentValue, oldValue );
-      ctrl[ propName ] = isImmutable ? angular.copy(newParentValue) : newParentValue;
+    return scope.$watch( parentGet, function parentValueWatchAction( newValue, oldValue ) {
+      // https://github.com/angular/angular.js/commit/d9448dcb9f901ceb04deda1d5f3d5aac8442a718
+      // https://github.com/angular/angular.js/commit/304796471292f9805b9cf77e51aacc9cfbb09921
+      if ( oldValue === newValue ) {
+        if ( oldValue === initialValue ) return;
+        oldValue = initialValue;
+      }
+      recordChanges( propName, newValue, oldValue );
+      ctrl[ propName ] = isImmutable ? angular.copy(newValue) : newValue;
     }, parentGet.literal );
 
   }
-  function _createTwoWayBinding( propName: string, attrName: string, optional: boolean ): Function {
+  function _createTwoWayBinding( propName: string, attrName: string, exp: string ): Function {
 
-    let lastValue;
+    if ( !exp ) return;
 
-    if ( !Object.hasOwnProperty.call( attributes, attrName ) ) {
-      if ( optional ) return;
-      attributes[ attrName ] = void 0;
-    }
-    if ( optional && !attributes[ attrName ] ) return;
-
-    let compare;
-    const parentGet = $parse( attributes[ attrName ] );
-    if (parentGet.literal) {
-      compare = global.angular.equals;
-    } else {
-      compare = function simpleCompare(a, b) { return a === b || (a !== a && b !== b); };
-    }
-    const parentSet = parentGet.assign || function() {
+    let lastValue: any;
+    const parentGet = $parse( exp );
+    const parentSet = parentGet.assign || function () {
         // reset the change, or we will throw this exception on every $digest
-        lastValue = ctrl[propName] = parentGet(scope);
+        lastValue = ctrl[ propName ] = parentGet( scope );
         throw new Error(
           `nonassign,
-          Expression '${attributes[ attrName ]}' in attribute '${attrName}' used with directive '{2}' is non-assignable!`
+          Expression '${ngAttrs[ attrName ]}' in attribute '${attrName}' used with directive '{2}' is non-assignable!`
         );
       };
-    lastValue = ctrl[propName] = parentGet(scope);
+    const compare: Function = parentGet.literal ? global.angular.equals : simpleCompare;
     const parentValueWatch = function parentValueWatch(parentValue) {
       if (!compare(parentValue, ctrl[propName])) {
         // we are out of sync and need to copy
@@ -162,6 +143,8 @@ export function _createDirectiveBindings(
       return lastValue = parentValue;
     };
     (parentValueWatch as any).$stateful = true;
+
+    lastValue = ctrl[propName] = parentGet(scope);
     // NOTE: we don't support collection watch, it's not good for performance
     // if (definition.collection) {
     //   removeWatch = scope.$watchCollection(attributes[attrName], parentValueWatch);
@@ -170,59 +153,53 @@ export function _createDirectiveBindings(
     // }
     // removeWatchCollection.push(removeWatch);
     return scope.$watch(
-      $parse( attributes[ attrName ], parentValueWatch ),
+      // $parse( ngAttrs[ attrName ], parentValueWatch ),
+      $parse( exp, parentValueWatch ),
       null,
       parentGet.literal
     );
 
+    function simpleCompare(a, b) { return a === b || (a !== a && b !== b); }
+
   }
-  function _createOutputBinding( propName: string, attrName: string, optional: boolean ): void {
+  function _createOutputBinding( propName: string, attrName: string, exp: string ): void {
 
     // Don't assign Object.prototype method to scope
-    const parentGet: Function = attributes.hasOwnProperty( attrName )
-      ? $parse( attributes[ attrName ] )
+    const parentGet: Function = exp
+      ? $parse( exp )
       : noop;
 
     // Don't assign noop to ctrl if expression is not valid
-    if (parentGet === noop && optional) return;
+    if ( parentGet === noop ) return;
 
-    // @TODO in ngMetadata 2.0 this will be removed
-    EventEmitter.makeNgExpBindingEmittable( _exprBindingCb );
-
-    // @TODO in ngMetadata 2.0 we will assign this property to EventEmitter directly
-    // const emitter = new EventEmitter();
-    // emitter.wrapNgExpBindingToEmitter( _exprBindingCb );
-    // ctrl[propName] = emitter;
-
-    ctrl[propName] = _exprBindingCb;
-
-    function _exprBindingCb( locals ) {
+    // here we assign property to EventEmitter instance directly
+    const emitter = new EventEmitter<any>();
+    emitter.wrapNgExpBindingToEmitter( function _exprBindingCb( locals ) {
       return parentGet( scope, locals );
-    }
+    } );
+
+    ctrl[propName] = emitter;
 
   }
-  function _createAttrBinding( attrName: string, propName: string, optional: boolean ): Function {
+  function _createAttrBinding( propName: string, attrName: string, exp: string ): Function {
 
-    let lastValue;
-
-    if ( !optional && !Object.hasOwnProperty.call( attributes, attrName ) ) {
-      ctrl[ propName ] = attributes[ attrName ] = void 0;
-    }
+    let lastValue = exp;
 
     // register watchers for further changes
     // The observer function will be invoked once during the next $digest following compilation.
     // The observer is then invoked whenever the interpolated value changes.
 
-    const _disposeObserver = attributes.$observe( attrName, function ( value ) {
-      if ( isString( value ) ) {
+    const _disposeObserver = ngAttrs.$observe( attrName, function ( value: string|boolean ) {
+      // https://github.com/angular/angular.js/commit/499e1b2adf27f32d671123f8dceadb3df2ad84a9
+      if ( isString( value ) || isBoolean( value ) ) {
         const oldValue = ctrl[ propName ];
         recordChanges( propName, value, oldValue );
         ctrl[ propName ] = value;
       }
     } );
 
-    (attributes as any).$$observers[ attrName ].$$scope = scope;
-    lastValue = attributes[ attrName ];
+    (ngAttrs as any).$$observers[ attrName ].$$scope = scope;
+
     if ( isString( lastValue ) ) {
       // If the attribute has been provided then we trigger an interpolation to ensure
       // the value is there for use in the link fn
@@ -267,7 +244,7 @@ export function _createDirectiveBindings(
 
   function removeWatches(): void {
     const removeWatchCollection = [ ..._internalWatchers, ..._internalObservers ];
-    for ( var i = 0, ii = removeWatchCollection.length; i < ii; ++i ) {
+    for ( let i = 0, ii = removeWatchCollection.length; i < ii; ++i ) {
       if (removeWatchCollection[ i ] && isFunction(removeWatchCollection[ i ])) {
         removeWatchCollection[ i ]();
       }

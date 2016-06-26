@@ -1,5 +1,5 @@
 import { Pipe } from 'ng-metadata/core';
-import { TodoModel } from '../stores/todoStore.service';
+import { TodoModel } from './todo-store.service';
 
 @Pipe( {
   name: 'remainingTodos'

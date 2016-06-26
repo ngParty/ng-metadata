@@ -26,6 +26,7 @@
       map: {
         app: "./app",
         angular: 'npm:angular',
+        rxjs: 'npm:rxjs',
         'ng-metadata': '/../../'
       },
       //packages defines our app package
@@ -45,6 +46,9 @@
               main: './platform.js'
             }
           }
+        },
+        rxjs:{
+          defaultExtension: 'js'
         }
       }
     } );
@@ -70,9 +74,9 @@
           class="demo-content mdl-color--white mdl-shadow--4dp content mdl-color-text--grey-800 mdl-cell mdl-cell--8-col">
 
           <!--APP Component-->
-          <todo-app style="display: block" element-ready my-global-listener>
+          <my-app style="display: block" element-ready my-global-listener>
             <div style="text-align: center"><div class="mdl-spinner mdl-js-spinner is-active"></div></div>
-          </todo-app>
+          </my-app>
 
         </div>
       </div>

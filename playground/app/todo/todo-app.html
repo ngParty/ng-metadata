@@ -1,0 +1,24 @@
+<h1>Todos yo!</h1>
+
+<h3>Todo List remaining: {{ $ctrl.todos | remainingTodos }}</h3>
+
+<add-todo (on-add)="$ctrl.createTodo($event)"></add-todo>
+
+<ul class="demo-list">
+  <li ng-repeat="item in $ctrl.todos">
+
+    <todo-item
+      [todo]="item"
+      (on-done)="$ctrl.markAsDone($event)"
+      (emit-test)="$ctrl.outputWithEmitReceiver($event)"
+      [idx]="$index"
+    >
+      <button
+        ng-click="$ctrl.removeTodo(item)"
+        class="mdl-button mdl-js-button mdl-button--accent">
+        Remove
+      </button>
+    </todo-item>
+
+  </li>
+</ul>

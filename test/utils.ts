@@ -4,6 +4,52 @@ import { isArray, isFunction, assign } from '../src/facade/lang';
 // _private helpers for testing
 // ============================
 
+export function createNgModule() {
+  return {
+    module( name, requires?: string[] ){
+      const _m = {
+        requires: [],
+        name: name
+      };
+      if ( requires ) {
+        _m.requires = requires;
+        // setter
+      } else {
+        // getter
+      }
+
+      return {
+        name: _m.name,
+        requires: _m.requires,
+        _configBlocks: [],
+        _invokeQueue: [],
+        _runBlocks: [],
+
+        constant(n,v){ this._invokeQueue.push(['$provide','constant',[n,v]]); return this; },
+        value(n,v){ this._invokeQueue.push(['$provide','value',[n,v]]); return this; },
+        provider(n,v){ this._invokeQueue.push(['$provide','provider',[n,v]]); return this; },
+        factory(n,v){ this._invokeQueue.push(['$provide','factory',[n,v]]); return this; },
+        service(n,v){ this._invokeQueue.push(['$provide','service',[n,v]]); return this; },
+        decorator(n,v){ this._configBlocks.push(['$provide','decorator',[n,v]]); return this; },
+
+        directive(n,v){ this._invokeQueue.push(['$compileProvider','directive',[n,v]]); return this; },
+        component(n,v){ this._invokeQueue.push(['$compileProvider','component',[n,v]]); return this; },
+
+        controller(n,v){ this._invokeQueue.push(['$controllerProvider','register',[n,v]]); return this; },
+
+        filter(n,v){ this._invokeQueue.push(['$filterProvider','register',[n,v]]); return this; },
+
+
+        animation(n,v){ this._invokeQueue.push(['$animateProvider','register',[n,v]]); return this; },
+
+        config(v){ this._configBlocks.push(['$injector','invoke',[v]]); return this; },
+        run(v){ this._runBlocks.push(v); return this; },
+      }
+
+    }
+  }
+}
+
 /**
  *
  * @internal
@@ -166,6 +212,8 @@ export class $Scope {
   $$prevSibling = {} as any;
   $$nextSibling = {} as any;
   $$postDigest = ( callback: Function ): void => {};
+
+  $digest() {}
 
   $watch( watchExp: Function|string, watchListener: Function ) {
     this.$$watchers.push( [ watchExp, watchListener ] );

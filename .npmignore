@@ -23,6 +23,11 @@ scripts
 assets
 playground
 
+# ignore gitbook specific files
+_book
+book.json
+SUMMARY.md
+
 #################
 ## VSCode
 #################

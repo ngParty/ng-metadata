@@ -79,7 +79,8 @@ export class DoCheckComponent implements DoCheck, OnChanges {
 
 @Component({
   selector: 'do-check-parent',
-  templateUrl: 'app/components/lifecycle/do-check-parent.component.html',
+  moduleId: module.id,
+  templateUrl: './do-check-parent.component.html',
   directives: [DoCheckComponent]
 })
 export class DoCheckParentComponent {

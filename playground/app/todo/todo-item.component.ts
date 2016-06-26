@@ -1,32 +1,31 @@
 import { Component, Input, Output, OnChanges, EventEmitter } from 'ng-metadata/core';
-import { TodoModel } from '../stores/todoStore.service';
+import { TodoModel } from './todo-store.service';
 
 @Component({
   selector: 'todo-item',
-  templateUrl: './app/components/todo-item.html',
+  moduleId: module.id,
+  templateUrl: './todo-item.html',
   legacy: {
     transclude: true
   }
 })
 export class TodoItemCmp implements OnChanges{
 
-  @Input('<') todo: TodoModel;
-  @Input('<') idx: number;
-  // this is old way how to bindings are created, will be removed in 2.0
-  // @Output() onDone: ( todo: {todo:TodoModel} )=>void;
-  @Output() onDone: EventEmitter<TodoModel>; // used as an interface 
-  @Output() emitTest = new EventEmitter<string>(); // use class instance
+  @Input() todo: TodoModel;
+  @Input() idx: number;
+  @Output() onDone = new EventEmitter<TodoModel>();
+  @Output() emitTest = new EventEmitter<string>();
 
   ngOnInit(){
 
-    const dispose = this.onDone.subscribe( (value)=> {
+    const subscription = this.onDone.subscribe( (value)=> {
       console.log(`Sample SIDE EFFECT: onDone emitted value: ${JSON.stringify(value)}` );
-      console.warn("DISPOSE SIDE EFFECT so it's called only first time...");
-      dispose();
+      console.warn(`DISPOSE SIDE EFFECT so it's called only first time...`);
+      subscription.unsubscribe();
     } )
 
   }
-  
+
   ngOnChanges(change){
     console.log('changes:', change);
     if(change.todo){

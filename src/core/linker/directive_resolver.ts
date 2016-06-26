@@ -1,4 +1,4 @@
-import { Type, isPresent, stringify, assign, isType, getFuncName } from '../../facade/lang';
+import { Type, isPresent, stringify, assign, isType, getFuncName, isBlank } from '../../facade/lang';
 import { StringMapWrapper, ListWrapper } from '../../facade/collections';
 import { reflector } from '../reflection/reflection';
 import {
@@ -21,6 +21,12 @@ import { ParamMetaInst, PropMetaInst, getInjectableName } from '../di/provider';
 import { resolveForwardRef } from '../di/forward_ref';
 import { getErrorMsg } from '../../facade/exceptions';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
+
+
+// asset:<package-name>/<realm>/<path-to-module>
+// var _ASSET_URL_RE = /asset:([^\/]+)\/([^\/]+)\/(.+)/g;
+// <path-to-module>/filename.js
+const ASSET_URL_RE = /^(.+)\/.+\.js$/;
 
 function _isDirectiveMetadata( type: any ): boolean {
   return type instanceof DirectiveMetadata;
@@ -217,6 +223,18 @@ export class DirectiveResolver {
 
   }
 
+  parseAssetUrl( cmpMetadata: ComponentMetadata ): string {
+
+    if ( isBlank( cmpMetadata.moduleId ) ) {
+      return '';
+    }
+
+    const moduleId = cmpMetadata.moduleId;
+    const [,urlPathMatch=''] = moduleId.match( ASSET_URL_RE ) || [];
+    return `${urlPathMatch}/`;
+
+  }
+
   /**
    *
    * @param type
@@ -373,6 +391,7 @@ export class DirectiveResolver {
         {},
         directiveSettings as ComponentMetadata,
         {
+          moduleId: dm.moduleId,
           template: dm.template,
           templateUrl: dm.templateUrl,
           changeDetection: isPresent(dm.changeDetection) ?  dm.changeDetection : ChangeDetectionStrategy.Default

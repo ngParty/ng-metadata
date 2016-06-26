@@ -6,9 +6,13 @@ import {
   toPath,
   isJsObject,
   isIndex,
-  isKey
-} from "./lang";
+  isKey,
+  isArray,
+  isArguments
+} from './lang';
 
+
+const INFINITY = 1 / 0;
 /**
  * Wraps Javascript Objects
  */
@@ -470,6 +474,103 @@ export class ListWrapper {
     }
 
     return -1;
+  }
+
+
+  private static isFlattenable(value): boolean {
+    return isArray(value) || isArguments(value);
+  }
+
+  /**
+   * Appends the elements of `values` to `array`.
+   *
+   * @private
+   * @param {Array} array The array to modify.
+   * @param {Array} values The values to append.
+   * @returns {Array} Returns `array`.
+   */
+  private static arrayPush( array: any[], values: any[] ): any[] {
+    var index = -1,
+      length = values.length,
+      offset = array.length;
+
+    while ( ++index < length ) {
+      array[ offset + index ] = values[ index ];
+    }
+    return array;
+  }
+  /**
+   * The base implementation of `_.flatten` with support for restricting flattening.
+   *
+   * @private
+   * @param {Array} array The array to flatten.
+   * @param {number} depth The maximum recursion depth.
+   * @param {boolean} [predicate=isFlattenable] The function invoked per iteration.
+   * @param {boolean} [isStrict] Restrict to values that pass `predicate` checks.
+   * @param {Array} [result=[]] The initial result value.
+   * @returns {Array} Returns the new flattened array.
+   */
+  private static baseFlatten(
+    array: any[],
+    depth: number,
+    predicate = ListWrapper.isFlattenable,
+    isStrict = false,
+    result = []
+  ) {
+    var index = -1;
+    var length = array.length;
+
+    while ( ++index < length ) {
+      var value = array[ index ];
+      if ( depth > 0 && predicate( value ) ) {
+        if ( depth > 1 ) {
+          // Recursively flatten arrays (susceptible to call stack limits).
+          ListWrapper.baseFlatten( value, depth - 1, predicate, isStrict, result );
+        } else {
+          ListWrapper.arrayPush( result, value );
+        }
+      } else if ( !isStrict ) {
+        result[ result.length ] = value;
+      }
+    }
+    return result;
+  }
+
+
+  /**
+   * Flattens `array` a single level deep.
+   *
+   * @static
+   * @param {Array} array The array to flatten.
+   * @returns {Array} Returns the new flattened array.
+   * @example
+   *
+   * _.flatten([1, [2, [3, [4]], 5]]);
+   * // => [1, 2, [3, [4]], 5]
+   */
+  static flatten(array: any[]): any[] {
+    const length = array ? array.length : 0;
+    return length ? ListWrapper.baseFlatten(array, 1) : [];
+  }
+
+  /**
+   * Recursively flattens `array`.
+   *
+   * @static
+   * @param {Array} array The array to flatten.
+   * @returns {Array} Returns the new flattened array.
+   * @example
+   *
+   * _.flattenDeep([1, [2, [3, [4]], 5]]);
+   * // => [1, 2, 3, 4, 5]
+   */
+  static flattenDeep( array: any[] ): any[] {
+    const length = array
+      ? array.length
+      : 0;
+    return length
+      ? ListWrapper.baseFlatten( array, INFINITY )
+      : [];
   }
 
 }

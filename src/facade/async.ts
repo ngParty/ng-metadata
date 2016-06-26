@@ -1,5 +1,7 @@
 import { noop } from './lang';
-import { isFunction } from './lang';
+import { Subject } from 'rxjs/Subject';
+import { Subscription } from 'rxjs/Subscription';
+
 /**
  * Use by directives and components to emit custom Events.
  *
@@ -22,8 +24,8 @@ import { isFunction } from './lang';
  * export class ZippyComponent {
  *   visible: boolean = true;
  *
- *   @Output() open: EventEmitter<boolean> // used as interface
- *   @Output() close: EventEmitter<boolean> = new EventEmitter();
+ *   @Output() open = new EventEmitter<boolean>();
+ *   @Output() close = new EventEmitter<boolean>();
  *
  *   toggle() {
  *     this.visible = !this.visible;
@@ -41,92 +43,79 @@ import { isFunction } from './lang';
  *
  * Once a reference implementation of the spec is available, switch to it.
  */
-export class EventEmitter<T> {
-  /** @internal */
-  _isAsync: boolean;
+export class EventEmitter<T> extends Subject<T> {
+  // TODO: mark this as internal once all the facades are gone
+  // we can't mark it as internal now because EventEmitter exported via @angular/core would not
+  // contain this property making it incompatible with all the code that uses EventEmitter via
+  // facades, which are local to the code and do not have this property stripped.
+  // tslint:disable-next-line
+  private __isAsync: boolean;
 
-  /** @internal */
-  private _generatorOrNextFn: EventHandler<T>[] = [];
+
   /** @internal */
   private _ngExpressionBindingCb: ngEmitPayloadEvent<T> = noop;
-
-  /** @internal */
-  static makeNgExpBindingEmittable<T>( cb: Function ) {
-    //used in _createOutputBinding to attach statics methods on @Output bindings to behave as an EventEmitter
-    const ee = ((cb as any) as EventEmitter<T>);
-    ee._generatorOrNextFn = [];
-
-    ee.emit = function ( value: T ) {
-      EventEmitter.createEmit( value, ee, (cb as ngEmitPayloadEvent<T>) );
-    };
-
-    ee._dispose = function ( cbRef: EventHandler<T> ) {
-      EventEmitter.createDisposable( cbRef, ee )
-    };
-
-    ee.subscribe = function ( generatorOrNext?: EventHandler<T> ): Function {
-      return EventEmitter.createSubscribe( generatorOrNext, ee );
-    };
-  }
-
-  /** @internal */
-  private static createDisposable<T>( cbRef: EventHandler<T>, _context: EventEmitter<T> ) {
-    const refIdx = _context._generatorOrNextFn.indexOf(cbRef);
-    if ( refIdx === -1 ) {
-      return;
-    }
-    _context._generatorOrNextFn.splice( refIdx, 1 );
-  }
-
-  /** @internal */
-  private static createEmit<T>( value:T, _context: EventEmitter<T>, exprBindingCb?: ngEmitPayloadEvent<T> ) {
-    const payload = { $event: value };
-
-    if ( isFunction( exprBindingCb ) ) {
-      exprBindingCb( payload );
-    } else {
-      _context._ngExpressionBindingCb( payload );
-    }
-
-    // notify all subscribers
-    _context._generatorOrNextFn.forEach( observerFn => observerFn( value ) );
-  }
-
-  /** @internal */
-  private static createSubscribe<T>( generatorOrNext: EventHandler<T>, _context: EventEmitter<T> ): Disposable {
-    console.warn( 'NOTE: This is not a real Observable!' );
-    _context._generatorOrNextFn.push( generatorOrNext );
-
-    return () => _context._dispose( generatorOrNext );
-  }
-
 
   /**
    * Creates an instance of [EventEmitter], which depending on [isAsync],
    * delivers events synchronously or asynchronously.
    */
-  constructor( isAsync: boolean = true ) {
-    this._isAsync = isAsync;
-  }
-
-  /** @internal */
-  private _dispose( cbRef: EventHandler<T> ) {
-    EventEmitter.createDisposable( cbRef, this );
+  constructor( isAsync: boolean = false ) {
+    super();
+    this.__isAsync = isAsync;
   }
 
   /** @internal */
   wrapNgExpBindingToEmitter( cb: Function ) {
     //used in reassignBindingsAndCreteEventEmitters to attach the original @Output binding to the instance new EventEmitter
     this._ngExpressionBindingCb = ( cb as ngEmitPayloadEvent<T> );
+    // this could create memory leaks because the subscription would be never terminated
+    // super.subscribe((newValue)=>this._ngExpressionBindingCb({$event:newValue}));
   }
 
   emit( value: T ) {
-    EventEmitter.createEmit( value, this );
+    const payload = { $event: value };
+    // push just the value
+    super.next( value );
+    // our & binding needs to be called via { $event: value } because Angular 1 locals
+    this._ngExpressionBindingCb( payload );
   }
 
-  subscribe( generatorOrNext?: EventHandler<T>, error?: any, complete?: any ): Function {
-    return EventEmitter.createSubscribe( generatorOrNext, this );
+  subscribe(generatorOrNext?: any, error?: any, complete?: any): Subscription {
+    let schedulerFn: any /** TODO #9100 */;
+    let errorFn = (err: any): any /** TODO #9100 */ => null;
+    let completeFn = (): any /** TODO #9100 */ => null;
+
+    if (generatorOrNext && typeof generatorOrNext === 'object') {
+      schedulerFn = this.__isAsync
+        ? (value: any /** TODO #9100 */) => { setTimeout(() => generatorOrNext.next(value)) }
+        : (value: any /** TODO #9100 */) => { generatorOrNext.next(value) };
+
+      if (generatorOrNext.error) {
+        errorFn = this.__isAsync
+          ? (err) => { setTimeout(() => generatorOrNext.error(err)) }
+          : (err) => { generatorOrNext.error(err) };
+      }
+      if (generatorOrNext.complete) {
+        completeFn = this.__isAsync
+          ? () => { setTimeout(() => generatorOrNext.complete()) }
+          : () => { generatorOrNext.complete() };
+      }
+    } else {
+      schedulerFn = this.__isAsync
+        ? (value: any /** TODO #9100 */) => { setTimeout(() => generatorOrNext(value))}
+        : (value: any /** TODO #9100 */) => { generatorOrNext(value) };
+
+      if (error) {
+        errorFn = this.__isAsync ? (err) => { setTimeout(() => error(err)) } : (err) => { error(err) };
+      }
+      if (complete) {
+        completeFn = this.__isAsync ? () => { setTimeout(() => complete()) } : () => { complete() };
+      }
+    }
+
+    return super.subscribe( schedulerFn, errorFn, completeFn );
   }
+
 }
 
 
@@ -161,14 +150,5 @@ export interface EventHandler<T> extends Function {
 }
 
 /** @internal */
-interface ngEmitPayloadEvent<T> extends Function {
-  // signature for ngExpressionBindingCb to pass a standard payload $event
-  ({$event: T}): void;
-}
-
-/** @internal */
-interface Disposable extends Function {
-  // signature for dispose method returned from .subscribe() to safely unsubscribe later
-  ():void;
-}
+type ngEmitPayloadEvent<T> = ( $event: {$event: T} )=>void;
 

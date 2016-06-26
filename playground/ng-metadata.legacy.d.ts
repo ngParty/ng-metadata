@@ -1,10 +1,16 @@
+// import Subject = require('rxjs/Subject');
+declare type Observable<T> = any;
+declare type Subject<T> = any;
+
 declare module ngMetadataPlatform{
 
-  type AppRoot = string | Element | Document;
-  function bootstrap(ngModule: string, {element, strictDi}?: {
-    element?: AppRoot;
-    strictDi?: boolean;
-  }): void;
+  // type AppRoot = string | Element | Document;
+  // function bootstrap(ngModule: string, {element, strictDi}?: {
+  //   element?: AppRoot;
+  //   strictDi?: boolean;
+  // }): void;
+
+  function bootstrap(rootComponent: Type, providers: any[]): void;
 
   /**
    * A service that can be used to get and set the title of a current HTML document.
@@ -292,16 +298,21 @@ export const enum ChangeDetectionStrategy {
    * @param type
    * @returns {string}
    */
-  export function provide(type: ProviderType, {useClass, useValue}?: {
-    useClass?: Type;
-    useValue?: any;
+  export function provide(type: ProviderType, {useClass, useValue, useFactory, deps}?: {
+    useClass?: Type,
+    useValue?: any,
+    useFactory?: Function,
+    deps?: Object[]
   }): [string, Type];
 
   function Directive({selector, legacy}: {
     selector: string;
     legacy?: ng.IDirective;
+    inputs?: string[],
+    outputs?: string[],
+    providers?: Function[],
   }): ClassDecorator;
-  function Component({selector, template, templateUrl, inputs, attrs, outputs, legacy, changeDetection, directives}: {
+  function Component({selector, template, templateUrl, inputs, attrs, outputs, legacy, changeDetection, directives, moduleId}: {
     selector: string;
     template?: string;
     templateUrl?: string;
@@ -310,8 +321,11 @@ export const enum ChangeDetectionStrategy {
     attrs?: string[];
     legacy?: ng.IDirective;
     changeDetection?: ChangeDetectionStrategy;
-    directives?: Function[];
-    providers?: Function[];
+    directives?: Function[],
+    providers?: Function[],
+    viewProviders?: Function[],
+    pipes?: Function[],
+    moduleId?: string
   }): ClassDecorator;
   function Output(bindingPropertyName?: string): PropertyDecorator;
   function Input(bindingPropertyName?: string): PropertyDecorator;
@@ -895,13 +909,18 @@ export interface DoCheck {
   export function enableProdMode(): void;
 
   export class EventEmitter<T> {
+    private __isAsync;
+    /** @internal */
+    private _ngExpressionBindingCb;
     /**
      * Creates an instance of [EventEmitter], which depending on [isAsync],
      * delivers events synchronously or asynchronously.
      */
     constructor(isAsync?: boolean);
+    /** @internal */
+    wrapNgExpBindingToEmitter(cb: Function): void;
     emit(value: T): void;
-    subscribe(generatorOrNext?: EventHandler<T>, error?: any, complete?: any): Function;
+    subscribe(generatorOrNext?: any, error?: any, complete?: any): {unsubscribe():void};
   }
 
   export interface EventHandler<T> {
@@ -970,11 +989,23 @@ declare module ngMetadataCommon {
     abstract hasOption(value: any): boolean;
     registerOption(optionScope: ng.IScope, optionElement: ng.IAugmentedJQuery, optionAttrs: ng.IAttributes, interpolateValueFn?: Function, interpolateTextFn?: Function): void;
   }
+
+  export class AsyncPipe {
+    private static nextObjectID;
+    private static values;
+    private static subscriptions;
+    private static TRACK_PROP_NAME;
+    private static objectId(obj);
+    private static isPromiseOrObservable(obj);
+    private static getSubscriptionStrategy(input);
+    private static dispose(inputId);
+    transform(input: Observable<any> | ng.IPromise<any> | ng.IHttpPromise<any>, scope?: ng.IScope): any;
+  }
 }
 declare module "ng-metadata/core" {
   export = ngMetadataCore;
 }
-declare module "ng-metadata/platform" {
+declare module "ng-metadata/platform-browser-dynamic" {
   export = ngMetadataPlatform;
 }
 

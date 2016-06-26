@@ -1,27 +1,4 @@
-<h1>Todos yo!</h1>
-
-<h3>Todo List remaining: {{ $ctrl.todos | remainingTodos }}</h3>
-
-<add-todo on-add="$ctrl.createTodo(todo)"></add-todo>
-
-<ul class="demo-list">
-  <li ng-repeat="item in $ctrl.todos">
-
-    <todo-item
-      todo="item"
-      on-done="$ctrl.markAsDone($event)"
-      emit-test="$ctrl.outputWithEmitReceiver($event)"
-      idx="$index"
-    >
-      <button
-        ng-click="$ctrl.removeTodo(item)"
-        class="mdl-button mdl-js-button mdl-button--accent">
-        Remove
-      </button>
-    </todo-item>
-
-  </li>
-</ul>
+<todo-app></todo-app>
 
 <hr>
 
@@ -32,14 +9,14 @@
 </button>
 <div ng-if="$ctrl.showQueryExample">
   <h3>check your console logs mate!</h3>
-<tabs>
-  <tabs-content-child></tabs-content-child>
-  <button ng-click="$ctrl.addItem()">add contentChild</button>
-  <ul><li ng-repeat="item in $ctrl.items">
-    <tabs-content-child id="item"></tabs-content-child>
-    <button ng-click="$ctrl.removeItem(item)">remove</button>
-  </li></ul>
-</tabs>
+  <tabs>
+    <tabs-content-child></tabs-content-child>
+    <button ng-click="$ctrl.addItem()">add contentChild</button>
+    <ul><li ng-repeat="item in $ctrl.items">
+      <tabs-content-child id="item"></tabs-content-child>
+      <button ng-click="$ctrl.removeItem(item)">remove</button>
+    </li></ul>
+  </tabs>
 </div>
 
 <button
@@ -187,6 +164,18 @@
   </div>
 </section>
 
+<!--ASYNC PIPE EXAMPLE-->
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showAsyncPipeExample=!$ctrl.showAsyncPipeExample">
+    {{ $ctrl.showAsyncPipeExample ? 'hide' : 'show'}} <code>AsyncPipe</code> example
+  </button>
+  <div ng-if="$ctrl.showAsyncPipeExample">
+    <async-example></async-example>
+  </div>
+</section>
+
 <!--Title-->
 <section class="demo-content">
   <button
@@ -196,5 +185,17 @@
   </button>
   <div ng-if="$ctrl.showTitleHandler">
     <my-title-handler></my-title-handler>
+  </div>
+</section>
+
+<!--Attribute Directive-->
+<section class="demo-content">
+  <button
+    class="mdl-button mdl-js-button mdl-button--accent"
+    ng-click="$ctrl.showAttrDirective=!$ctrl.showAttrDirective">
+    {{ $ctrl.showAttrDirective? 'hide' : 'show'}} <code>Attribute Directive</code> example
+  </button>
+  <div ng-if="$ctrl.showAttrDirective">
+    <my-attribute-directive-example></my-attribute-directive-example>
   </div>
 </section>

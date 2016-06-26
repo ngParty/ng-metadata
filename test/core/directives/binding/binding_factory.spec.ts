@@ -6,6 +6,7 @@ import { DirectiveMetadata } from '../../../../src/core/directives/metadata_dire
 import { StringMapWrapper } from '../../../../src/facade/collections';
 import { _createDirectiveBindings } from '../../../../src/core/directives/binding/binding_factory';
 import { isFunction, isPresent } from '../../../../src/facade/lang';
+import { EventEmitter } from '../../../../src/facade/async';
 
 describe( `directives/binding/binding_factory`, () => {
 
@@ -93,13 +94,11 @@ describe( `directives/binding/binding_factory`, () => {
 
     } );
 
-    it( `should create array of attrs.$observe disposable callbacks for @Attr`, ()=> {
+    it( `should create array of attrs.$observe disposable callbacks for @Input('@')`, ()=> {
 
       const metadata = {
-        attrs: [
-          'foo: @'
-        ],
         inputs: [
+          'foo: @',
           'one: @oneAlias'
         ]
       } as DirectiveMetadata;
@@ -131,7 +130,7 @@ describe( `directives/binding/binding_factory`, () => {
 
     } );
 
-    it( `should set to property function which evaluates expression for @Output`, ()=> {
+    it( `should set to property EventEmitter instance which evaluates expression for @Output`, ()=> {
 
       const metadata = {
         outputs: [
@@ -149,8 +148,18 @@ describe( `directives/binding/binding_factory`, () => {
       expect( watchers.length ).to.equal( 0 );
       expect( observers.length ).to.equal( 0 );
       expect( Object.keys( ctrl ) ).to.deep.equal( [ 'onFoo', 'onOne' ] );
-      expect( ctrl.onFoo() ).to.equal( '$ctrl.parentFoo() evaluated' );
-      expect( ctrl.onOne() ).to.equal( '$ctrl.parentOne() evaluated' );
+      expect( ctrl.onFoo ).to.be.an.instanceOf( EventEmitter );
+      expect( ctrl.onOne ).to.be.an.instanceOf( EventEmitter );
+
+      (ctrl.onFoo as EventEmitter<void>).subscribe( ( val )=> {
+        expect( val ).to.equal( '$ctrl.parentFoo() evaluated' );
+      } );
+      (ctrl.onOne as EventEmitter<void>).subscribe( ( val )=> {
+        expect( val ).to.equal( '$ctrl.parentOne() evaluated' );
+      } );
+
+      (ctrl.onFoo as EventEmitter<any>).emit( '$ctrl.parentFoo() evaluated' );
+      (ctrl.onOne as EventEmitter<any>).emit( '$ctrl.parentOne() evaluated' );
 
     } );
 
