@@ -28,6 +28,11 @@ export const PARAM_REFLECT_META_KEY = 'design:paramtypes';
  */
 export const PROP_META_KEY = 'propMetadata';
 
+/**
+ * @internal
+ */
+export const DOWNGRADED_COMPONENT_NAME_KEY = 'downgradeComponentName';
+
 function isReflectMetadata( reflect: any ): boolean {
   return isPresent( reflect ) && isPresent( reflect.getMetadata );
 }
@@ -251,6 +256,14 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
 
   registerPropMetadata( propMetadata, typeOrFunc: Type ): void {
     this._reflect.defineMetadata( PROP_META_KEY, propMetadata, typeOrFunc );
+  }
+
+  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type ): void {
+    this._reflect.defineMetadata( DOWNGRADED_COMPONENT_NAME_KEY, componentName, typeOrFunc );
+  }
+
+  downgradedNg2ComponentName( typeOrFunc: Type ): string {
+    return this._reflect.getOwnMetadata( DOWNGRADED_COMPONENT_NAME_KEY, typeOrFunc );
   }
 
   interfaces( type: Type ): any[] {

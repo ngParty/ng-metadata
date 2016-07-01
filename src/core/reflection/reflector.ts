@@ -97,6 +97,14 @@ export class Reflector extends ReflectorReader {
     this.reflectionCapabilities.registerPropMetadata( parameters, typeOrFunc );
   }
 
+  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type ): void {
+    this.reflectionCapabilities.registerDowngradedNg2ComponentName( componentName, typeOrFunc );
+  }
+
+  downgradedNg2ComponentName( typeOrFunc: Type ): string {
+    return this.reflectionCapabilities.downgradedNg2ComponentName( typeOrFunc );
+  }
+
   /** @internal */
   _getReflectionInfo( typeOrFunc: any )/*: ReflectionInfo */ {
     /*if (isPresent(this._usedKeys)) {
