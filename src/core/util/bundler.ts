@@ -10,6 +10,14 @@ import { ListWrapper } from '../../facade/collections';
 
 export function bundle( ComponentClass: Type, otherProviders: any[] = [], NgModule?: ng.IModule ): ng.IModule {
 
+  // Support registering downgraded ng2 components directly
+  const downgradedNgComponentName = reflector.downgradedNg2ComponentName( ComponentClass );
+  if (downgradedNgComponentName) {
+    const ngModule = NgModule || global.angular.module( downgradedNgComponentName, [] );
+    ngModule.directive( downgradedNgComponentName, ComponentClass );
+    return ngModule;
+  }
+
   const ngModuleName = getInjectableName( ComponentClass );
   const ngModule = NgModule || global.angular.module( ngModuleName, [] );
   const annotations = reflector.annotations( ComponentClass );

@@ -18,6 +18,9 @@ export interface PlatformReflectionCapabilities {
   ownPropMetadata( typeOrFunc: Type ): {[key: string]: any[]},
   registerPropMetadata( propMetadata, typeOrFunc: Type ): void,
 
+  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type ): void,
+  downgradedNg2ComponentName( typeOrFunc: Type ): string
+
   getter( name: string ): GetterFn;
   setter( name: string ): SetterFn;
   method( name: string ): MethodFn;

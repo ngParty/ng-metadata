@@ -162,7 +162,7 @@ export function isJsObject( o: any ): boolean {
 
 export function isArguments(value: any): boolean {
   // Safari 8.1 incorrectly makes `arguments.callee` enumerable in strict mode.
-  return ('lenght' in value) && Object.prototype.hasOwnProperty.call(value, 'callee') &&
+  return ('length' in value) && Object.prototype.hasOwnProperty.call(value, 'callee') &&
     (!Object.prototype.propertyIsEnumerable.call(value, 'callee') || Object.prototype.toString.call(value) == argsTag);
 }
 
