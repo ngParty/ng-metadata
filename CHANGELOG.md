@@ -1,3 +1,13 @@
+<a name="2.1.0"></a>
+# [2.1.0](https://github.com/ngParty/ng-metadata/compare/2.0.0...v2.1.0) (2016-07-13)
+
+
+### Features
+
+* **upgrade:** add ngUpgrade integration support (#116) ([cdc86dc](https://github.com/ngParty/ng-metadata/commit/cdc86dc)), closes [#83](https://github.com/ngParty/ng-metadata/issues/83)
+
+
+
 <a name="2.0.0"></a>
 # [2.0.0](https://github.com/ngParty/ng-metadata/compare/1.12.4...v2.0.0) (2016-06-26)
 
