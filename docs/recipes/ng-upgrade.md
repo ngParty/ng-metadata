@@ -1,7 +1,7 @@
 # Hybrid Angular 1 and 2 apps with "ngUpgrade"
 
 The Angular core team provides a module called "ngUpgrade" which gives us the power to create a hybrid application -
-one in which we use both Angular 1 and Angular 2 together. 
+one in which we use both Angular 1 and Angular 2 together.
 
 This is a very natural migration-step for large Angular 1 apps, because it allows us to mix and match Components and Providers
 from the two frameworks.
@@ -20,7 +20,7 @@ In order to "supercharge" `@angular/upgrade`'s UpdateAdapter we pass its constru
 *upgrade-adapter.ts*:
 
 ```typescript
-import { NgMetadataUpgradeAdapter } 'ng-metadata/upgrade';
+import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade';
 import { UpgradeAdapter } from '@angular/upgrade';
 
 export const upgradeAdapter = new NgMetadataUpgradeAdapter( UpgradeAdapter );
@@ -123,7 +123,7 @@ import { Component } from '@angular/core';
   template: `<h1>Hello, ng2!</h1>`,
 })
 export class Ng2Component {
-  
+
   constructor() {
     console.log( 'Woop!' );
   }
@@ -151,7 +151,7 @@ import { Ng2Component } from './ng2.component.ts';
 
 // Our old Angular 1 Module
 export const FooModule = angular.module( 'foo', [] )
-  
+
   // The classic `provide()` helper from ng-metadata would look
   // like this for an Angular 1 Component.
   // .directive( ...provide( SomeNg1Component ) )
@@ -237,7 +237,7 @@ import { $state } from '../some-file.ts'
  template: `<h1>Ng2</h1>`,
 })
 class Ng2Component {
- 
+
  constructor(
    @Inject('$rootScope') private $rootScope: any, // by name using @Inject
    private $state: $state // by type using the user defined token
