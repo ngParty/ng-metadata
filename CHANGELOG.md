@@ -1,3 +1,13 @@
+<a name="2.1.1"></a>
+## [2.1.1](https://github.com/ngParty/ng-metadata/compare/2.1.0...v2.1.1) (2016-07-15)
+
+
+### Bug Fixes
+
+* **upgrade:** fix adapter export and typo in docs (#120) ([3c59319](https://github.com/ngParty/ng-metadata/commit/3c59319)), closes [(#120](https://github.com/(/issues/120)
+
+
+
 <a name="2.1.0"></a>
 # [2.1.0](https://github.com/ngParty/ng-metadata/compare/2.0.0...v2.1.0) (2016-07-13)
 
