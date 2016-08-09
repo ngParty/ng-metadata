@@ -104,7 +104,7 @@ import { AdminDirectives, AdminProviders, AdminPipes, adminConfig } from './modu
 })
 export class AdminComponent{}
 
-const AdminModule = bundle(AdminComponent,[adminConfig]);
+const AdminModule = bundle(AdminComponent,[adminConfig]).name;
 
 export const AppModule = angular.module('myApp',[UserModule, AdminModule]);
 ```
