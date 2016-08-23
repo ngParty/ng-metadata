@@ -8,6 +8,7 @@ export abstract class NgForm implements ng.IFormController {
   $invalid: boolean;
   $submitted: boolean;
   $error: any;
+  $name: string;
   $pending: any;
 
   $addControl( control: angular.INgModelController ): void {}
