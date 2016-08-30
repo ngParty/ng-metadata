@@ -210,7 +210,7 @@ ng-metadata requires certain polyfills in the application environment. We instal
 
 Install peer dependencies by running:
 
-`npm i --save reflect-metadata core-js rxjs@5.0.0-beta.6`
+`npm i --save reflect-metadata core-js rxjs@5.0.0-beta.11`
 
 **core-js** - monkey patches the global context (window) with essential features of ES2015 (ES6). Developers may substitute an alternative polyfill that provides the same core APIs. This dependency should go away once these APIs are implemented by all supported ever-green browsers.
 
