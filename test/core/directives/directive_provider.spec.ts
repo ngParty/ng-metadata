@@ -71,6 +71,7 @@ describe( `directives/directive_provider`, ()=> {
     expect( isFunction( directiveFactory ) ).to.equal( true );
 
     expect( directiveFactory() ).to.deep.equal( {
+      restrict: 'A',
       require: [ 'myClicker' ],
       controller: ddo.controller,
       link: (ddo.link as ng.IDirectivePrePost),
@@ -193,6 +194,7 @@ describe( `directives/directive_provider`, ()=> {
     expect( isFunction( directiveFactory ) ).to.equal( true );
 
     expect( ddo ).to.deep.equal( {
+      restrict: 'E',
       scope: {},
       bindToController: {
         // enableColor: '=',
@@ -281,6 +283,7 @@ describe( `directives/directive_provider`, ()=> {
       expect( directiveName ).to.equal( 'validator' );
       expect( isFunction( directiveFactory ) ).to.equal( true );
       expect( directiveFactory() ).to.deep.equal( {
+        restrict: 'A',
         require: [ 'validator','^ngModel' ],
         controller: ddo.controller,
         link: ddo.link as ng.IDirectiveLinkFn,
@@ -313,6 +316,7 @@ describe( `directives/directive_provider`, ()=> {
       expect( directiveName ).to.equal( 'validator' );
       expect( isFunction( directiveFactory ) ).to.equal( true );
       expect( directiveFactory() ).to.deep.equal( {
+        restrict: 'A',
         require: [ 'validator','^ngModel','^myCssMutator','^myCssExtractor' ],
         controller: ddo.controller,
         link: ddo.link as ng.IDirectiveLinkFn,
@@ -344,6 +348,7 @@ describe( `directives/directive_provider`, ()=> {
         expect( isFunction(ddo.compile) ).to.equal(true);
 
         expect( ddo ).to.deep.equal( {
+          restrict: 'A',
           require: [ 'withCompile' ],
           controller: ddo.controller,
           compile: ddo.compile,
@@ -415,6 +420,7 @@ describe( `directives/directive_provider`, ()=> {
         expect( ddo.link ).to.equal( WithLink.link );
 
         expect( ddo ).to.deep.equal( {
+          restrict: 'A',
           require: [ 'withCompile' ],
           controller: ddo.controller,
           link: WithLink.link as ng.IDirectiveLinkFn,

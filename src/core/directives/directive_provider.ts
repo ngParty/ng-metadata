@@ -61,6 +61,7 @@ export class DirectiveProvider {
     const requireMap = this.directiveResolver.getRequiredDirectivesMap( type );
     const lfHooks = resolveImplementedLifeCycleHooks(type);
     const _ddo = {
+      restrict: 'A',
       controller: _controller,
       link: {
         pre: function () { _ddo._ngOnInitBound() },
@@ -85,6 +86,7 @@ export class DirectiveProvider {
 
       const assetsPath = this.directiveResolver.parseAssetUrl( metadata );
       const componentSpecificDDO = {
+        restrict: 'E',
         scope: {},
         bindToController: {},
         controllerAs: DirectiveProvider._controllerAs,
