@@ -1,3 +1,18 @@
+<a name="2.2.0"></a>
+# [2.2.0](https://github.com/ngParty/ng-metadata/compare/2.1.1...v2.2.0) (2016-08-30)
+
+
+### Bug Fixes
+
+* **core/di/reflective_provider:** allow boolean false value as useValue provider value (#134) ([f4e583e](https://github.com/ngParty/ng-metadata/commit/f4e583e)), closes [#123](https://github.com/ngParty/ng-metadata/issues/123)
+* **core/directives/ng_form:** add $name property (#130) ([f2c28d0](https://github.com/ngParty/ng-metadata/commit/f2c28d0)), closes [#127](https://github.com/ngParty/ng-metadata/issues/127)
+
+### Features
+
+* **core/directives:** explicitly set restriction type for Directive/Component to A/E (#132) ([e0af65d](https://github.com/ngParty/ng-metadata/commit/e0af65d)), closes [#128](https://github.com/ngParty/ng-metadata/issues/128)
+
+
+
 <a name="2.1.1"></a>
 ## [2.1.1](https://github.com/ngParty/ng-metadata/compare/2.1.0...v2.1.1) (2016-07-15)
 
