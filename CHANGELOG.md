@@ -19,7 +19,7 @@
 
 ### Bug Fixes
 
-* **upgrade:** fix adapter export and typo in docs (#120) ([3c59319](https://github.com/ngParty/ng-metadata/commit/3c59319)), closes [(#120](https://github.com/(/issues/120)
+* **upgrade:** fix adapter export and typo in docs (#120) ([3c59319](https://github.com/ngParty/ng-metadata/commit/3c59319)), closes [#120](https://github.com/ngParty/ng-metadata/issues/120)
 
 
 
