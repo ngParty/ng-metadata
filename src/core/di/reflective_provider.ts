@@ -1,4 +1,4 @@
-import { isType, isArray, isString, getFuncName, isBlank } from '../../facade/lang';
+import { isType, isArray, isString, getFuncName, isBlank, isPresent } from '../../facade/lang';
 
 import { reflector } from '../reflection/reflection';
 
@@ -15,7 +15,7 @@ export function resolveReflectiveProvider( provider: Provider ): {method: string
 
   const {token} = provider;
 
-  if (provider.useValue) {
+  if (isPresent(provider.useValue)) {
     const [name,value] = provide( token, { useValue: provider.useValue } );
     const method = 'value';
     return { method, name, value };
@@ -39,6 +39,8 @@ export function resolveReflectiveProvider( provider: Provider ): {method: string
     // annotate(target, 'factory', {name});
     // annotate(target, 'inject', [toInjectorName(provider.useExisting)]);
   }
+
+  throw new Error('invalid provider type! please specify one of: [useValue,useFactory,useClass]');
 
 }
 

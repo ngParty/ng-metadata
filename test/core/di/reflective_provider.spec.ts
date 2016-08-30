@@ -29,18 +29,33 @@ describe( `di/reflective_provider`, () => {
 
   describe( `#resolveReflectiveProvider`, () => {
 
-    it( `should resolve value by useValue and provide metadata for ngModule`, () => {
+    it( `should throw error when no valid provider type is defined`, () => {
 
       const ValueToken = new OpaqueToken('helloToken');
       const providers = [
+        createProvider( { provide: ValueToken, useValueee: 'hello' } as any ),
+        createProvider( { provide: 'viaString', useValue: 'stringzzzz' } )
+      ];
+
+      expect(() => providers.map(resolveReflectiveProvider)).to.throw();
+
+    } );
+
+    it( `should resolve value by useValue and provide metadata for ngModule`, () => {
+
+      const ValueToken = new OpaqueToken('helloToken');
+      const FalseToken = new OpaqueToken('helloFalse');
+      const providers = [
         createProvider( { provide: ValueToken, useValue: 'hello' } ),
         createProvider( { provide: 'viaString', useValue: 'stringzzzz' } ),
+        createProvider( { provide: FalseToken, useValue: false } ),
       ];
 
       const actual = providers.map(resolveReflectiveProvider);
       const expected = [
         { method: 'value', name: 'helloToken', value: 'hello' },
-        { method: 'value', name: 'viaString', value: 'stringzzzz' }
+        { method: 'value', name: 'viaString', value: 'stringzzzz' },
+        { method: 'value', name: 'helloFalse', value: false }
       ];
 
       expect( actual ).to.deep.equal( expected );
