@@ -45,8 +45,9 @@ export function renderFactory( $compile: ng.ICompileService, $scope: any ) {
 
     }
 
-    jqHost.attr(attrs);
-
+    if (attrs){
+      jqHost.attr(attrs);
+    }
     if (jqChildren) {
       jqHost.append(jqChildren);
     }
