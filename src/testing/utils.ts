@@ -44,7 +44,7 @@ export function renderFactory( $compile: ng.ICompileService, $scope: any ) {
       jqHost = angular.element( hostElement );
 
     }
-
+    // since attributes can be undefined we check them
     if (attrs){
       jqHost.attr(attrs);
     }
