@@ -468,7 +468,7 @@ class MenuDropdown {
 ## @Output
 
 An alternative and more declarative way to using the `outputs` property on `@Component`/`@Directive`.
-Via `@Output` and `EventEmitter` you can emit custom events to parent component
+Via `@Output` and `EventEmitter` you can emit custom events to parent component. These output parameters are optional in the template.
 
 *Example:*
 
