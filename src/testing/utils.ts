@@ -44,9 +44,10 @@ export function renderFactory( $compile: ng.ICompileService, $scope: any ) {
       jqHost = angular.element( hostElement );
 
     }
-
-    jqHost.attr(attrs);
-
+    // since attributes can be undefined we check them
+    if (attrs){
+      jqHost.attr(attrs);
+    }
     if (jqChildren) {
       jqHost.append(jqChildren);
     }
