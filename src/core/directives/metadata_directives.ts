@@ -1225,3 +1225,38 @@ export class HostBindingMetadata {
 export class HostListenerMetadata {
   constructor(public eventName: string, public args?: string[]) {}
 }
+
+/**
+ * Interface for creating NgModuleMetadata
+ */
+export interface NgModuleMetadataType {
+  providers?: any[]; // Decorated providers
+  declarations?: Array<Type|Type[]>; // Decorated Components, Directives or Pipes
+  imports?: Array<Type|string>; // Other NgModules or string names of Angular 1 modules
+  exports?: Array<Type|any[]>; // Not used, only here for interface compatibility
+  entryComponents?: Array<Type|any[]>; // Not used, only here for interface compatibility
+  bootstrap?: Array<Type|any[]>; // Not used, only here for interface compatibility
+  schemas?: Array<any[]>; // Not used, only here for interface compatibility
+}
+
+/**
+ * Declares an Angular Module.
+ */
+export class NgModuleMetadata extends InjectableMetadata implements NgModuleMetadataType {
+
+  get providers(): any[] { return this._providers; }
+  private _providers: any[];
+
+  declarations: Array<Type|Type[]>;
+
+  imports: Array<Type|string>;
+
+  constructor(options: NgModuleMetadataType = {}) {
+    // We cannot use destructuring of the constructor argument because `exports` is a
+    // protected symbol in CommonJS and closure tries to aggressively optimize it away.
+    super();
+    this._providers = options.providers;
+    this.declarations = options.declarations;
+    this.imports = options.imports;
+  }
+}
