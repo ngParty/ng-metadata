@@ -1,5 +1,10 @@
 import { createBootstrapFn } from './browser_utils'
 
-export const bootstrap = createBootstrapFn()
-
 export * from './title';
+
+export const platformBrowserDynamic = () => {
+  return {
+    bootstrapModule: createBootstrapFn(),
+  }
+}
+
