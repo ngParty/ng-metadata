@@ -1,7 +1,9 @@
 import { global } from '../../facade/lang';
 import { reflector } from '../reflection/reflection';
-import { ComponentMetadata } from '../directives/metadata_directives';
+import { ComponentMetadata, NgModuleMetadata } from '../directives/metadata_directives';
 import { getInjectableName, provide } from '../di/provider';
+import { isNgModule } from '../di/provider_util';
+
 import {
   _isTypeRegistered, _normalizeProviders, _getNgModuleMetadataByType,
   _registerTypeProvider
@@ -54,4 +56,46 @@ export function bundle( ComponentClass: Type, otherProviders: any[] = [], NgModu
   _normalizeProviders( ngModule, otherProviders );
 
   return ngModule;
+}
+
+export function bundleNgModule( NgModuleClass: Type, existingAngularModule?: ng.IModule ): ng.IModule {
+
+  const angularModuleName = getInjectableName( NgModuleClass );
+  const angularModule = existingAngularModule || global.angular.module( angularModuleName, [] );
+  const annotations = reflector.annotations( NgModuleClass );
+  const ngModuleAnnotation: NgModuleMetadata = annotations[ 0 ];
+  const { declarations = [], providers = [], imports = [] }={} = ngModuleAnnotation;
+
+  _normalizeProviders( angularModule, declarations );
+  _normalizeProviders( angularModule, providers );
+
+  /**
+   * Process `imports`
+   */
+
+  // 1. imports which are not NgModules
+  const nonNgModuleImports: any[] = imports.filter((imported) => {
+    if (typeof imported !== 'function') {
+      return true
+    }
+    const annotations = reflector.annotations( imported );
+    return !isNgModule(ngModuleAnnotation)
+  })
+
+  _normalizeProviders( angularModule, nonNgModuleImports );
+
+  // 2.imports which are NgModules
+  const NgModuleImports: any[] = imports.filter((imported) => {
+    if (typeof imported !== 'function') {
+      return false
+    }
+    const annotations = reflector.annotations( imported );
+    return isNgModule(ngModuleAnnotation)
+  })
+
+  NgModuleImports.forEach(( importedNgModule: Type ) => {
+    bundleNgModule(importedNgModule, angularModule)
+  })
+
+  return angularModule;
 }

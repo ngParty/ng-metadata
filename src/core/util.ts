@@ -1,2 +1,2 @@
 export * from './util/decorators';
-export { bundle } from './util/bundler';
+export { bundle, bundleNgModule } from './util/bundler';
