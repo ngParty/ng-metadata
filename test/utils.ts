@@ -325,7 +325,7 @@ export function ElementFactory() {
       this._eventListeners.push({ eventName, cb } )
     },
     off(eventName?){
-
+      if(!eventName) this._eventListeners = [];
     },
     eq(idx:number){
       return isArray(_$element) ? _$element[idx] : _$element
@@ -338,7 +338,12 @@ export function ElementFactory() {
     injector(){
       return $InjectorStatic
     },
-    controller( ctrlName: string ){}
+    controller( ctrlName: string ){},
+    remove(){
+      this._eventListeners.forEach(function(evtHandler:{eventName:string, cb:Function}) {
+        if(evtHandler.eventName === "$destroy") evtHandler.cb();
+      });
+    }
   };
 
   return _$element;
