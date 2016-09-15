@@ -15,7 +15,7 @@ export class NgMetadataUpgradeAdapter {
     /**
      * Manage the @angular/upgrade singleton
      */
-    this._upgradeAdapter = new UpgradeAdapter();
+    this._upgradeAdapter = UpgradeAdapter;
     /**
      * Used to bootstrap a hybrid Angular 1 and Angular 2 application,
      * using the same signature as `bootstrap` from ng-metadata/platform-browser-dynamic
