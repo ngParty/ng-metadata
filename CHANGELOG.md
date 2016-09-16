@@ -1,3 +1,14 @@
+<a name="2.2.1"></a>
+## [2.2.1](https://github.com/ngParty/ng-metadata/compare/2.2.0...v2.2.1) (2016-09-16)
+
+
+### Bug Fixes
+
+* **core/directives/directive_utils#_setupDestroyHandler:** remove element.off() on scope  event (#145) ([cbc2e20](https://github.com/ngParty/ng-metadata/commit/cbc2e20)), closes [#143](https://github.com/ngParty/ng-metadata/issues/143)
+* **testing:** Add a check on attributes before assigning to element i… (#137) ([cbb245d](https://github.com/ngParty/ng-metadata/commit/cbb245d)), closes [#136](https://github.com/ngParty/ng-metadata/issues/136)
+
+
+
 <a name="2.2.0"></a>
 # [2.2.0](https://github.com/ngParty/ng-metadata/compare/2.1.1...v2.2.0) (2016-08-30)
 
