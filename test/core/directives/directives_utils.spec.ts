@@ -75,14 +75,28 @@ describe( `directives/directives_utils`, () => {
     it( `should properly setup cleanup on directive destroy`, () => {
 
       sandbox.spy( ctrl, 'ngOnDestroy' );
-      sandbox.spy( $element, 'off' );
 
       _setupDestroyHandler( $scope as any, $element as any, ctrl, true, watchers, observers );
 
       $scope.$$events[ 0 ].cb();
 
       expect( (ctrl.ngOnDestroy as Sinon.SinonSpy).called ).to.equal( true );
-      expect( ($element.off as Sinon.SinonSpy).called ).to.equal( true );
+
+    } );
+
+    it( `should trigger $element.$destroy event on element removal`, () => {
+
+      var destroyHandlerSpy = sandbox.spy();
+
+      $element.on( "$destroy", destroyHandlerSpy );
+
+      _setupDestroyHandler( $scope as any, $element as any, ctrl, true, watchers, observers );
+
+      $scope.$$events[ 0 ].cb();
+
+      $element.remove();
+
+      expect( destroyHandlerSpy.called ).to.equal( true );
 
     } );
 

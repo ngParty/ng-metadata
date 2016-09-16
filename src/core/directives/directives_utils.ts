@@ -40,6 +40,5 @@ export function _setupDestroyHandler(
 
     watchersToDispose.forEach( _watcherDispose=>_watcherDispose() );
     observersToDispose.forEach( _observerDispose=>_observerDispose() );
-    element.off();
   } );
 }
