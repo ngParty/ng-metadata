@@ -1,5 +1,5 @@
 export * from './src/core/di';
-export { bundle, bundleNgModule } from './src/core/util'
+export { bundle } from './src/core/util'
 export {
   Directive,
   Component,

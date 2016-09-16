@@ -4,7 +4,7 @@ import { isArray, isFunction, assign } from '../src/facade/lang';
 // _private helpers for testing
 // ============================
 
-export function createNgModule() {
+export function createAngular1Module() {
   return {
     module( name, requires?: string[] ){
       const _m = {
