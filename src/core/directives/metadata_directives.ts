@@ -1231,7 +1231,7 @@ export class HostListenerMetadata {
  */
 export interface NgModuleMetadataType {
   providers?: any[]; // Decorated providers
-  declarations?: Array<Type>; // Decorated Components, Directives or Pipes
+  declarations?: Array<Type|Type[]>; // Decorated Components, Directives or Pipes
   imports?: Array<Type|string>; // Other NgModules or string names of Angular 1 modules
   // exports?: Array<Type|any[]>; NOT SUPPORTED
   // entryComponents?: Array<Type|any[]>; NOT SUPPORTED
@@ -1247,7 +1247,7 @@ export class NgModuleMetadata extends InjectableMetadata implements NgModuleMeta
   get providers(): any[] { return this._providers; }
   private _providers: any[];
 
-  declarations: Array<Type>;
+  declarations: Array<Type|Type[]>;
 
   imports: Array<Type|string>;
 
