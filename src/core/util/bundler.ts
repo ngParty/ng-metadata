@@ -24,7 +24,7 @@ function _bundleComponent( ComponentClass: Type, otherProviders: any[] = [], exi
   const angular1Module = existingAngular1Module || global.angular.module( angular1ModuleName, [] );
   const annotations = reflector.annotations( ComponentClass );
   const cmpAnnotation: ComponentMetadata = annotations[ 0 ];
-  const { directives = [], pipes = [], providers = [], viewProviders = [] }={} = cmpAnnotation;
+  const { providers = [], viewProviders = [] }={} = cmpAnnotation;
 
   // process component
   const [cmpName,cmpFactoryFn] = provide( ComponentClass );
@@ -38,16 +38,9 @@ function _bundleComponent( ComponentClass: Type, otherProviders: any[] = [], exi
   // _registerTypeProvider( angular1Module, ComponentClass, { moduleMethod, name: cmpName, value: cmpFactoryFn } );
   angular1Module[moduleMethod]( cmpName, cmpFactoryFn );
 
-  // 1. process component/directive decorator providers/viewProviders/pipes
+  // 1. process component/directive decorator providers/viewProviders
   _normalizeProviders( angular1Module, providers );
   _normalizeProviders( angular1Module, viewProviders );
-  _normalizeProviders( angular1Module, pipes );
-
-
-  // step through all directives
-  ListWrapper.flattenDeep(directives).forEach( ( directiveType: Type ) => {
-    _bundleComponent( directiveType, [], angular1Module );
-  } );
 
   // 2. process otherProviders argument
   // - providers can be string(angular1Module reference), Type, StringMap(providerLiteral)
