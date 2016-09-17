@@ -938,13 +938,11 @@ export class ComponentMetadata extends DirectiveMetadata {
   template: string;
   styleUrls: string[];
   styles: string[];
-  directives: Array<Type | any[]>;
-  pipes: Array<Type | any[]>;
 
   constructor({
     selector, inputs, attrs, outputs, host, exportAs, moduleId, providers, viewProviders,
     changeDetection = ChangeDetectionStrategy.Default, queries, templateUrl, template,
-    styleUrls, styles, directives, pipes, legacy
+    styleUrls, styles, legacy
   }: {
     selector?: string,
     inputs?: string[],
@@ -961,8 +959,6 @@ export class ComponentMetadata extends DirectiveMetadata {
     template?: string,
     styleUrls?: string[],
     styles?: string[],
-    directives?: Array<Type | any[]>,
-    pipes?: Array<Type | any[]>,
     legacy?: LegacyDirectiveDefinition
   } = {}) {
     super({
@@ -983,8 +979,6 @@ export class ComponentMetadata extends DirectiveMetadata {
     this.template = template;
     this.styleUrls = styleUrls;
     this.styles = styles;
-    this.directives = directives;
-    this.pipes = pipes;
     this.moduleId = moduleId;
   }
 }
