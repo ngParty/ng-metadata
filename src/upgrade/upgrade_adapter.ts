@@ -1,8 +1,3 @@
-<<<<<<< f1614e895e2a925e7b66f7c86d19df610a110d30
-=======
-import { UpgradeAdapter, UpgradeAdapterInstance } from './upgrade';
-// import { createBootstrapFn } from '../platform/browser_utils';
->>>>>>> refactor(core): Add NgModule, use it for angular1Module bundling
 import { reflector } from '../core/reflection/reflection';
 import { getInjectableName, OpaqueToken } from '../core/di';
 import { ProviderLiteral } from '../core/di/provider_util';
