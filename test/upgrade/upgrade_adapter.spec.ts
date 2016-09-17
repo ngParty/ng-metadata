@@ -1,14 +1,12 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 import { NgMetadataUpgradeAdapter } from '../../src/upgrade/upgrade_adapter'
-import { Component, OpaqueToken, getInjectableName } from '../../core'
+import { Component, OpaqueToken, getInjectableName, NgModule } from '../../core'
 import { reflector } from '../../src/core/reflection/reflection';
 
 class MockAngularUpgradeAdapter {
+  constructor(ngModule: Type) {}
   bootstrap(element: Element, modules?: any[], config?: angular.IAngularBootstrapConfig): void {
-    return void 0
-  }
-  addProvider(provider: Type | any[] | any): void {
     return void 0
   }
   downgradeNg2Provider(token: any): Function {
@@ -22,6 +20,7 @@ class MockAngularUpgradeAdapter {
   }
 }
 
+let instantiatedNgUpgradeAdapter: MockAngularUpgradeAdapter
 let upgradeAdapter: NgMetadataUpgradeAdapter
 
 describe( `upgrade`, () => {
@@ -29,39 +28,25 @@ describe( `upgrade`, () => {
   describe( `NgMetadataUpgradeAdapter`, () => {
 
     let sandbox: Sinon.SinonSandbox;
+
     beforeEach( () => {
+
       sandbox = sinon.sandbox.create();
+
+      @NgModule({})
+      class AppModule {}
+
+      instantiatedNgUpgradeAdapter = new MockAngularUpgradeAdapter(AppModule)
+      upgradeAdapter = new NgMetadataUpgradeAdapter(instantiatedNgUpgradeAdapter)
+
     } );
+
     afterEach( () => {
       sandbox.restore();
     } );
 
-    beforeEach( () => {
-      upgradeAdapter = new NgMetadataUpgradeAdapter( MockAngularUpgradeAdapter );
-    } )
-
-    afterEach( () => {
-      sandbox.restore();
-    } );
-
-    it( `should set the internal _upgradeAdapter singleton`, () => {
-      expect( JSON.stringify( upgradeAdapter._upgradeAdapter ) ).to.equal( JSON.stringify( new MockAngularUpgradeAdapter() ) );
-    } );
-
-    describe( `#addProvider`, () => {
-
-      it( `should call the internal adapter's addProvider() method with the given provider`, () => {
-
-          sandbox.spy( upgradeAdapter._upgradeAdapter, 'addProvider' );
-
-          class Ng2Provider {}
-
-          upgradeAdapter.addProvider( Ng2Provider );
-
-          expect( (upgradeAdapter._upgradeAdapter.addProvider as Sinon.SinonSpy).calledWith( Ng2Provider ) ).to.equal( true );
-
-      } );
-
+    it( `should store a reference to the given upgradeAdapter singleton`, () => {
+      expect( JSON.stringify( upgradeAdapter._upgradeAdapter ) ).to.equal( JSON.stringify( instantiatedNgUpgradeAdapter ) );
     } );
 
     describe( `#upgradeNg1Provider`, () => {

@@ -1,29 +1,43 @@
-import { UpgradeAdapter, UpgradeAdapterInstance } from './upgrade';
-// import { createBootstrapFn } from '../platform/browser_utils';
 import { reflector } from '../core/reflection/reflection';
 import { getInjectableName, OpaqueToken } from '../core/di';
 import { ProviderLiteral } from '../core/di/provider_util';
 import { resolveDirectiveNameFromSelector } from '../facade/lang';
 
+/**
+ * `UpgradeAdapterRef` controls a hybrid AngularJS v1 / Angular v2 application,
+ * but we don't have a use for it right now so no point in creating an interface for it...
+ */
+export type UpgradeAdapterRef = void;
+
+export interface UpgradeAdapterInstance {
+  /**
+   * Allows Angular v2 Component to be used from AngularJS v1.
+   */
+  downgradeNg2Component(type: Type): Function;
+  /**
+   * Bootstrap a hybrid AngularJS v1 / Angular v2 application.
+   */
+  bootstrap(element: Element, modules?: any[], config?: angular.IAngularBootstrapConfig): UpgradeAdapterRef;
+  /**
+   * Allows Angular v2 service to be accessible from AngularJS v1.
+   */
+  downgradeNg2Provider(token: any): Function;
+  /**
+   * Allows AngularJS v1 service to be accessible from Angular v2.
+   */
+  upgradeNg1Provider(name: string, options?: { asToken: any; }): void;
+}
+
+export interface UpgradeAdapter {
+  new (ng2AppModule: Type): UpgradeAdapterInstance;
+}
+
 export class NgMetadataUpgradeAdapter {
 
-  bootstrap: Function;
-
-  _upgradeAdapter: UpgradeAdapterInstance;
-
-  constructor( UpgradeAdapter: UpgradeAdapter ) {
-    /**
-     * Manage the @angular/upgrade singleton
-     */
-    this._upgradeAdapter = new UpgradeAdapter();
-    /**
-     * Used to bootstrap a hybrid Angular 1 and Angular 2 application,
-     * using the same signature as `bootstrap` from ng-metadata/platform-browser-dynamic
-     *
-     * E.g. `upgradeAdapter.bootstrap(AppComponent, providers)`
-     */
-    // this.bootstrap = createBootstrapFn(this._upgradeAdapter.bootstrap.bind(this._upgradeAdapter));
-  }
+  /**
+   * Store a reference to the instantiated upgradeAdapter
+   */
+  constructor( public _upgradeAdapter: UpgradeAdapterInstance ) {}
 
   /**
    * Used to register an Angular 2 component as a directive on an Angular 1 module,
@@ -54,13 +68,6 @@ export class NgMetadataUpgradeAdapter {
     const [ directiveName, directiveFactory ] = this.downgradeNg2Component( component );
     reflector.registerDowngradedNg2ComponentName( directiveName, directiveFactory );
     return directiveFactory;
-  }
-
-  /**
-   * Adds an Angular 2 provider to the hybrid application.
-   */
-  addProvider( provider: Type | any[] | any ): void {
-    return this._upgradeAdapter.addProvider( provider );
   }
 
   /**
