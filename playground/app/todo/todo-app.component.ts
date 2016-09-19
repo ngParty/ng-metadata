@@ -1,17 +1,13 @@
 import { Component, EventHandler } from 'ng-metadata/core';
 
 import { TodoModel, TodoStore } from './todo-store.service';
-import { AddTodoCmp } from './add-todo.component';
-import { TodoItemCmp } from './todo-item.component';
-import { RemainingTodosPipe } from './remaining-todos.pipe'
 
 @Component( {
   selector: 'todo-app',
   moduleId: module.id,
   templateUrl: './todo-app.html',
-  directives: [ AddTodoCmp, TodoItemCmp ],
+  // note that this is private ( hierarchical ) in ng2
   providers: [ TodoStore ],
-  pipes: [ RemainingTodosPipe ],
   legacy: { transclude: true }
 } )
 export class TodoAppCmp{
