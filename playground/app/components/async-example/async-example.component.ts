@@ -14,7 +14,7 @@ import { Component, Inject } from 'ng-metadata/core';
      <ul><li ng-repeat="u in $ctrl.stream$ | async:this">{{ u }}</li></ul>`
   )
 })
-class AsyncTaskComponent {
+export class AsyncTaskComponent {
 
   clock$ = Observable.create((observer: Subscriber<number>) => {
     this.$interval(() => observer.next(new Date().getTime()), 500);
@@ -28,7 +28,6 @@ class AsyncTaskComponent {
 
 @Component({
   selector: 'async-example',
-  directives: [AsyncTaskComponent],
   template: (
     `<button ng-click="$ctrl.renderTimers=!$ctrl.renderTimers">Show Timers</button>
      <async-task ng-if="$ctrl.renderTimers"></async-task>
