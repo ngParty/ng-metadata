@@ -1,5 +1,5 @@
 import { UpgradeAdapter, UpgradeAdapterInstance } from './upgrade';
-import { createBootstrapFn } from '../platform/browser_utils';
+// import { createBootstrapFn } from '../platform/browser_utils';
 import { reflector } from '../core/reflection/reflection';
 import { getInjectableName, OpaqueToken } from '../core/di';
 import { ProviderLiteral } from '../core/di/provider_util';
@@ -22,7 +22,7 @@ export class NgMetadataUpgradeAdapter {
      *
      * E.g. `upgradeAdapter.bootstrap(AppComponent, providers)`
      */
-    this.bootstrap = createBootstrapFn(this._upgradeAdapter.bootstrap.bind(this._upgradeAdapter));
+    // this.bootstrap = createBootstrapFn(this._upgradeAdapter.bootstrap.bind(this._upgradeAdapter));
   }
 
   /**

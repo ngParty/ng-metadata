@@ -50,7 +50,7 @@ export function resolveReflectiveProvider( provider: Provider ): {method: string
  * @returns {any}
  * @private
  */
-export function _getNgModuleMetadataByType( injectable: Type ): { providerName: string, providerMethod: string, moduleMethod: string} {
+export function _getAngular1ModuleMetadataByType( injectable: Type ): { providerName: string, providerMethod: string, moduleMethod: string} {
   // only the first class annotations is injectable
   const [annotation] = reflector.annotations( injectable );
 
@@ -135,7 +135,7 @@ export function _normalizeProviders(
       // const provider = createProvider( {provide:b, useClass:b} );
       // const { method, name, value } = resolveReflectiveProvider( provider );
       const [name,value] = provide( providerType );
-      const { providerName, providerMethod, moduleMethod } = _getNgModuleMetadataByType( providerType );
+      const { providerName, providerMethod, moduleMethod } = _getAngular1ModuleMetadataByType( providerType );
 
       // config phase support
       if ( isType( name ) ) {
