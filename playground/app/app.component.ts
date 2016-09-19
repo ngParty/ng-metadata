@@ -1,12 +1,9 @@
 import { Component, Inject, OnInit } from 'ng-metadata/core';
 import { DynamicValueToken, NgRxStore, SomeFactoryFnToken, SomeClassToInstantiate } from './index';
-import { TodoAppCmp } from './todo/todo-app.component';
-import { AsyncExampleComponent } from './components/async-example/async-example.component';
-import { AttributeDirectiveExampleComponent } from './components/attribute-directive/attribute-directive-example.component';
+
 
 @Component( {
   selector: 'my-app',
-  directives: [ TodoAppCmp, AsyncExampleComponent, AttributeDirectiveExampleComponent ],
   moduleId: module.id,
   templateUrl: './app.component.html'
 } )
