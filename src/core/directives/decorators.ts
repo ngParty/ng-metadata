@@ -9,7 +9,9 @@ import {
   OutputMetadata,
   HostBindingMetadata,
   HostListenerMetadata,
-  LegacyDirectiveDefinition
+  LegacyDirectiveDefinition,
+  NgModuleMetadataType,
+  NgModuleMetadata
 } from './metadata_directives';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 
@@ -27,6 +29,15 @@ export interface DirectiveDecorator extends TypeDecorator {}
  * See {@link ComponentMetadataFactory}.
  */
 export interface ComponentDecorator extends DirectiveDecorator {}
+
+/**
+ * Interface for the {@link NgModuleMetadata} decorator function.
+ *
+ * See {@link NgModuleMetadataFactory}.
+ *
+ * @stable
+ */
+export interface NgModuleDecorator extends TypeDecorator {}
 
 /**
  * {@link DirectiveMetadata} factory for creating annotations, decorators.
@@ -194,6 +205,16 @@ export interface HostListenerMetadataFactory {
   new (eventName: string, args?: string[]): any;
 }
 
+/**
+ * {@link NgModuleMetadata} factory for creating annotations, decorators or DSL.
+ *
+ * @experimental
+ */
+export interface NgModuleMetadataFactory {
+  (obj?: NgModuleMetadataType): NgModuleDecorator;
+  new (obj?: NgModuleMetadataType): NgModuleMetadata;
+}
+
 
 export const Component: ComponentMetadataFactory = makeDecorator(ComponentMetadata) as ComponentMetadataFactory;
 
@@ -221,3 +242,10 @@ export const Output: OutputMetadataFactory = makePropDecorator(OutputMetadata);
 export const HostBinding: HostBindingMetadataFactory = makePropDecorator(HostBindingMetadata);
 
 export const HostListener: HostListenerMetadataFactory = makePropDecorator(HostListenerMetadata);
+
+/**
+ * Declares an ng module.
+ * @experimental
+ * @Annotation
+ */
+export const NgModule: NgModuleMetadataFactory = makeDecorator(NgModuleMetadata) as NgModuleMetadataFactory;
