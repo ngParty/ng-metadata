@@ -3,6 +3,7 @@ import { AsyncExampleComponent, AsyncTaskComponent } from './async-example.compo
 
 @NgModule({
   imports: [],
+  // exports, bootstrap, entryComponents have no real functionality yet
   exports: [AsyncExampleComponent],
   declarations: [AsyncExampleComponent, AsyncTaskComponent]
 })

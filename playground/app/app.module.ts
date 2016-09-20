@@ -15,6 +15,7 @@ import { AppComponent } from './app.component';
   imports: [Ng1LegacyModule, TodoAppModule, AttributeDirectiveModule, AsyncExampleModule],
   providers: [Title, configureProviders],
   declarations: [AsyncPipe, AppComponent],
+  // exports, bootstrap, entryComponent have no real functionality yet
   bootstrap: [AppComponent]
 })
 export class AppModule{}

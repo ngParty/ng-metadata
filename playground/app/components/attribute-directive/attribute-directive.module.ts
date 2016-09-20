@@ -5,6 +5,7 @@ import { HighlightDirective } from './highlight.directive';
 
 @NgModule({
   imports: [],
+  // exports, bootstrap, entryComponents have no real functionality yet
   exports: [AttributeDirectiveExampleComponent],
   declarations: [AttributeDirectiveExampleComponent, HighlightDirective]
 })

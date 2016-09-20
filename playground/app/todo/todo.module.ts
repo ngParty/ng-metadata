@@ -8,6 +8,7 @@ import { RemainingTodosPipe } from './remaining-todos.pipe'
 
 @NgModule({
   imports: [],
+  // exports, bootstrap, entryComponents have no real functionality yet
   exports: [TodoAppCmp],
   declarations: [TodoAppCmp, AddTodoCmp, TodoItemCmp, RemainingTodosPipe],
   entryComponents: [TodoAppCmp]
