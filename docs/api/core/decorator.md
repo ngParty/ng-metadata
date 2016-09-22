@@ -419,7 +419,7 @@ name if JS engine doesn't implements ES6 name property
 
 An alternative and more declarative way to using the `inputs` property on `@Component`/`@Directive`.
 
-Binds to Component/Directive via on of binding types `=`/`<`/`@`.
+Binds to Component/Directive via on of binding types `=`/`<`/`@` with the optional ? alias in Angular 1 syntax terms.
 
 Binding type is determined by template or if you wanna keep template as is you have to provide on of these types within @Input(`BINDING_TYPE`)
 
@@ -468,7 +468,7 @@ class MenuDropdown {
 ## @Output
 
 An alternative and more declarative way to using the `outputs` property on `@Component`/`@Directive`.
-Via `@Output` and `EventEmitter` you can emit custom events to parent component
+Via `@Output` and `EventEmitter` you can emit custom events to parent component. These output parameters are optional in the template.
 
 *Example:*
 
