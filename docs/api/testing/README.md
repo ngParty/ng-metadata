@@ -72,10 +72,10 @@ For exemple if the child does AJAX request on initialisation, we don't want to c
 To test that we must do : 
 ```typescript
 describe('Parent component test', () => {
-  let $rootScope;
-  let $compile;
-  let $scope;
-  let render;
+  let $rootScope: IRootScopeService;
+  let $compile: ICompileService;
+  let $scope: IScopeService;
+  let render: IRender;
   
   beforeEach(() => {
     const TestModule: string = bundle(ParentComponent).name;
@@ -97,5 +97,5 @@ describe('Parent component test', () => {
 }));
 ```
 
-Ps : the important part here to mock component children is the '$provide.decorator'. 
+**Ps : the important part here to mock component children is the '$provide.decorator'. **
 We can use that to mock directive (take care of the restrict: 'EA' property)
