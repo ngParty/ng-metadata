@@ -58,7 +58,7 @@ export function bundle( NgModuleClass: Type, otherProviders: any[] = [], existin
   const annotations = reflector.annotations( NgModuleClass );
   const ngModuleAnnotation: NgModuleMetadata = annotations[ 0 ];
   if (!isNgModule(ngModuleAnnotation)) {
-    throw new Error(`bundle() requires an @NgModule as it's first argument`)
+    throw new Error(`bundle() requires a decorated NgModule as its first argument`)
   }
   const { declarations = [], providers = [], imports = [] }={} = ngModuleAnnotation;
 

@@ -41,16 +41,16 @@ function _hasTemplate( annotation: any ): boolean {
   return isPresent( annotation.template || annotation.templateUrl );
 }
 
-export function isService(annotation: any): annotation is InjectableMetadata {
+export function isService( annotation: any ): annotation is InjectableMetadata {
   return annotation instanceof InjectableMetadata;
 }
-export function isPipe(annotation: any): annotation is PipeMetadata {
-  return isString(annotation.name) && annotation instanceof PipeMetadata;
+export function isPipe( annotation: any ): annotation is PipeMetadata {
+  return isString( annotation.name ) && annotation instanceof PipeMetadata;
 }
 export function isInjectMetadata( injectMeta: any ): injectMeta is InjectMetadata {
   return injectMeta instanceof InjectMetadata;
 }
 
 export function isNgModule( annotation: any ): annotation is NgModuleMetadata {
-  return isPresent( annotation.declarations ) && annotation instanceof NgModuleMetadata
+  return annotation instanceof NgModuleMetadata
 }
