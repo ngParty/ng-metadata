@@ -1,4 +1,5 @@
 import { reflector } from '../core/reflection/reflection';
+import { createBootstrapFn } from '../platform/browser_utils';
 import { getInjectableName, OpaqueToken } from '../core/di';
 import { ProviderLiteral } from '../core/di/provider_util';
 import { resolveDirectiveNameFromSelector } from '../facade/lang';
@@ -34,10 +35,20 @@ export interface UpgradeAdapter {
 
 export class NgMetadataUpgradeAdapter {
 
+  bootstrap: Function;
+
   /**
    * Store a reference to the instantiated upgradeAdapter
    */
-  constructor( public _upgradeAdapter: UpgradeAdapterInstance ) {}
+  constructor( public _upgradeAdapter: UpgradeAdapterInstance ) {
+    /**
+     * Used to bootstrap a hybrid Angular 1 and Angular 2 application,
+     * it is called with a single ng-metadata NgModule
+     *
+     * E.g. `upgradeAdapter.bootstrap(NgModule)`
+     */
+    this.bootstrap = createBootstrapFn(this._upgradeAdapter.bootstrap.bind(this._upgradeAdapter));
+  }
 
   /**
    * Used to register an Angular 2 component as a directive on an Angular 1 module,
