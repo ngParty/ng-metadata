@@ -59,9 +59,20 @@ export class AppComponent {
   }
 }
 
-// main.ts
-import { bootstrap, Title } from 'ng-metadata/platform-browser-dynamic';
+// app.module.ts
+import { NgModule } from 'ng-metadata/core';
+import { Title } from 'ng-metadata/platform-browser-dynamic';
 import { AppComponent } from './app.component';
 
-bootstrap( AppComponent, [ Title ] );
+@NgModule({
+  providers: [ Title ],
+  declarations: [ AppComponent ]
+})
+export class AppModule {}
+
+// main.ts
+import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic';
+import { AppModule } from './app.module';
+
+platformBrowserDynamic().bootstrapModule( AppModule );
 ```

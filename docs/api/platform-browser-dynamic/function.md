@@ -1,14 +1,12 @@
 # Function
 
-- [bootstrap](#bootstrap)
+- [platformBrowserDynamic](#platformBrowserDynamic)
 
 ---
 
-## bootstrap
+## platformBrowserDynamic
 
-Bootstrapping for Angular applications.
-
-You instantiate an Angular application by explicitly specifying a component to use as the root component for your application via the bootstrap() method.
+We use the `platformBrowserDynamic` function to create a "platform" for our application. This platform object has a "bootstrapModule" method on it which we use to bootstrap our Angular applications.
 
 > bootstrap your application manually after DOMContentLoaded is fired. Do **not** use the `ng-app` directive.
 
@@ -37,18 +35,27 @@ class AppComponent{
   name: string = 'World';
 }
 
-// main.ts
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
+// app.module.ts
+import { NgModule } from 'ng-metadata/core';
 import { AppComponent } from './app.component';
 
-bootstrap( AppComponent )
+@NgModule({
+  declarations: [ AppComponent ]
+})
+export class AppModule {}
+
+// main.ts
+import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic';
+import { AppModule } from './app.module';
+
+platformBrowserDynamic().bootstrapModule( AppModule );
 ```
 
-###### Parameters
+###### platformBrowserDynamic().bootstrapModule Parameters
 
 | Parameter             | Type                            | Description                                |
 | --------------------- | ------------------------------- | ------------------------------------------ |
-| **appComponentType**  | `Type`                          | The root component which should act as the application. This is a reference to a Type which is annotated with @Component(...) |
+| **appComponentType**  | `Type`                          | The root NgModule which should act as the application. This is a reference to a Type which is annotated with @NgModule(...) |
 | **customProviders?**  | `Array<Type OR Function OR string OR any[]>` |  An additional set of providers that can be added to the app injector to override default injection behavior. It also accepts 3rd party angular modules as string, or configPhase functions |
 
 returns `undefined`
