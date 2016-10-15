@@ -1,6 +1,7 @@
 # Decorator
 
 **Class Decorators**
+- [@NgModule](#ngModule)
 - [@Component](#component)
 - [@Directive](#directive)
 - [@Pipe](#pipe)
@@ -25,10 +26,42 @@
 
 ---
 
+## @NgModule
+
+A decorator for adding NgModule metadata to a class.
+NgModules are how we register our dependencies (such as Component, Directives, Pipes and Providers), both 1st and 3rd-party, with Angular's dependency injector.
+
+They are conceptually similar to Angular 1's own `angular.module`.
+
+*Example:*
+
+```typescript
+import { NgModule } from 'ng-metadata/core';
+
+@NgModule({ 
+  declarations: [ MyPipe, MyComponent ],
+  providers: [ MyProvider ],
+  imports: [ ThirdPartyModule ]
+})
+class MyModule {}
+```
+
+###### Parameters
+
+| Parameter     | Type     | Description                               |
+| ------------- | ---------|------------------------------------------ |
+| **providers?**  | `Array<Injectable|Injectable[]|string>` |  Decorated providers. |
+| **declarations?**  | `Array<Type|Type[]>` |  Decorated Components, Directives or Pipes`  |
+| **imports?**  | `Array<Type|string>` |  Other decorated NgModule classes, or string names of Angular 1 modules  |
+| **exports?**  | `Array<Type|any[]>` |  Not used, only here for interface compatibility |
+| **entryComponents?**  | `Array<Type|any[]>` |  Not used, only here for interface compatibility |
+| **bootstrap?**  | `Array<Type|any[]>` |  Not used, only here for interface compatibility |
+| **schemas?**  | `Array<Type|any[]>` |  Not used, only here for interface compatibility |
+
 ## @Component
 
-A decorator for adding component metadata to a class. 
-Components are essentially angular 1 directives with both a template, controller and isolate scope. 
+A decorator for adding component metadata to a class.
+Components are essentially angular 1 directives with both a template, controller and isolate scope.
 If you are looking to only modify the host element in some way, you should use @Directive.
 
 *Example:*
@@ -39,18 +72,10 @@ import { Component } from 'ng-metadata/core';
 @Component({ 
   selector: 'greeter', 
   template: `Hello World!`,
-  attrs: ['mood'],
   inputs: ['user'],
   outputs: ['onNameChange'] 
 })
 class GreeterComponent {}
-
-@Component({
-  selector: 'my-app',
-  template: `...`,
-  directives: [ GreeterComponent ]
-})
-class AppComponent{}
 ```
 
 ###### Parameters
@@ -66,8 +91,6 @@ class AppComponent{}
 | **host?**       | `{[key: string]: string}` |  Specify the events, actions, properties and attributes related to the [host element](#host). |
 | **providers?**  | `Array<Injectables|string>` | Any providers that this component or any of it's children depends on. If you provide string it has to be Angular 1 module name |
 | **viewProviders?**  | `Array<Injectables|string>` | Any providers that this component or any of it's children depends on. In Angular 2 it defines the set of injectable objects that are visible to its view DOM children. In ng1 it will register it to global Injector, but it's good visual indication to register here just providers which should be used only within this component view. If you provide string it has to be Angular 1 module name |
-| **directives?** | `Array<Directive|Component>` | Any directives or components that this component or any of it's children depends on. |
-| **pipes?**      | `Array<Pipes|string>` | Any pipes that this component or any of it's children depends on. |
 | **moduleId?**   | `string` | The module id of the module that contains the component. Needed to be able to resolve relative urls for templates and styles. In CommonJS, this can always be set to `module.id`, similarly SystemJS exposes `__moduleName` variable within each module. |
 | **legacy?**     | `Object<`[DirectiveDefinitionObject](#directivedefinitionobject)`>`  |  striped angular 1 ddo, use it if you wanna use angular 1 specific API  |
 
@@ -83,7 +106,7 @@ Specifies which DOM events a directive listens to via a set of `(event)` to `met
 To listen to global events, a target must be added to the event name ( before the event separated with colon, like this `(target: click)`). 
 
 The target can be:
- - `window`, 
+ - `window`,
  - `document`
  - `body`
 
@@ -94,7 +117,7 @@ When writing a directive event binding, you can also refer to the `$event` local
 *example:*
 
 > The following example declares a directive that attaches a click listener to the button and counts clicks.
-> notice the `$event.targer` and `btn` parameter in `onClick` method. Yes the target is the button :)
+> notice the `$event.target` and `btn` parameter in `onClick` method. Yes the target is the button :)
 
 ```typescript
 import { Directive, Component } from 'ng-metadata/core';
@@ -113,9 +136,9 @@ class CountClicks {
 }
 @Component({
   selector: 'app',
-  template: `<button counting>Increment</button>`,
-  directives: [ CountClicks ]
+  template: `<button counting>Increment</button>`
 })
+class AppComponent {}
 ```
 
 **Host Property Bindings**
@@ -153,8 +176,7 @@ class NgModelStatusDirective {
 
 @Component({
   selector: 'my-app',
-  template: `<input ng-model="prop" validator-sign >`,
-  directives: [NgModelStatusDirective]
+  template: `<input ng-model="prop" validator-sign >`
 })
 class AppComponent{}
 ```
@@ -165,7 +187,7 @@ Specifies static attributes that should be propagated to a host element.
 
 *example:*
 ```typescript
-import {Directive} from 'ng-metadata/core';
+import { Directive } from 'ng-metadata/core';
 
 @Directive({
   selector: '[myButton]',
@@ -173,8 +195,7 @@ import {Directive} from 'ng-metadata/core';
     'role': 'button'
   }
 })
-class MyButtonDirective {
-}
+class MyButtonDirective {}
 ```
 ```html
 <!--raw html-->
@@ -206,14 +227,14 @@ class MyButtonDirective {
 
 Just inject needed directives via constructor.
 Also note that instances of other directives are available only during `ngOnInit` or `ngAfterViewInit` life cycles,
-because other controller instances are available during `preLink` or `postLink` of starting **Angular 1.5 during `$onInit` controller hook 
+because other controller instances are available during `preLink` or `postLink` of starting **Angular 1.5 during `$onInit` controller hook.
 
 *example:*
 
 So you used to use require property on your DDO
 ```
 {require: ['ngModel','someFoo']}
-```  
+```
 
 now you do it this way:
 ```typescript
@@ -225,7 +246,7 @@ import { NgModel } from 'ng-metadata/common';
   
   @Component({ 
     selector:'foo',
-    template:`<div>hello</div>`    
+    template:`<div>hello</div>`
   })
   class FooComponent implements AfterViewInit, OnInit {
     constructor(
@@ -260,7 +281,7 @@ Directives differ from Components in that they don't have templates; they only m
 ```typescript
 import { Component, Directive, Inject, AfterViewInit } from 'ng-metadata/core';
 
-@Directive({ 
+@Directive({
   selector: '[classAdder]'
 })
 class ClassAdderDirective implements AfterViewInit {
@@ -276,8 +297,7 @@ class ClassAdderDirective implements AfterViewInit {
 
 @Component({
   selector: 'my-app',
-  template: `<div class-adder></div>`,
-  directives: [ClassAdderDirective]
+  template: `<div class-adder></div>`
 })
 class AppComponent{}
 ```
@@ -306,7 +326,7 @@ A decorator for adding pipe metadata to a class. Pipes are essentially the same 
 ```typescript
 import { Pipe } from 'ng-metadata/core';
 
-@Pipe({name:'firstLetter'})
+@Pipe({ name: 'firstLetter' })
 class FirstLetter {
   
   // Optional
@@ -372,22 +392,30 @@ export class MyOtherService {
 
 // app.component
 import { Component } from 'ng-metadata/core';
-import {MyService, GoodService, MyOtherService} from './shared';
+import { MyService, GoodService, MyOtherService } from './shared';
 
 @Component({
   selector: 'my-app',
   template: `...`,
   providers: [MyService, GoodService, MyOtherService]
 })
-class AppComponent{}
+export class AppComponent{}
+
+// app.module.ts
+import { NgModule } from 'ng-metadata/core';
+
+@NgModule({
+  declarations: [AppComponent]
+})
+export class AppModule {}
 
 // test.ts
 import * as angular from 'angular';
-import {expect} from 'chai';
-import {getInjectableName,bundle} from 'ng-metadata/core';
-import { AppComponent } from './app.component';
+import { expect } from 'chai';
+import { getInjectableName, bundle } from 'ng-metadata/core';
+import { AppModule } from './app.module';
 
-const angular1Module = bundle( AppComponent )
+const angular1Module = bundle( AppModule )
 
 const $injector = angular.injector(angular1Module.name);
 
@@ -515,7 +543,7 @@ Angular automatically checks host property bindings during change detection. If 
 
 ```typescript
 import { Component, Directive, Inject, HostBinding } from 'ng-metadata/core';
-import {FORM_DIRECTIVES} from 'ng-metadata/common';
+import { FORM_DIRECTIVES } from 'ng-metadata/common';
 
 @Directive({
   selector: '[validator-sign]'
@@ -528,8 +556,8 @@ class NgModelStatus {
 @Component({
   selector: 'app',
   template: `<input ng-model="prop" validator-sign >`,
-  directives: [FORM_DIRECTIVES]
 })
+class AppComponent {}
 ```
 
 ###### Parameters
@@ -574,8 +602,8 @@ class CountClicks {
 @Component({
   selector: 'app',
   template: `<button counting>Increment</button>`,
-  directives: [CountClicks]
 })
+class AppComponent {}
 ```
 
 > Or you can attach to global target if you need
@@ -596,8 +624,8 @@ class ResizeHandlerDirective {
 @Component({
   selector: 'app',
   template: `<div resize-handler>Hello World!</div>`,
-  directives: [ResizeHandlerDirective]
 })
+class AppComponent {}
 ```
 
 ###### Parameters
@@ -630,7 +658,7 @@ An alternative and more declarative way to using the [query](#query) property on
 
 *Example:*
 ```typescript
-import {Component, Inject, forwardRef, ViewChild} from 'ng-metadata/core';
+import { Component, Inject, forwardRef, ViewChild } from 'ng-metadata/core';
 
 @Component({
   selector: 'item',
@@ -642,7 +670,6 @@ class ItemComponent{
 
 @Component({
   selector:'my-cmp',
-  directives:[ItemComponent],
   template: `
     <item> a </item>
     <item> b </item>
@@ -687,7 +714,7 @@ Similar to [@ViewChild](#viewchild), but querying for all occurrences not just o
 
 *Example:*
 ```typescript
-import {Component, Inject, forwardRef,ViewChildren} from 'ng-metadata/core';
+import { Component, Inject, forwardRef, ViewChildren } from 'ng-metadata/core';
 
 @Component({
   selector: 'item',
@@ -699,7 +726,6 @@ class ItemComponent{
 
 @Component({
   selector:'my-cmp',
-  directives:[ItemComponent],
   template: `
     <item> a </item>
     <item> b </item>
@@ -744,7 +770,7 @@ to get queried component/directive. If not found returns `null`
 - property decorator
 
 Configures a content query.
-Queries component content( html which is projected to `ng-transclude` slot), for only first match
+Queries component content (html which is projected to `ng-transclude` slot), for only first match
 Content queries are set before the `ngAfterContentInit` callback is called.
 
 **Note**
@@ -757,7 +783,7 @@ An alternative and more declarative way to using the [query](#query) property on
 
 *Example:*
 ```typescript
-import {Component, Inject, forwardRef, ContentChild} from 'ng-metadata/core';
+import { Component, Inject, forwardRef, ContentChild } from 'ng-metadata/core';
 
 @Component({
   selector: 'item',
@@ -770,7 +796,6 @@ class ItemComponent{
 
 @Component({
   selector:'parent',
-  directives:[MyComponent,ItemComponent],
   template:`
     <my-cmp>
       <item> a </item>
@@ -828,7 +853,7 @@ Similar to [@ContentChild](#contentchild), but querying for all ocurrences not j
 
 *Example:*
 ```typescript
-import {Component, Inject, forwardRef, ContentChildren} from 'ng-metadata/core';
+import { Component, Inject, forwardRef, ContentChildren } from 'ng-metadata/core';
 
 @Component({
   selector: 'item',
@@ -840,7 +865,6 @@ class ItemComponent{
 
 @Component({
   selector:'parent',
-  directives:[MyComponent,ItemComponent],
   template:`
     <my-cmp>
       <item> a </item>
@@ -1004,11 +1028,11 @@ This will work thanks to `forwardRef`
 
 ```typescript
 // index.ts
-import {AService} from './fileA';
-import {BService} from './fileB';
+import { AService } from './fileA';
+import { BService } from './fileB';
 
 // fileA.ts
-import {BService} from './fileB';
+import { BService } from './fileB';
 import { Inject, Injectable, forwardRef } from 'ng-metadata/core';
 
 Injectable()
@@ -1017,7 +1041,7 @@ class AService{
 }
 
 // fileB.ts
-import {AService} from './fileA';
+import { AService } from './fileA';
 import { Inject, Injectable, forwardRef } from 'ng-metadata/core';
 
 
@@ -1050,7 +1074,7 @@ It could also be a special `local`, for example component's can inject $element,
 The string names are extracted from `injectables` and are added to the `$inject` property of the class constructor function,
 
 
-**Hierarchical Local Injections ( directives requires ):**
+**Hierarchical Local Injections (directives requires):**
 
 ## @Host
 
@@ -1066,9 +1090,9 @@ It can be used together with `@Optional` to not throw error when required direct
 > In the following example, Directive requires ngModel directive solely on itself, so we Inject it
 
 ```typescript
-import {Directive, Inject, Host} from 'ng-metadata/core';
+import { Directive, Inject, Host } from 'ng-metadata/core';
 
-@Directive({selector:'[validator]'})
+@Directive({ selector:'[validator]' })
 class ValidatorDirective{
   constructor(@Inject('ngModel') @Host() private ngModel: ng.INgModelController){
     // here ngModel is defined
@@ -1101,9 +1125,9 @@ A parameter metadata that marks a dependency as optional. Injector provides null
 *example:*
 
 ```typescript
-import {Directive, Inject, Host, Optional} from 'ng-metadata/core';
+import { Directive, Inject, Host, Optional } from 'ng-metadata/core';
 
-@Directive({selector:'[validator]'})
+@Directive({ selector:'[validator]' })
 class ValidatorDirective{
   constructor(@Inject('ngModel') @Host() @Optional() private ngModel: ng.INgModelController){
     // here ngModel is defined and if not found it is null
@@ -1136,9 +1160,9 @@ Specifies that an Injector should retrieve a dependency only from itself.
 *example:*
 
 ```typescript
-import {Directive, Inject, Self} from 'ng-metadata/core';
+import { Directive, Inject, Self } from 'ng-metadata/core';
 
-@Directive({selector:'[validator]'})
+@Directive({ selector:'[validator]' })
 class ValidatorDirective{
   constructor(@Inject('ngModel') @Self() private ngModel: ng.INgModelController){
     // here ngModel is undefined
@@ -1169,9 +1193,9 @@ Specifies that the dependency resolution should start from the parent element.
 *example:*
 
 ```typescript
-import {Directive, Inject, SkipSelf} from 'ng-metadata/core';
+import { Directive, Inject, SkipSelf } from 'ng-metadata/core';
 
-@Directive({selector:'[validator]'})
+@Directive({ selector:'[validator]' })
 class ValidatorDirective{
   constructor(@Inject('ngModel') @SkipSelf() private ngModel: ng.INgModelController){
     // here ngModel is defined
