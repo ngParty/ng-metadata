@@ -57,15 +57,23 @@ export class AppComponent implements OnInit {
 
 }
 
-//main.ts
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
-import { getInjectableName } from 'ng-metadata/core';
+// app.module.ts
+import { NgModule, getInjectableName } from 'ng-metadata/core';
 import { ROUTER_PRIMARY_COMPONENT } from 'ng-metadata/router-deprecated';
-
 import { AppComponent } from './app.component';
 
-bootstrap( AppComponent, [
-  'ngComponentRouter',
-  { provide: ROUTER_PRIMARY_COMPONENT, useValue: getInjectableName( AppComponent ) }
-] );
+@NgModule({
+  declarations: [ AppComponent ],
+  providers: [
+    'ngComponentRouter',
+    { provide: ROUTER_PRIMARY_COMPONENT, useValue: getInjectableName( AppComponent ) }
+  ]
+})
+export class AppModule {}
+
+// main.ts
+import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic';
+import { AppModule } from './app.module';
+
+platformBrowserDynamic().bootstrapModule(AppModule);
 ```
