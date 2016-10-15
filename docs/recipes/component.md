@@ -7,7 +7,7 @@ Component is represented in DOM as a `custom element`, which consists from:
 * isolate scope
 * shadow dom ( transclusion/projection )
 
-Component is registered via other `@Component` `directives` metadata or `bootstrap` 2nd (providers/root component) argument or legacy `angular.directive`(deprecated)
+A Component is registered via an `@NgModule`'s `declarations` metadata, or manually using `angular.directive` and `provide` (deprecated).
 
 **ES5**
 
@@ -35,7 +35,7 @@ function HeroController($log){}
 ```
 
 ```js
-// hero.js
+// hero.module.js
 
 angular.module('hero',[]);
 ```
@@ -62,36 +62,29 @@ export class HeroComponent {
 ```
 
 ```typescript
-// app.component.ts
-import { Component } from 'ng-metadata/core';
-
+// hero.module.ts
+import { NgModule } from 'ng-metadata/core';
 import { HeroComponent } from './hero.component';
 
-@Component({
-  selector:'my-app',
-  directives: [ HeroComponent ],
-  template: `<hero [name]="'Martin'" (on-call)="$ctrl.called($event)"></hero>`
+@NgModule({
+  declarations: [ HeroComponent ]
 })
-export class AppComponent{
-  called(){
-    console.log('called')
-  }
-}
+export class HeroModule {}
 ```
 
 ---
 
-**(DEPRECATED)TS + ng-metadata**
+**(DEPRECATED) TS + ng-metadata using provide**
 
 ```typescript
 // hero.component.ts
-import {Component,Inject,Input,Output} from 'ng-metadata/core';
+import { Component, Inject, Input, Output } from 'ng-metadata/core';
 
 @Component({
   selector: 'hero',
   templateUrl: 'hero.html'
 })
-export class HeroCmp{
+export class HeroComponent {
 
   @Input() name: string;
   @Output() onCall: Function;
@@ -102,11 +95,11 @@ export class HeroCmp{
 ```
 
 ```typescript
-// hero.ts
+// hero.module.ts
 import * as angular from 'angular';
-import {provide} from 'ng-metadata/core';
-import {HeroCmp} from './hero.component';
+import { provide } from 'ng-metadata/core';
+import { HeroComponent } from './hero.component';
 
 angular.module('hero',[])
-  .directive( ...provide(HeroCmp) );
+  .directive( ...provide(HeroComponent) );
 ```
