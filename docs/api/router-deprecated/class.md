@@ -2,7 +2,7 @@
 
 **Global Injectables**
 
-These services can be injected globally ( standard Angular 1 injectables )
+These services can be injected globally (standard Angular 1 injectables)
 
 - [ROUTER_PRIMARY_COMPONENT](#router_primary_component)
 - [RootRouter](#rootrouter)
@@ -21,7 +21,7 @@ These are not singletons, every component/directive owns it's own instance of th
 
 **Types**
 
-- [RouteDefinition](#routedefinition)  
+- [RouteDefinition](#routedefinition)
 - [RouteConfig](#routeconfig)
 - [Instruction](#instruction)
 - [ComponentInstruction](#componentinstruction)
@@ -29,34 +29,41 @@ These are not singletons, every component/directive owns it's own instance of th
 ---
 
 ## ROUTER_PRIMARY_COMPONENT
- 
+
 `OpaqueToken` used to bind the component with the top-level( Root ) `RouteConfig`s for the application.
- 
+
 We define the top level Root Component by providing a value for the ROUTER_PRIMARY_COMPONENT token.
- 
+
 **NOTE:**
-- You must do this to tell Angular 1 downgraded ComponentRouter which comopnent is Root ( this is done automaticaly in Angular 2 because app boots as a Tree ) 
+- You must do this to tell Angular 1 downgraded ComponentRouter which comopnent is Root (this is done automaticaly in Angular 2 because app boots as a Tree).
 - Unlike Angular 2, we need to provide string names to register the component, so in our case we use `getInjectableName` so we work with references
- 
- > Once you register it, you can inject it within your app via `@Inject(ROUTER_PRIMARY_COMPONENT) routerRootComponent`, but don't forget that it's just `string` ( name of rootComponent directive ) under the hood
+
+ > Once you register it, you can inject it within your app via `@Inject(ROUTER_PRIMARY_COMPONENT) routerRootComponent`, but don't forget that it's just `string` (name of rootComponent directive) under the hood
  > Under the hood the opaque token description is [$routerRootComponent](https://docs.angularjs.org/api/ngComponentRouter/service/$routerRootComponent)
- 
+
 ```typescript
-
-// main.ts
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
-import { getInjectableName } from 'ng-metadata/core';
+// app.module.ts
+import { NgModule, getInjectableName } from 'ng-metadata/core';
 import { ROUTER_PRIMARY_COMPONENT } from 'ng-metadata/router-deprecated';
-
 import { AppComponent } from './app.component';
 
-bootstrap( AppCompoennt, [
-  // we need to register 3rd party old angular module
-  'ngComponentRouter',
-  // Here we have specified that the Root Component is the AppCmponent.
+@NgModule({
+  declarations: [ AppComponent ],
+  providers: [
+    // we need to register 3rd party old angular module
+    'ngComponentRouter',
+    // Here we have specified that the Root Component is the AppCmponent.
     // We need to get component string name because Angular 1 works with string....
-  { provide: ROUTER_PRIMARY_COMPONENT, useValue: getInjectableName( AppComponent ) }
-] );
+    { provide: ROUTER_PRIMARY_COMPONENT, useValue: getInjectableName( AppComponent ) }
+  ]
+})
+export class AppModule {}
+
+// main.ts
+import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic';
+import { AppModule } from './app.module';
+
+platformBrowserDynamic().bootstrapModule( AppModule );
 ```
 
 ## RootRouter
