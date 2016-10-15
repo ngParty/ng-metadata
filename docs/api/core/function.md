@@ -242,12 +242,12 @@ Manually bundle component with all it's dependencies registered via `@Component`
 
 You may need this when migrating from previous ng-metadata 1.x to Angular 2 component bundling style.
 
-It returns new instance of `ngModule` which can be then registered to other ngModules or provided to `angular.bootstrap`
+It returns new instance of `angular.module` which can be then registered to other angular.modules or provided to `angular.bootstrap`
 
-returns new created `ngModule` instance (if you don't provide existing one as 3rd argument) 
+returns new created `angular.module` instance (if you don't provide existing one as 3rd argument) 
 
 | Parameter          | Type                  | Description                               |
 | -------------------| ----------------------|------------------------------------------ |
 | **ComponentClass** | `Type`                | Component class which is decorated by `@Component` |
 | **otherProviders?**| `Array<Type,Function,string>` | you can optionally add other providers manual way ( also function for config phase ) |
-| **ngModule?**| `ng.IModule` | you can provide existing ngModule instance, and if you do everything will be registered to this module instead of creating new one |
+| **angular.module?**| `ng.IModule` | you can provide existing angular.module instance, and if you do everything will be registered to this module instead of creating new one |

@@ -115,8 +115,8 @@ import { expect } from 'chai';
 import { bundle } from 'ng-metadata/core';
 import { AppComponent } from './app.component';
 
-const ngModule = bundle( AppComponent ); 
-const $injector = angular.injector([ngModule.name]);
+const angular1Module = bundle( AppComponent ); 
+const $injector = angular.injector([angular1Module.name]);
 
 expect($injector.get(getInjectableName(SomeValueToken))).to.equal(someValue);
 ```

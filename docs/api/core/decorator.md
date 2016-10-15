@@ -387,9 +387,9 @@ import {expect} from 'chai';
 import {getInjectableName,bundle} from 'ng-metadata/core';
 import { AppComponent } from './app.component';
 
-const ngModule = bundle( AppComponent )
+const angular1Module = bundle( AppComponent )
 
-const $injector = angular.injector(ngModule.name);
+const $injector = angular.injector(angular1Module.name);
 
 expect($injector.get('myService#1') instanceof MyService).to.equal(true)
 expect($injector.get(getInjectableName(MyService)) instanceof MyService).to.equal(true)

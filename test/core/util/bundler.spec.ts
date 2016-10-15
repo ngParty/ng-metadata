@@ -257,12 +257,12 @@ describe( `util/bundler`, () => {
 
   } );
 
-  function _execConfigBlocks( ngModule: any ) {
-    const configBlocks = ngModule._configBlocks;
+  function _execConfigBlocks( angular1Module: any ) {
+    const configBlocks = angular1Module._configBlocks;
     configBlocks.forEach( ( config )=> {
       const registeredFnArr = config[ 2 ];
       const fn = registeredFnArr[ 0 ];
-      fn(ngModule);
+      fn(angular1Module);
     } );
   }
 
