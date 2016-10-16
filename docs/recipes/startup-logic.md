@@ -62,8 +62,6 @@ import { NgModule } from 'ng-metadata/core';
 import { provideState } from './state.config';
 
 @NgModule({
-  selector:'my-app',
-  template: `...`,
   providers: [provideState]
 })
 export class AppModule{}
