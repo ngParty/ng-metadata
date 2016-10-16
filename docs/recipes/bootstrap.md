@@ -1,19 +1,19 @@
-# Bootstrapping ( General overview how to do things )
+# Bootstrapping (General overview of how to do things)
 
 ng-metadata is indeed very flexible, so it allows you to do things not just in one particular way!
 
 This document is a broad overview how to do things within your app.
 
 You have 2 options how to bootstrap:
-- using ng-metadata/platform-browser-dynamic `bootstrap` function
+- using ng-metadata/platform-browser-dynamic to create a `bootstrap` function
 - using traditional `angular.bootstrap`
 
-You have 2 options how to register your components/directives/pipes/services:
-- using `@Component/@Directive` decorators metadata ( Angular 2 way )
-- using `provide` function within `ngModule.directive`,`ngModule.service` etc
+You have 2 options for registering your components/directives/pipes/services:
+- using `@NgModule/@Component/@Directive` decorators metadata (Angular 2 way)
+- using `provide` function within `angular.module.directive`, `angular.module.service` etc
 
-You have 3 options how to define type of component/directive bindings
-- by template ( angular 2 syntax )
+You have 3 options for defining the type of component/directive bindings you are using:
+- by template (Angular 2 syntax)
 - by Angular 1 special symbol within `Input` decorator
 - by combining previous 2 types
 
@@ -21,57 +21,52 @@ You have 3 options how to define type of component/directive bindings
 
 ### ng-metadata bootstrap
 
-This is preferred way how to bootstrap your app, because it gives you ability to register other providers etc in Angular 2 way.
+This is preferred way to bootstrap your app, because it gives you ability to register other providers etc in an Angular 2 way.
 
-It allows you to `enableProdMode()` by very convenient way without touching the `ngModule.config` and configuring $compile and $http providers.
+It allows you to `enableProdMode()` in a very convenient way without touching `angular.module.config`, or configuring $compile and $http providers.
 
-Also by default the app is bootstrap with `strictDi:true`, which you should be doing anyway.
+Also by default the app is bootstrapped with `strictDi:true`, which you should be doing anyway.
 
-Refactoring to this bootstrap is really easy, just create root app component and register all legacy angular 1 modules from your abb via bootstrap function 
+Refactoring to this bootstrap is really easy, just create a root app NgModule and register all legacy Angular 1 modules from your app.
 
 ```typescript
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
-import { enableProdMode } from 'ng-metadata/core';
+import { NgModule } from 'ng-metadata/core';
 
-// some 3rd party
+// some 3rd party Angular 1 module dependencies
 import * as ngSanitize from 'angular-sanitize';
 import * as uiRouter from 'angular-ui-router';
 
-// configuration function for `ngModule.config()`
+// configuration function for `angular.module.config()`
 import { configProviders } from './config' 
 
 // root app component
 import { AppComponent } from './app.component';
 // old angular.module modules
-import { UserModule, AmdminModule } from './modules';
+import { UserModule, AdminModule } from './modules';
+
+@NgModule({
+  // You can pass either Angular 1 `angular.module` names,
+  // or other ng-metadata @NgModule classes to `imports`,
+  // it will automatically figure out how to bundle them!
+  imports: [ngSanitize, uiRouter, configProviders, UserModule, AdminModule],
+  declarations: [AppComponent]
+})
+export class AppModule {}
+
+// main.ts
+import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic';
+import { enableProdMode } from 'ng-metadata/core';
+import { AppModule } from './app.module.ts';
 
 // node env variable (available with Webpack)
 if(env === 'production'){
   enableProdMode();
 }
 
-bootstrap( AppComponent, [ngSanitize, uiRouter, configProviders, UserModule, AmdminModule] );
+platformBrowserDynamic().bootstrapModule(AppModule);
 ```
 
-This is initial state, it is advised to refactor those old Angular modules to be a root component of that module and registered
-via `directives` metadata on AppComponent:
-
-```typescript
-import { Component } from 'ng-metadata/core';
-
-import {AdminComponent} from './modules/admin'
-import {UserComponent} from './modules/user'
-
-@Component({
-  selector: 'my-app',
-  template:'...',
-  directives: [AdminComponent,UserComponent]
-})
-export class AppComponent{}
-```
-
-
-### angular.bootstrap
+### Manual Angular 1 angular.bootstrap
 
 ```typescript
 import * as angular from 'angular';
@@ -86,50 +81,53 @@ angular.bootstrap( document, [AppModule, ngSanitize, uiRouter], {strictDi: true}
 ```
 
 You can still leverage ng2 way of components registration without ng-metadata bootstrap, 
-but you have to manually create your module bundle with `bundle` function:
+but you have to manually create your Angular 1 module from an ng-metadata @NgModule using the `bundle` helper function:
 
 ```typescript
-// index.ts - this is the index file used in previous boostrap example
-import { bundle, Component } from 'ng-metadata/core';
+// index.ts
+import { bundle, Component, NgModule } from 'ng-metadata/core';
 
 import { UserModule } from './modules/user';
 import { AdminDirectives, AdminProviders, AdminPipes, adminConfig } from './modules/admin'
 
 @Component({
   selector: 'admin',
-  template: '...',
-  directives: [AdminDirectives],
-  providers: [AdminProviders],
-  pipes: [AdminPipes]
+  template: '...'
 })
-export class AdminComponent{}
+export class AdminComponent {}
 
-const AdminModule = bundle(AdminComponent,[adminConfig]).name;
+@NgModule({
+  declarations: [AdminComponent, AdminDirectives, AdminPipes],
+  providers: [AdminProviders]
+})
+export class AdminModule {}
 
-export const AppModule = angular.module('myApp',[UserModule, AdminModule]);
+const Ng1AdminModule = bundle(AdminModule, [adminConfig]).name;
+
+export const AppModule = angular.module('myApp',[UserModule, Ng1AdminModule]);
 ```
 
 
 ## Registering parts of your app
 
-### `@Component/@Directive` decorators metadata ( Angular 2 way )
+### `@Component/@Directive` decorators metadata (Angular 2 way)
 
 **Note:** Always remember that Angular 1 does not have Hierarchical Injector, so every service, directive, pipe you register, will be registered
 to global Angular namespace
 
-It highly advised to build you app as a component oriented tree and not register providers(services) within multiple nested components.
+It highly advised to build you app as a component oriented tree and not register providers (services) within multiple nested components.
 
 For registering services/factories/values within `provider` Component metadata property,
-only [provider map literal](http://blog.thoughtram.io/angular/2016/05/13/angular-2-providers-using-map-literals.html) is allowed, `provide` function is deprecated. 
+only [provider map literal](http://blog.thoughtram.io/angular/2016/05/13/angular-2-providers-using-map-literals.html) is allowed, `provide` function is deprecated.
+
+Just like in Angular 2:
+
+- We can register Components, Directives, Pipes and Providers on NgModules.
+- We can register Providers on Components.
 
 ```typescript
 // app.component.ts
 import { Component, OpaqueToken } from 'ng-metadata/core';
-
-import { AdminComponent } from './modules/admin';
-import { UserComponent } from './modules/user';
-// all of these are nested array which have particular providers, ngMetadata will flatten these arrays like Angular 2
-import { SharedProviders, SharedDirectives, SharedPipes } from './shared'
 
 const MyFooToken = new OpaqueToken('myFooValue')
 const MyFactoryToken = new OpaqueToken('myFooFactory');
@@ -137,24 +135,35 @@ const MyFactoryToken = new OpaqueToken('myFooFactory');
 @Component({
   selector: 'my-app',
   template:'...',
-  directives: [AdminComponent, UserComponent, SharedDirectives],
   providers: [
-    SharedProviders, 
     // you can also use pure 'string' as provide value, but OpaqueToken makes DI easier, because you are using reference instead magic string
     { provide: MyFooToken, useValue: 'hello' }, 
     { provide: MyFactoryToken, useFactory: ($log)=>{ $log.log('a girl has no name') }, deps: ['$log'] } 
   ],
-  pipes: [SharedPipes]
 })
 export class AppComponent{}
+
+// app.module.ts
+import { NgModule } from 'ng-metadata/core';
+import { AdminComponent } from './modules/admin';
+import { UserComponent } from './modules/user';
+// all of these are nested array which have particular providers,
+// ng-metadata will flatten these arrays like Angular 2
+import { SharedProviders, SharedDirectives, SharedPipes } from './shared'
+
+@NgModule({
+  declarations: [AppComponent, SharedPipes, AdminComponent, UserComponent, SharedDirectives],
+  providers: [SharedProviders]
+})
+export class AppModule {}
 ```
 
 
-### `provide` function within `ngModule.directive`,`ngModule.service`
+### `provide` function within `angular.module.directive`,`angular.module.service`
 
 - using `provide` is deprecated, although it was the only registration method in previous version (ng-metadata 1.x), and you can still use it if you want
 
-**NOTE** with provide there was no support for `factories`, so if you needed them you have to register them via old school `ngModule.factory()`
+**NOTE** with provide there was no support for `factories`, so if you needed them you have to register them via old school `angular.module.factory()`
 
 ```typescript
 // index.ts
@@ -189,7 +198,7 @@ export const AppModule = angular.module('myApp',[])
 
 ## Binding Options
 
-### by template ( angular 2 syntax )
+### by template (Angular 2 syntax)
 
 This is the preferred way of defining bindings and you can easily migrate to it if you are coming from ng-metadata 1.x
 
@@ -214,7 +223,6 @@ export class GreeterComponent {
 
 @Component({
   selector: 'my-app',
-  directives: [GreeterComponent],
   template: `
     <my-greeter 
       [(mutation-madness)]="$ctrl.twoWayBoomerang" 
@@ -256,7 +264,6 @@ export class GreeterComponent {
 
 @Component({
   selector: 'my-app',
-  directives: [GreeterComponent],
   template: `
     <my-greeter 
       mutation-madness="$ctrl.twoWayBoomerang" 
@@ -277,7 +284,7 @@ export class AppComponent{
 
 ### combined by template + by declaration
 
-You can also combine both type of bindings ( you may need this for directives for example ).
+You can also combine both type of bindings (you may need this for directives for example).
 
 > we cannot bind one way to directive particular name, because this is how angular 1 compilator works.
 It is although not recommended to directly bind to directive, rather create additional properties to make things clear
@@ -302,7 +309,6 @@ export class GreeterDirective {
 
 @Component({
   selector: 'my-app',
-  directives: [GreeterDirective],
   template: `
     <div my-greeter="$ctrl.name" [default-name]="'Martin'" (greet)="$ctrl.onGreet($event)"></div>`
 })

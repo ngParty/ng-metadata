@@ -1,12 +1,11 @@
 # Angular 1 Directives (Types)
 
-We are providing angular directives as angular 2 like directives with proper types 
+We are providing angular directives as angular 2 like directives with proper types.
 You can leverage these classes for DI
 
 - [NgModel](#ngmodel)
 - [NgForm](#ngform)
 - [NgSelect](#ngselect)
-  
 
 ## NgModel
 

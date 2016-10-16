@@ -57,29 +57,19 @@ export function provideState($stateProvider, $urlRouterProvider){
 ```
 
 ```typescript
-// app.component.ts
-import { Component } from 'ng-metadata/core';
-
-@Component({
-  selector:'my-app',
-  template: `...`
-})
-export class AppComponent{}
-```
-
-```typescript
-// main.ts
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
-
-import { AppComponent } from './app.component';
+// app.module.ts
+import { NgModule } from 'ng-metadata/core';
 import { provideState } from './state.config';
 
-bootstrap( AppComponent, [provideState] );
+@NgModule({
+  providers: [provideState]
+})
+export class AppModule{}
 ```
 
 ---
 
-**(Deprecated)TS + ng-metadata**
+**(Deprecated) TS + ng-metadata**
 
 **NOTE:** don't use `this` within `StateConfig` class, because angular invokes `.config` function via `Function.apply` so `this` is `undefined`
  
@@ -110,11 +100,11 @@ export class StateConfig{
 
 import * as angular from 'angular';
 import * as uiRouter from 'angular-ui-router';
-import {StateConfig} from './app.config';
+import { StateConfig } from './app.config';
 
 angular.module('app',[uiRouter])
   // NOTE: StateConfig class is not instantiated, angular will use the constructor as a factory function ( wrong 'this' context)
-  .config(StateConfig); 
+  .config( StateConfig );
 ```
 
 
@@ -144,15 +134,15 @@ angular.module('app',[])
 ```
 
 
-**(DEPRECATED)TS + ng-metadata**
+**(DEPRECATED) TS + ng-metadata**
 
 **NOTE:** don't use `this` within `RunBlock` class, because angular invokes `.config` function via `Function.apply` so `this` is `undefined`
 
 ```typescript
 // app.config.ts
 
-import {Inject} from 'ng-metadata/core';
-import {Authenticator, Translator ) from 'some-library';
+import { Inject } from 'ng-metadata/core';
+import { Authenticator, Translator } from 'some-library';
 
 export class RunBlock {
   
@@ -169,9 +159,9 @@ export class RunBlock {
 // app.ts
 
 import * as angular from 'angular';
-import {RunBlock} from './app.config';
+import { RunBlock } from './app.config';
 
 angular.module('app',[])
   // NOTE: RunBlock class is not instantiated, angular will use the constructor as a factory function
-  .run(RunBlock); 
+  .run( RunBlock );
 ```

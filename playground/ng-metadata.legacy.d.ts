@@ -5,7 +5,7 @@ declare type Subject<T> = any;
 declare module ngMetadataPlatform{
 
   // type AppRoot = string | Element | Document;
-  // function bootstrap(ngModule: string, {element, strictDi}?: {
+  // function bootstrap(angular1Module: string, {element, strictDi}?: {
   //   element?: AppRoot;
   //   strictDi?: boolean;
   // }): void;

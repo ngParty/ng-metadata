@@ -42,12 +42,12 @@ export class ChildComponent implements OnChanges {
   // without OnPush if we change some property on this object in the parent, it will mutate also within child,
   // because that's how javascript works (Objects are passed reference baby!)
   // => this is not true if the bounded property is a primitive ( again this is how JS works)
-  @Input('<') user: User;  
+  @Input('<') user: User;
 
-  ngOnChanges( changes ) {  
+  ngOnChanges( changes ) {
     if(changes.user){
       // this will execute only when user reference has changed on parent
-      console.log(changes.user)  
+      console.log(changes.user);
     }
   }
 

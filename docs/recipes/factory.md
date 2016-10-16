@@ -2,7 +2,7 @@
 
 Factory is some function that returns something ( most of the time it should return always something else ).
 
-In angular 1. we can create reusable factories via `ngModule.factory`, this is not recommended with ng-metadata.
+In angular 1. we can create reusable factories via `angular.module.factory`, this is not recommended with ng-metadata.
 
 Instead use provide map literal: 
 
