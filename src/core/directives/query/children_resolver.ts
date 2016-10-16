@@ -323,7 +323,7 @@ export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Ob
               return false;
             }
             // check if current child is really queried from its parent
-            return ctrl instanceof <Type>propMetaInstance.selector;
+            return ctrl instanceof (propMetaInstance.selector as Type);
 
           } )
           .forEach( ( propMetaInstance: QueryMetadata )=> {
