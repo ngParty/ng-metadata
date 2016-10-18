@@ -1,4 +1,4 @@
-import { isString, isPresent } from '../../facade/lang';
+import { isString, isPresent, Type } from '../../facade/lang';
 import { DirectiveMetadata, ComponentMetadata } from '../directives/metadata_directives';
 import { PipeMetadata } from '../pipes/metadata';
 

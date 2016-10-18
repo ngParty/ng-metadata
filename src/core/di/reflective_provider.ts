@@ -1,4 +1,4 @@
-import { isType, isArray, isString, getFuncName, isBlank, isPresent } from '../../facade/lang';
+import { isType, isArray, isString, getFuncName, isBlank, isPresent, Type } from '../../facade/lang';
 
 import { reflector } from '../reflection/reflection';
 

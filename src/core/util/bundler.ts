@@ -1,4 +1,4 @@
-import { global } from '../../facade/lang';
+import { global, Type } from '../../facade/lang';
 import { reflector } from '../reflection/reflection';
 import { ComponentMetadata } from '../directives/metadata_directives';
 import { getInjectableName, provide } from '../di/provider';

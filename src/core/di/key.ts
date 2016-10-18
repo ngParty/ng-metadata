@@ -6,7 +6,7 @@ import {StringWrapper} from '../../facade/primitives';
 import {isString} from '../../facade/lang';
 import {OpaqueToken} from './opaque_token';
 import {ListWrapper} from '../../facade/collections';
-import {isType} from '../../facade/lang';
+import {isType, Type} from '../../facade/lang';
 import {getTypeName} from '../../facade/lang';
 
 /**

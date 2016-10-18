@@ -3,7 +3,7 @@ import { createBootstrapFn } from '../platform/browser_utils';
 import { reflector } from '../core/reflection/reflection';
 import { getInjectableName, OpaqueToken } from '../core/di';
 import { ProviderLiteral } from '../core/di/provider_util';
-import { resolveDirectiveNameFromSelector } from '../facade/lang';
+import { resolveDirectiveNameFromSelector, Type } from '../facade/lang';
 
 export class NgMetadataUpgradeAdapter {
 
