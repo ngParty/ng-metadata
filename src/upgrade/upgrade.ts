@@ -2,6 +2,7 @@
  * `UgradeAdapterRef` controls a hybrid AngularJS v1 / Angular v2 application,
  * but we don't have a use for it right now so no point in creating an interface for it...
  */
+import { Type } from "../facade/lang";
 export type UgradeAdapterRef = void;
 
 export interface UpgradeAdapter {

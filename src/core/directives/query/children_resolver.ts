@@ -1,4 +1,4 @@
-import { global, isString, noop, isType, isJsObject, getFuncName, isFunction } from '../../../facade/lang';
+import { global, isString, noop, isType, isJsObject, getFuncName, isFunction, Type } from '../../../facade/lang';
 import { ListWrapper, StringMapWrapper } from '../../../facade/collections';
 import { ChildrenChangeHook } from '../../linker/directive_lifecycle_interfaces';
 import { reflector } from '../../reflection/reflection';

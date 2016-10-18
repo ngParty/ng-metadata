@@ -4,7 +4,7 @@ import { DirectiveMetadata, ComponentMetadata } from '../metadata_directives';
 import { ChangeDetectorRef } from '../../change_detection/change_detector_ref';
 import { _createDirectiveBindings } from '../binding/binding_factory';
 import { isAttrDirective } from '../directives_utils';
-import { isFunction, isJsObject, isArray, getFuncName, isString } from '../../../facade/lang';
+import { isFunction, isJsObject, isArray, getFuncName, isString, Type } from '../../../facade/lang';
 import { StringWrapper } from '../../../facade/primitives';
 import { DirectiveCtrl, NgmDirective } from '../constants';
 import { REQUIRE_PREFIX_REGEXP } from './constants';
