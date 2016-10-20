@@ -1,9 +1,19 @@
-declare type StringMap = {[key:string]:string};
-declare type Type = Function;
-declare type ProvideSpreadType = string|Type;
+import * as angular from 'angular';
 
-// @TODO add angular1 module overrides for proper ...provide handling
-declare module angular {
+///////////////////////////////////////////////////////////////////////////////
+// functions attached to global object (window)
+///////////////////////////////////////////////////////////////////////////////
+declare global {
+  type StringMap = {[key: string]: string};
+  type Type = Function;
+  type ProvideSpreadType = string|Type;
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// custom angular module overrides
+// - add angular1 module overrides for proper ...provide handling
+///////////////////////////////////////////////////////////////////////////////
+declare module 'angular' {
   interface IParseService{
     ( exp: string, interceptorFn?: Function, expensiveChecks?: boolean ): ng.ICompiledExpression
   }
