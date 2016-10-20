@@ -1,3 +1,13 @@
+<a name="3.0.1"></a>
+## [3.0.1](https://github.com/ngParty/ng-metadata/compare/3.0.0...v3.0.1) (2016-10-20)
+
+
+### Bug Fixes
+
+* **manual_typings:** make custom global angular overrides work with both global and module type defin ([3eb047d](https://github.com/ngParty/ng-metadata/commit/3eb047d))
+
+
+
 <a name="3.0.0"></a>
 # [3.0.0](https://github.com/ngParty/ng-metadata/compare/3.0.0-beta.0...v3.0.0) (2016-10-20)
 
