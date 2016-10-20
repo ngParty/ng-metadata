@@ -7,13 +7,12 @@ Directive is represented in DOM as a `element attribute`, which consists from:
 
 > Directive should be used only for behavioral/extension purposes
 
-Directive is registered via `@Component` `directives` metadata or `bootstrap` 2nd (providers) argument or legacy `angular.directive`(deprecated)
+Directive is registered via an `@NgModule`'s `declarations` metadata, or manually using `angular.directive` and `provide` (deprecated).
 
 **ES5**
 
 ```js
 // clicker.directive.js
-
 angular.module('clicker')
   .directive('clickMe',clickMeDirective);
 
@@ -40,8 +39,7 @@ function clickMeDirective($log){
 ```
 
 ```js
-// clicker.js
-
+// clicker.module.js
 angular.module('clicker',[]);
 ```
 
@@ -70,29 +68,23 @@ export class ClickMeDirective {
 ```
 
 ```typescript
-// app.component.ts
-import { Component } from 'ng-metadata/core';
-
+// clicker.module.ts
+import { NgModule } from 'ng-metadata/core';
 import { ClickMeDirective } from './clicker.directive';
 
-@Component({
-  selector:'my-app',
-  directives: [ ClickMeDirective ],
-  template: `<div my-click-me [name]="$ctrl.name">click this!</div>`
+@NgModule({
+  declarations: [ ClickMeDirective ]
 })
-export class AppComponent{
-  name = 'a girl, has no name';
-}
+export class ClickerModule {}
 ```
 
 ---
 
-**(DEPRECATED)TS + ng-metadata**
+**(DEPRECATED) TS + ng-metadata using provide**
 
 ```typescript
 // clicker.directive.ts
-
-import {Directive,Inject,Input,HostListener} from 'ng-metadata/core';
+import { Directive, Inject, Input, HostListener } from 'ng-metadata/core';
 
 @Directive({
   selector: '[click-me]'
@@ -113,12 +105,11 @@ export class ClickMe {
 ```
 
 ```typescript
-// clicker.ts
-
+// clicker.module.ts
 import * as angular from 'angular';
-import {provide} from 'ng-metadata/core';
-import {ClickMe} from './clicker.directive';
+import { provide } from 'ng-metadata/core';
+import { ClickMe } from './clicker.directive';
 
 angular.module('clicker',[])
-  .directive( ...provide(ClickMe) );
+  .directive( ...provide( ClickMe ) );
 ```

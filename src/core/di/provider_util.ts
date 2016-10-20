@@ -1,5 +1,5 @@
 import { isString, isPresent } from '../../facade/lang';
-import { DirectiveMetadata, ComponentMetadata } from '../directives/metadata_directives';
+import { DirectiveMetadata, ComponentMetadata, NgModuleMetadata } from '../directives/metadata_directives';
 import { PipeMetadata } from '../pipes/metadata';
 
 import { Provider } from './provider';
@@ -41,12 +41,16 @@ function _hasTemplate( annotation: any ): boolean {
   return isPresent( annotation.template || annotation.templateUrl );
 }
 
-export function isService(annotation: any): annotation is InjectableMetadata {
+export function isService( annotation: any ): annotation is InjectableMetadata {
   return annotation instanceof InjectableMetadata;
 }
-export function isPipe(annotation: any): annotation is PipeMetadata {
-  return isString(annotation.name) && annotation instanceof PipeMetadata;
+export function isPipe( annotation: any ): annotation is PipeMetadata {
+  return isString( annotation.name ) && annotation instanceof PipeMetadata;
 }
 export function isInjectMetadata( injectMeta: any ): injectMeta is InjectMetadata {
   return injectMeta instanceof InjectMetadata;
+}
+
+export function isNgModule( annotation: any ): annotation is NgModuleMetadata {
+  return annotation instanceof NgModuleMetadata
 }

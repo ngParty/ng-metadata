@@ -1,11 +1,11 @@
 //main entry point
-import { bootstrap, Title } from 'ng-metadata/platform-browser-dynamic';
-import { AsyncPipe } from 'ng-metadata/common';
+import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic';
+
 import { enableProdMode } from 'ng-metadata/core';
 
-import { AppComponent } from './app.component';
-import { AppModule, configureProviders } from './index';
+import { AppModule } from './app.module';
 
 // enableProdMode();
 
-bootstrap( AppComponent, [ Title, AsyncPipe, AppModule, configureProviders ] );
+const platform = platformBrowserDynamic();
+platform.bootstrapModule( AppModule );

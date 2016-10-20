@@ -3,6 +3,7 @@ export { bundle } from './src/core/util'
 export {
   Directive,
   Component,
+  NgModule,
   Attr,
   Input,
   Output,

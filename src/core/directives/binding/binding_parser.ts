@@ -194,7 +194,7 @@ export function _setupOutputs(
  * @private
  * @deprecated
  */
-export function _parseBindings({ inputs=[], outputs=[], attrs=[] }): ParsedBindings {
+export function _parseBindings({ inputs=[], outputs=[], attrs=[] }: { inputs: string[], outputs: string[], attrs: string[] }): ParsedBindings {
 
   const SPLIT_BY = ':';
 

@@ -1,7 +1,5 @@
 import { Component } from 'ng-metadata/core';
 
-import { HighlightDirective } from './highlight.directive';
-
 @Component({
   selector: 'my-attribute-directive-example',
   template: `
@@ -16,8 +14,7 @@ import { HighlightDirective } from './highlight.directive';
     <p my-highlight [color]="$ctrl.color" (on-color-click)="$ctrl.colorClicked($event)">Highlight me!</p>
 
     <p my-highlight [color]="$ctrl.color" [default-color]="'violet'">Highlight me too!</p>
-  `,
-  directives: [HighlightDirective]
+  `
 })
 export class AttributeDirectiveExampleComponent {
   color: string;

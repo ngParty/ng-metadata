@@ -1,8 +1,8 @@
 import * as sinon from 'sinon';
 import { expect } from 'chai';
 import { global } from '../../../src/facade/lang';
-import { Component } from '../../../src/core/directives/decorators';
-import { createNgModule } from '../../utils';
+import { Component, NgModule } from '../../../src/core/directives/decorators';
+import { createAngular1Module } from '../../utils';
 import { provide } from '../../../src/core/di';
 import { bundle } from '../../../src/core/util/bundler';
 import { Pipe } from '../../../src/core/pipes/decorators';
@@ -14,7 +14,7 @@ describe( `util/bundler`, () => {
 
   let sandbox: Sinon.SinonSandbox;
   beforeEach( () => {
-    global.angular = createNgModule() as any;
+    global.angular = createAngular1Module() as any;
     sandbox = sinon.sandbox.create();
   } );
   afterEach( () => {
@@ -56,17 +56,14 @@ describe( `util/bundler`, () => {
     @Component( {
       selector: 'nested',
       template: `Im nested`,
-      viewProviders: [ MyPrivateService ],
-      pipes: [ UpsPipe ]
+      viewProviders: [ MyPrivateService ]
     } )
     class NestedComponent {
     }
 
     @Component( {
       selector: 'child-one',
-      directives: [ NestedComponent ],
       providers: [ MyService, 'ui.bootstrap.modal' ],
-      pipes: [ UpsPipe ],
       template: `hello Im childOne <nested></nested>`
     } )
     class ChildOneComponent {
@@ -75,9 +72,7 @@ describe( `util/bundler`, () => {
     const MyFactoryToken = new OpaqueToken( 'myFactory' );
     @Component( {
       selector: 'child-two',
-      directives: [ NestedComponent ],
       providers: [ OtherService, MyService, { provide: MyFactoryToken, deps: [ '$q' ], useFactory: ( $q )=>({}) } ],
-      pipes: [ UpsPipe ],
       template: `hello Im childTwo <nested></nested>`
     } )
     class ChildTwoComponent {
@@ -85,7 +80,6 @@ describe( `util/bundler`, () => {
 
     @Component( {
       selector: 'app',
-      directives: [ ChildOneComponent, ChildTwoComponent ],
       providers: [ MySingleton, { provide: 'tokenAsClass', useClass: ViaProviderLiteralService } ],
       template: `Hello App
         <child-one></child-one>
@@ -95,19 +89,37 @@ describe( `util/bundler`, () => {
     class AppComponent {
     }
 
-    it( `should create module which has name as root component selector`, () => {
+    it( `should use an existing Angular 1 module, if one is provided`, () => {
 
-      const ngModule = bundle( AppComponent );
+      @NgModule({
+        declarations: [ AppComponent, ChildOneComponent, UpsPipe, NestedComponent, ChildTwoComponent ],
+      })
+      class AppModule {
+      }
 
-      expect( ngModule.name ).to.equal( 'app' );
-      expect( ngModule.requires ).to.deep.equal( ['ui.bootstrap.modal'] );
+      const existingAngular1Module = createAngular1Module().module( 'existing', [] );
+
+      const angular1Module = bundle( AppModule );
+      const angular1ModuleUsingExisting = bundle( AppModule, [], existingAngular1Module as any );
+
+      expect( angular1Module.name ).to.contain( 'appModule' );
+      expect( angular1ModuleUsingExisting.name ).to.equal( 'existing' );
 
     } );
 
     it( `should parse whole component tree and register all providers,viewProviders,pipes,directives`, () => {
 
-      const thirdPartyModule = createNgModule().module( '3rdParty', [] ).name;
-      const ngModule = bundle( AppComponent, [ SomeGlobalService, thirdPartyModule ] );
+      const thirdPartyModule = createAngular1Module().module( '3rdParty', [] ).name;
+
+      @NgModule({
+        declarations: [ AppComponent, ChildOneComponent, UpsPipe, NestedComponent, ChildTwoComponent ],
+        providers: [ SomeGlobalService ],
+        imports: [ thirdPartyModule ]
+      })
+      class AppModule {
+      }
+
+      const angular1Module = bundle( AppModule );
 
       const expectedInvokeQueue = [
         [ '$compileProvider', 'directive', provide( AppComponent ) ],
@@ -123,7 +135,7 @@ describe( `util/bundler`, () => {
         [ '$provide', 'factory', provide( MyFactoryToken, { useFactory: ()=>({}) } ) ],
         [ '$provide', 'service', provide( SomeGlobalService ) ]
       ];
-      const actualInvokeQueue = (ngModule as any)._invokeQueue;
+      const actualInvokeQueue = (angular1Module as any)._invokeQueue;
       const actual = _invokeQueueToCompare( actualInvokeQueue, false );
       const expected = _invokeQueueToCompare( expectedInvokeQueue, false );
 
@@ -132,7 +144,7 @@ describe( `util/bundler`, () => {
       // console.log( 'expected:',expected );
 
       expect( actual ).to.deep.equal( expected );
-      expect( ngModule.requires ).to.deep.equal( [ 'ui.bootstrap.modal','3rdParty' ] );
+      expect( angular1Module.requires ).to.deep.equal( [ 'ui.bootstrap.modal','3rdParty' ] );
 
     } );
 
@@ -148,13 +160,17 @@ describe( `util/bundler`, () => {
       @Component( {
         selector: 'app-with-plugin',
         template: 'hello',
-        directives: [ PluginFooDirectives, YoDirective ],
-        providers: [ PluginFooProviders, MyPrivateService ],
-        pipes: [ PluginFooPipes ]
+        providers: [ PluginFooProviders, MyPrivateService ]
       } )
       class AppWithPluginComponent {}
 
-      const ngModule = bundle( AppWithPluginComponent );
+      @NgModule({
+        declarations: [ AppWithPluginComponent, PluginFooPipes, PluginFooDirectives, YoDirective ],
+      })
+      class AppWithPluginModule {
+      }
+
+      const angular1Module = bundle( AppWithPluginModule );
 
       const expectedInvokeQueue = [
         [ '$compileProvider', 'directive', provide( AppWithPluginComponent ) ],
@@ -165,7 +181,7 @@ describe( `util/bundler`, () => {
         [ '$compileProvider', 'directive', provide( NestedComponent ) ],
         [ '$compileProvider', 'directive', provide( YoDirective ) ]
       ];
-      const actualInvokeQueue = (ngModule as any)._invokeQueue;
+      const actualInvokeQueue = (angular1Module as any)._invokeQueue;
       const actual = _invokeQueueToCompare( actualInvokeQueue, false );
       const expected = _invokeQueueToCompare( expectedInvokeQueue, false );
 
@@ -177,7 +193,7 @@ describe( `util/bundler`, () => {
 
     } );
 
-    it( `should allow ngModule.config within otherProviders setup`, () => {
+    it( `should allow angular1Module.config within otherProviders setup`, () => {
 
       @Injectable()
       class MyDynamicService {}
@@ -199,7 +215,13 @@ describe( `util/bundler`, () => {
       } )
       class PureAppComponent {}
 
-      const ngModule = bundle( PureAppComponent, [ configPhase ] );
+      @NgModule({
+        declarations: [ PureAppComponent ],
+      })
+      class AppModule {
+      }
+
+      const angular1Module = bundle( AppModule, [ configPhase ] );
 
       const expectedInvokeQueue = [
         [ '$compileProvider', 'directive', provide( PureAppComponent ) ],
@@ -215,12 +237,12 @@ describe( `util/bundler`, () => {
         [ '$injector', 'invoke', [ configPhase ] ]
       ];
 
-      const actualConfigBlocks = (ngModule as any)._configBlocks;
-      const actualInvokeQueue = (ngModule as any)._invokeQueue;
+      const actualConfigBlocks = (angular1Module as any)._configBlocks;
+      const actualInvokeQueue = (angular1Module as any)._invokeQueue;
 
       expect( actualConfigBlocks ).to.deep.equal( expectedConfigBlocks );
 
-      _execConfigBlocks(ngModule);
+      _execConfigBlocks(angular1Module);
 
       const actual = _invokeQueueToCompare( actualInvokeQueue, false );
       const expected = _invokeQueueToCompare( expectedInvokeQueue, false );
@@ -235,12 +257,12 @@ describe( `util/bundler`, () => {
 
   } );
 
-  function _execConfigBlocks( ngModule: any ) {
-    const configBlocks = ngModule._configBlocks;
+  function _execConfigBlocks( angular1Module: any ) {
+    const configBlocks = angular1Module._configBlocks;
     configBlocks.forEach( ( config )=> {
       const registeredFnArr = config[ 2 ];
       const fn = registeredFnArr[ 0 ];
-      fn(ngModule);
+      fn(angular1Module);
     } );
   }
 

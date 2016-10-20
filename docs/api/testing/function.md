@@ -45,20 +45,24 @@ import * as angular from 'angular';
 import { expect } from 'chai';
 import { MyComponent } from './my-component';
 import { renderFactory, IRender } from 'ng-metadata/testing';
-import { bundle, getInjectableName } from 'ng-metadata/core';
+import { bundle, getInjectableName, NgModule } from 'ng-metadata/core';
 
 describe(`MyComponent`, () => {
   
   @Component( {
     selector: 'test-component',
-    directives: [ MyComponent ],
     template: `<my-component ng-model="$ctrl.data"></my-component>`
   } )
   class TestComponent {
-    data = {name:'Martin'}
+    data = { name: 'Martin' }
   }
+
+  @NgModule({
+    declarations: [ TestComponent, MyComponent ]
+  })
+  class TestNgModule {}
   
-  const TestModule: string = bundle(TestComponent).name;
+  const TestModule: string = bundle(TestNgModule).name;
   
   let $compile: ng.ICompileService;
   let $rootScope: ng.IRootScopeService;

@@ -22,16 +22,15 @@ export function createBootstrapFn(bootstrapFn: Function = angular.bootstrap.bind
 
   /**
    * bootstrap angular app
-   * @param {Type}  rootComponent
+   * @param {Type}  NgModule
    * @param {Array<any>}  providers
    */
-  return function bootstrap(
-    rootComponent: Type,
-    providers: any[]
+  return function bootstrapModule(
+    NgModule: Type
   ) {
 
-    const ngModule = bundle( rootComponent, providers );
-    const ngModuleName = ngModule.name;
+    const angular1Module = bundle( NgModule );
+    const angular1ModuleName = angular1Module.name;
     const strictDi = true;
     const element = document;
 
@@ -40,13 +39,13 @@ export function createBootstrapFn(bootstrapFn: Function = angular.bootstrap.bind
         'Angular is running in the development mode. Call enableProdMode() to enable the production mode.'
       );
     } else {
-      angular.module( ngModuleName ).config( prodModeConfig );
+      angular.module( angular1ModuleName ).config( prodModeConfig );
     }
 
     const appRoot = _getAppRoot( element );
 
     angular.element( document ).ready( ()=> {
-      bootstrapFn( appRoot, [ ngModuleName ], {
+      bootstrapFn( appRoot, [ angular1ModuleName ], {
         strictDi
       } )
     } );

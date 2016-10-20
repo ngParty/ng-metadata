@@ -5,12 +5,14 @@ declare type Subject<T> = any;
 declare module ngMetadataPlatform{
 
   // type AppRoot = string | Element | Document;
-  // function bootstrap(ngModule: string, {element, strictDi}?: {
+  // function bootstrap(angular1Module: string, {element, strictDi}?: {
   //   element?: AppRoot;
   //   strictDi?: boolean;
   // }): void;
 
-  function bootstrap(rootComponent: Type, providers: any[]): void;
+  const platformBrowserDynamic: () => {
+    bootstrapModule: Function;
+  };
 
   /**
    * A service that can be used to get and set the title of a current HTML document.
@@ -330,6 +332,58 @@ export const enum ChangeDetectionStrategy {
   function Output(bindingPropertyName?: string): PropertyDecorator;
   function Input(bindingPropertyName?: string): PropertyDecorator;
   function Attr(bindingPropertyName?: string): PropertyDecorator;
+
+  /**
+   * Interface for creating NgModuleMetadata
+   */
+  interface NgModuleMetadataType {
+      providers?: any[];
+      declarations?: Array<Type | Type[]>;
+      imports?: Array<Type | string>;
+      exports?: Array<Type | any[]>;
+      entryComponents?: Array<Type | any[]>;
+      bootstrap?: Array<Type | any[]>;
+      schemas?: Array<any[]>;
+  }
+  class NgModuleMetadata implements NgModuleMetadataType {
+      providers: any[];
+      private _providers;
+      declarations: Array<Type | Type[]>;
+      imports: Array<Type | string>;
+      constructor(options?: NgModuleMetadataType);
+  }
+
+  export interface TypeDecorator {
+      /**
+       * Invoke as ES7 decorator.
+       */
+      <T extends Type>(type: T): T;
+      (target: Object, propertyKey?: string | symbol, parameterIndex?: number): void;
+  }
+  /**
+   * Interface for the {@link NgModuleMetadata} decorator function.
+   *
+   * See {@link NgModuleMetadataFactory}.
+   *
+   * @stable
+   */
+  export interface NgModuleDecorator extends TypeDecorator {
+  }
+  /**
+   * {@link NgModuleMetadata} factory for creating annotations, decorators or DSL.
+   *
+   * @experimental
+   */
+  export interface NgModuleMetadataFactory {
+      (obj?: NgModuleMetadataType): NgModuleDecorator;
+      new (obj?: NgModuleMetadataType): NgModuleMetadata;
+  }
+  /**
+   * Declares an ng module.
+   * @experimental
+   * @Annotation
+   */
+  export const NgModule: NgModuleMetadataFactory;
 
   function Pipe({name, pure}?: {
     name?: string;

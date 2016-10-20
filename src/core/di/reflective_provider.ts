@@ -7,7 +7,7 @@ import { isPipe, isDirectiveLike, isService, isProviderLiteral, createProvider, 
 import { isDirective } from './provider_util';
 
 /**
- * process provider literals and return map for ngModule consumption
+ * process provider literals and return map for angular1Module consumption
  * @param provider
  * @returns {{method: string, name: string, value: any}}
  */
@@ -45,12 +45,12 @@ export function resolveReflectiveProvider( provider: Provider ): {method: string
 }
 
 /**
- * returns StringMap of values needed for ngModule registration and duplicity checks
+ * returns StringMap of values needed for angular1Module registration and duplicity checks
  * @param injectable
  * @returns {any}
  * @private
  */
-export function _getNgModuleMetadataByType( injectable: Type ): { providerName: string, providerMethod: string, moduleMethod: string} {
+export function _getAngular1ModuleMetadataByType( injectable: Type ): { providerName: string, providerMethod: string, moduleMethod: string} {
   // only the first class annotations is injectable
   const [annotation] = reflector.annotations( injectable );
 
@@ -101,13 +101,13 @@ export function _getNgModuleMetadataByType( injectable: Type ): { providerName: 
 /**
  * run through Component tree and register everything that is registered via Metadata
  * - works for nested arrays like angular 2 does ;)
- * @param ngModule
+ * @param angular1Module
  * @param providers
  * @returns {ng.IModule}
  * @private
  */
 export function _normalizeProviders(
-  ngModule: ng.IModule,
+  angular1Module: ng.IModule,
   providers: Array<string|Type|ProviderLiteral|any[]>
 ): ng.IModule {
 
@@ -115,7 +115,7 @@ export function _normalizeProviders(
 
     // this is for legacy Angular 1 module
     if ( isString( providerType ) ) {
-      ngModule.requires.push( providerType );
+      angular1Module.requires.push( providerType );
       return;
     }
 
@@ -124,8 +124,8 @@ export function _normalizeProviders(
     if ( isProviderLiteral( providerType ) ) {
       const provider = createProvider( providerType );
       const { method, name, value } = resolveReflectiveProvider( provider );
-      if ( !_isTypeRegistered( name, ngModule, '$provide', method ) ) {
-        ngModule[ method ]( name, value );
+      if ( !_isTypeRegistered( name, angular1Module, '$provide', method ) ) {
+        angular1Module[ method ]( name, value );
       }
       return;
     }
@@ -135,38 +135,38 @@ export function _normalizeProviders(
       // const provider = createProvider( {provide:b, useClass:b} );
       // const { method, name, value } = resolveReflectiveProvider( provider );
       const [name,value] = provide( providerType );
-      const { providerName, providerMethod, moduleMethod } = _getNgModuleMetadataByType( providerType );
+      const { providerName, providerMethod, moduleMethod } = _getAngular1ModuleMetadataByType( providerType );
 
       // config phase support
       if ( isType( name ) ) {
-        ngModule.config( name );
+        angular1Module.config( name );
         return;
       }
 
-      if ( !_isTypeRegistered( name, ngModule, providerName, providerMethod ) ) {
+      if ( !_isTypeRegistered( name, angular1Module, providerName, providerMethod ) ) {
         // @TODO register via this once requires are resolved for 3 types of attr directive from template
-        // _registerTypeProvider( ngModule, providerType, { moduleMethod, name, value } );
-        ngModule[ moduleMethod ]( name, value );
+        // _registerTypeProvider( angular1Module, providerType, { moduleMethod, name, value } );
+        angular1Module[ moduleMethod ]( name, value );
       }
       return;
     }
 
     // un flattened array, unwrap and parse next array level of providers
     if (isArray(providerType)) {
-      _normalizeProviders( ngModule, providerType );
+      _normalizeProviders( angular1Module, providerType );
     } else {
       throw new Error(`InvalidProviderError(${providerType})`);
     }
   });
 
   // return res;
-  return ngModule;
+  return angular1Module;
 }
 
 /**
- * check if `findRegisteredType` is registered within ngModule, so we don't have duplicates
+ * check if `findRegisteredType` is registered within angular1Module, so we don't have duplicates
  * @param findRegisteredType
- * @param ngModule
+ * @param angular1Module
  * @param instanceType
  * @param methodName
  * @returns {boolean}
@@ -174,11 +174,11 @@ export function _normalizeProviders(
  */
 export function _isTypeRegistered(
   findRegisteredType: string,
-  ngModule: ng.IModule,
+  angular1Module: ng.IModule,
   instanceType: string,
   methodName: string
 ): boolean {
-  const invokeQueue: any[] = (ngModule as any)._invokeQueue;
+  const invokeQueue: any[] = (angular1Module as any)._invokeQueue;
   const types = invokeQueue
     .filter( ( [type,fnName]:[string,string] ) => {
       return type === instanceType && fnName === methodName;
@@ -199,7 +199,7 @@ export function _isTypeRegistered(
  * @private
  */
 export function _registerTypeProvider(
-  ngModule: ng.IModule,
+  angular1Module: ng.IModule,
   provider: Type,
   { moduleMethod, name, value }: { moduleMethod: string,name: string,value: Function }
 ): void {
@@ -210,11 +210,11 @@ export function _registerTypeProvider(
 
   // we need to register attr directives for all possible binding types
   if ( isDirective( annotation ) ) {
-    ngModule[ moduleMethod ]( name, value );
-    ngModule[ moduleMethod ]( `[${name}]`, value );
-    ngModule[ moduleMethod ]( `(${name})`, value );
+    angular1Module[ moduleMethod ]( name, value );
+    angular1Module[ moduleMethod ]( `[${name}]`, value );
+    angular1Module[ moduleMethod ]( `(${name})`, value );
   } else {
-    ngModule[ moduleMethod ]( name, value )
+    angular1Module[ moduleMethod ]( name, value )
   }
 
 }

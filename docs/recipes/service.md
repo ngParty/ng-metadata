@@ -1,6 +1,6 @@
 # Service
 
-Service is just pure `ES2015 class` with `@Injectable()` decorator, registered via `@Component/@Directive` `providers/viewProviders` metadata  or legacy `angular.service`(deprecated).
+Service is just pure `ES2015 class` with `@Injectable()` decorator, registered via `@NgModule/@Component` `providers` metadata or legacy `angular.service` using `provide` (deprecated).
 
 **ES5**
 
@@ -29,7 +29,7 @@ function User($http){
 ```
 
 ```js
-// user.js
+// user.module.js
 
 angular.module('user',[]);
 ```
@@ -75,14 +75,14 @@ export class UserComponent{}
 
 ---
 
-**(DEPRECATED) TS + ng-metadata**
+**(DEPRECATED) TS + ng-metadata using provide**
 
 ```typescript
 // user.service.ts
 import { Inject, Injectable } from 'ng-metadata/core';
 
 @Injectable()
-export class UserSvc{
+export class UserService {
 
   hobbies: string[] = [];
 
@@ -101,11 +101,11 @@ export class UserSvc{
 ```
 
 ```typescript
-// user.ts
+// user.module.ts
 import * as angular from 'angular';
-import {provide} from 'ng-metadata/core';
-import {UserSvc} from './user.service';
+import { provide } from 'ng-metadata/core';
+import { UserService } from './user.service';
 
 angular.module('user',[])
-  .service( ...provide(UserSvc) );
+  .service( ...provide( UserService ) );
 ```

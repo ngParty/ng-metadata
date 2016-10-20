@@ -39,8 +39,7 @@ import { Component } from 'ng-metadata/core';
 
 @Component({
   selector: 'my-app',
-  template:`<zippy (open)="$ctrl.onOpen($event)" "$ctrl.onClose($event)">My visibility will be toggled! wooot!</zippy>`,
-  directives: [ ZippyComponent ]
+  template:`<zippy (open)="$ctrl.onOpen($event)" "$ctrl.onClose($event)">My visibility will be toggled! wooot!</zippy>`
 })
 class AppComponent {
 
@@ -80,12 +79,6 @@ export class ZippyComponent {
     }
   }
 }
-
-// index.ts
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
-import { AppComponent } from './app.component';
-
-bootstrap( AppComponent );
 ```
 
 
@@ -98,7 +91,7 @@ Using an OpaqueToken is preferable to using strings as tokens because of possibl
 *example:*
 
 ```typescript
-import {Component, OpaqueToken, getInjectableName} from 'ng-metadata/core';
+import { Component, OpaqueToken, getInjectableName } from 'ng-metadata/core';
 
 const SomeValueToken = new OpaqueToken("value");
 const someValue = 'Dont change me DI!';
@@ -113,10 +106,10 @@ class AppComponent{}
 // test.ts
 import { expect } from 'chai';
 import { bundle } from 'ng-metadata/core';
-import { AppComponent } from './app.component';
+import { AppModule } from './app.module';
 
-const ngModule = bundle( AppComponent ); 
-const $injector = angular.injector([ngModule.name]);
+const angular1Module = bundle( AppModule );
+const $injector = angular.injector([angular1Module.name]);
 
 expect($injector.get(getInjectableName(SomeValueToken))).to.equal(someValue);
 ```
@@ -133,8 +126,8 @@ Note: by change detector, we mean in Angular 1 terms, local component `$scope`
 
 | members           | Type       | Description                                  |
 | ----------------- | ---------- |--------------------------------------------- |
-| **markForCheck**  | `Function` | Marks all ancestors to be checked. ( calls `$scope.$applyAsync()` ) |
-| **detectChanges** | `Function` | Checks the change detector and its children. ( calls `$scope.$digest()` ). This can also be used in combination with `detach` to implement local change detection checks. |
+| **markForCheck**  | `Function` | Marks all ancestors to be checked. (Calls `$scope.$applyAsync()`) |
+| **detectChanges** | `Function` | Checks the change detector and its children. (Calls `$scope.$digest()`). This can also be used in combination with `detach` to implement local change detection checks. |
 | **detach**        | `Function` | Detaches the change detector from the change detector tree. The detached change detector($scope) will not be checked until it is reattached. |
 | **reattach**      | `Function` | Reattach the change detector to the change detector tree |
 
@@ -153,7 +146,6 @@ import {
   OnInit,
   Input
 } from 'ng-metadata/core';
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
 
 @Component( {
   selector: 'mark-for-check',
@@ -183,14 +175,11 @@ export class MarkForCheckComponent implements OnInit {
   template: `
     Number of ticks inside parent: {{ $ctrl.numberOfTicks }}
     <mark-for-check [ticks]="$ctrl.numberOfTicks"></mark-for-check>
-  `,
-  directives: [ MarkForCheckComponent ]
+  `
 } )
 export class AppComponent {
   numberOfTicks = 0;
 }
-  
-bootstrap( AppComponent );
 ```
 
 *example:*
@@ -208,7 +197,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef
 } from 'ng-metadata/core';
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
 
 @Injectable()
 export class DataProvider {
@@ -249,12 +237,8 @@ export class DetachComponent {
    <detach></detach>
   `,
   providers: [ DataProvider ],
-  directives: [ DetachComponent ]
 } )
 export class AppComponent {}
-
-  
-bootstrap( AppComponent );
 ```
 
 *example:*
@@ -273,7 +257,6 @@ import {
   SimpleChange,
   Input
 } from 'ng-metadata/core';
-import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
 
 @Injectable()
 export class DataProvider {
@@ -317,11 +300,8 @@ export class ReattachComponent implements OnChanges {
     <reattach [live]="$ctrl.live"></reattach>
   `,
   providers: [ DataProvider ],
-  directives: [ ReattachComponent ]
 } )
 export class AppComponent {
   live = true;
 }
-  
-bootstrap( AppComponent );
 ```

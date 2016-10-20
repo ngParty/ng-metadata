@@ -15,15 +15,30 @@ everywhere in our application.
 
 In the root of our project we create `upgrade-adapter.ts`, which will export the singleton and be referenced later.
 
-In order to "supercharge" `@angular/upgrade`'s UpdateAdapter we pass its constructor to the `NgMetadataUpgradeAdapter`, and so our file should look like this:
+We first instantiate the `@angular/upgrade` UpdateAdapter using an Angular 2 NgModule (NOTE: not an ng-metadata NgModule).
+
+Then, in order to create our "supercharged" upgradeAdapter singleton, we pass the instantiated `@angular/upgrade` UpdateAdapter to the `NgMetadataUpgradeAdapter` constructor.
+
+Our file should now look like this:
 
 *upgrade-adapter.ts*:
 
 ```typescript
-import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade';
-import { UpgradeAdapter } from '@angular/upgrade';
+import { NgModule } from '@angular/core'
+import { BrowserModule } from '@angular/platform-browser'
+import { UpgradeAdapter } from '@angular/upgrade'
+import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade'
 
-export const upgradeAdapter = new NgMetadataUpgradeAdapter( UpgradeAdapter );
+// Angular 2 NgModule (not ng-metadata NgModule)
+@NgModule({
+	imports: [BrowserModule], // required Angular 2 BrowserModule
+})
+class UpgradeModule {}
+
+const instantiatedAdapter = new UpgradeAdapter(UpgradeModule)
+
+// Export the "supercharged" ng-metadata upgradeAdapter singleton
+export const upgradeAdapter = new NgMetadataUpgradeAdapter(instantiatedAdapter)
 ```
 
 ## Bootstrapping our hybrid app
@@ -33,30 +48,28 @@ to work harmoniously together, we need to update the bootstrap process of our ap
 use the `upgradeAdapter` singleton.
 
 This is simply a case of importing it and using its bootstrap method instead of
-the bootstrap function from `ng-metadata/core`.
+the bootstrap function created via platformBrowserDynamic() from `ng-metadata/platform-browser-dynamic`.
 
 *BEFORE: main.ts*
 
 ```typescript
-import { bootstrap } from 'ng-metadata/core';
-import { AppComponent } from './app/app.component';
+import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic';
+import { AppModule } from './app.module'; // ng-metadata NgModule
 // ...other imports
-// ...configure providers
 // ...etc
 
-bootstrap( AppComponent, providers );
+platformBrowserDynamic().bootstrapModule(AppModule);
 ```
 
 *AFTER: main.ts*
 
 ```typescript
 import { upgradeAdapter } from './upgrade-adapter';
-import { AppComponent } from './app/app.component';
+import { AppModule } from './app.module.ts'; // ng-metadata NgModule
 // ...other imports
-// ...configure providers
 // ...etc
 
-upgradeAdapter.bootstrap( AppComponent, providers );
+upgradeAdapter.bootstrap( AppModule );
 ```
 
 ## Upgrading an Angular 1 Component
@@ -170,15 +183,15 @@ export const FooModule = angular.module( 'foo', [] )
 In order to make our ng-metadata apps match as closely to Angular 2
 apps as is reasonable, we want to avoid dealing with Angular 1 modules directly in our code.
 
-As of ng-metadata 2.0, we can let ng-metadata deal with creating the Angular 1
+As of ng-metadata 3.0, we can let ng-metadata deal with creating the Angular 1
 modules behind the scenes, and register our directives and providers
-directly onto parent Components.
+directly onto parent NgModules.
 
 For this reason, ng-metadata's upgradeAdapter also offers a helper function for
-registering a downgraded Angular 2 Component directly on an Angular 1 Component's directives array called `provideNg2Component()`.
+registering a downgraded Angular 2 Component directly on an ng-metadata NgModule's declarations array called `provideNg2Component()`.
 
 ```typescript
-import { Component } from 'ng-metadata/core';
+import { NgModule } from 'ng-metadata/core';
 
 // Our upgradeAdapter singleton
 import { upgradeAdapter } from '../upgrade-adapter';
@@ -186,23 +199,15 @@ import { upgradeAdapter } from '../upgrade-adapter';
 // Our example Angular 2 Component
 import { Ng2Component } from './ng2.component.ts';
 
-@Component({
-  selector: 'some-parent',
-  template: '<h1>Foo!</h1><angular-two></angular-two>',
-  directives: [
+@NgModule({
+  declarations: [
     // Ng1Component,
     // SomeOtherNg1Component,
     // ...etc...
     upgradeAdapter.provideNg2Component( Ng2Component ),
   ],
 })
-export class SomeParentComponent {
-
-  constructor() {
-    console.log( 'No more angular.module!' );
-  }
-
-}
+export class SomeParentModule {}
 ```
 
 ## Upgrading an Angular 1 Provider
@@ -282,7 +287,7 @@ export const FooModule = angular.module( 'foo', [] )
 ### 2) `upgradeAdapter.provideNg2Provider()`
 
 The alternative to directly interacting with an Angular 1 module (not recommended)
-for the purposes of registering Provider, is to make use of the Provider array on a Component, or at bootstrap.
+for the purposes of registering Provider, is to make use of the providers array on an NgModule.
 
 Just like with downgrading and registering Angular 2 Components, ng-metadata offers us a helper for this called `provideNg2Provider()`.
 
@@ -324,69 +329,4 @@ export class FooComponent {
 ### NOTE: Using downgraded Angular 2 Providers in other Angular 2 Components/Providers
 
 If we want to also use our downgraded Angular 2 Providers in other Angular 2 Providers or Components,
-we need to _additionally_ add it as a Provider via the `upgradeAdapter`.
-
-We can do that with the `addProvider()` helper function.
-
-**In the downgradeNg2Provider() example:**
-
-```typescript
-import * as angular from 'angular';
-
-// An Angular 2 Provider
-import { Ng2Service } from './ng2.service.ts';
-
-// Call `addProvider()` on the Angular 2 Provider
-// to make it available to other Angular 2 Providers and Components
-upgradeAdapter.addProvider( Ng2Service );
-
-const otherServiceToken = new OpaqueToken( 'otherService' );
-
-// Our old Angular 1 Module
-export const FooModule = angular.module( 'foo', [] )
-
-  // Using a string for the name
-  .factory( ...upgradeAdapter.downgradeNg2Provider( 'ng2Service', { useClass: Ng2Service }) )
-
-  // Using an OpaqueToken for the name
-  .factory( ...upgradeAdapter.downgradeNg2Provider( otherServiceToken, { useClass: Ng2Service }) )
-```
-
-**In the provideNg2Provider() example:**
-
-```typescript
-import { Component } from 'ng-metadata/core';
-
-// Our upgradeAdapter singleton
-import { upgradeAdapter } from '../upgrade-adapter';
-
-// An Angular 2 Provider
-import { Ng2Service } from './ng2.service.ts';
-
-// Call `addProvider()` on the Angular 2 Provider
-// to make it available to other Angular 2 Providers and Components
-upgradeAdapter.addProvider( Ng2Service );
-
-const otherServiceToken = new OpaqueToken( 'otherService' );
-
-@Component({
-  selector: 'foo',
-  template: '<h1>Foo!</h1>',
-  providers: [
-
-    // Using a string for the name
-    upgradeAdapter.provideNg2Provider( 'ng2Service', { useClass: Ng2Service } ),
-
-    // Using an OpaqueToken for the name
-    upgradeAdapter.provideNg2Provider( otherServiceToken, { useClass: Ng2Service } ),
-
-  ],
-})
-export class FooComponent {
-
-  constructor() {
-    console.log( 'No more angular.module!' );
-  }
-
-}
-```
+we need to _additionally_ add it as a Provider to the Angular 2 NgModule that we pass into the `@angular/upgrade` UpgradeAdapter in `upgrade-adapter.ts`.

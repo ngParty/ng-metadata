@@ -15,14 +15,13 @@
 
 Disable Angular's development mode, which turns off debug data information and optimizes $http calls execution.
 
-Behind the scenes we are setting :
+Behind the scenes we are setting:
 - [`$compileProvider.debugInfoEnabled(false);`](https://docs.angularjs.org/guide/production#disabling-debug-data)
 - [`$httpProvider.useApplyAsync(true)`](https://docs.angularjs.org/api/ng/provider/$httpProvider#useApplyAsync)
 
 
 *example:*
 ```typescript
-  
 // main.ts
 import { bootstrap } from 'ng-metadata/platform-browser-dynamic';
 import { enableProdMode } from 'ng-metadata/core';
@@ -54,8 +53,8 @@ but not yet defined. It is also used when the `token` which we use when creating
 | **forwardRefFn**  | `ForwardRefFn`        | callback function which returns demanded Injectable |
 
 > ForwardRefFn:
->   An interface that a function passed into forwardRef has to implement. `const ref = forwardRef(() => Lock);`
- 
+> An interface that a function passed into forwardRef has to implement. `const ref = forwardRef(() => Lock);`
+
 *example:*
 
 ```typescript
@@ -81,7 +80,7 @@ class Lock {}
 class AppComponent{}
 
 
-//test.ts
+// test.ts
 import { expect } from 'chai';
 
 const $injector = angular.injector(['ng','myApp']);
@@ -92,7 +91,7 @@ expect(door.lock instanceof Lock).to.equal(true);
 ```
 
 
-## provide 
+## provide
 
 > @deprecated, [use component tree composition and provide map literal instead](/docs/recipes/bootstrap.md)
 
@@ -112,16 +111,19 @@ this:
 
 ```typescript
 import * as angular from 'angular';
-import {provide, Component} from 'ng-metadata/core';
+import { provide, Component } from 'ng-metadata/core';
 
-@Component({selector:'hero-cmp',template:`<div>hello hero</div>`})
-class HeroCmp{}
+@Component({
+  selector:'hero-cmp',
+  template:`<div>hello hero</div>`
+})
+class HeroComponent {}
 
 angular.module('hero',[])
-  .directive( ...provide(HeroCmp) );
+  .directive( ...provide( HeroComponent ) );
 ```
 
-will register as `angular.directive('heroCmp', function directiveFactory(){ return {} })`.  
+will register as `angular.directive('heroCmp', function directiveFactory(){ return {} })`.
 
 
 > For Services which have @Injectable, by default, it will extract the generated `id` token
@@ -130,14 +132,14 @@ so this:
 
 ```typescript
 import * as angular from 'angular';
-import {provide} from 'ng-metadata/core';
-import {HeroSvc} from './hero.service';
+import { provide } from 'ng-metadata/core';
+import { HeroService } from './hero.service';
 
 angular.module('hero',[])
-  .service( ...provide(HeroSvc) );
+  .service( ...provide( HeroService ) );
 ```
 
-will register as `angular.service('heroSvc#12', HeroSvc)`
+will register as `angular.service('heroSvc#12', HeroService)`
 
 ###### Parameters
 
@@ -155,12 +157,12 @@ use this string across whole app
 
 ```typescript
 import * as angular from 'angular';
-import {provide, Inject} from 'ng-metadata/core';
+import { provide, Inject } from 'ng-metadata/core';
 
-class MyService{}
+class MyService {}
 
 angular.module('myApp')
-  .constant(...provide('mySvc',{useClass:MyService));
+  .constant(...provide( 'mySvc', { useClass: MyService } );
 
 // now when you are injecting the constant in some service or so
 export class MyLogger{
@@ -177,14 +179,14 @@ don't use strings but references
 
 ```typescript
 import * as angular from 'angular';
-import {provide, Inject, OpaqueToken} from 'ng-metadata/core';
+import { provide, Inject, OpaqueToken } from 'ng-metadata/core';
 
 export const myConstToken = new OpaqueToken('myConstanstYo');
-export const myConstants = {foo:123123,moo:'12312'};
+export const myConstants = { foo: 123123, moo: '12312' };
 
 angular.module('myApp')
-  .constant(...provide(myConstToken,{useValue:myConstants));
-    
+  .constant(...provide( myConstToken, { useValue: myConstants } );
+
 // now when you are injecting the constant in some service or so
 export class MyService{
   constructor(
@@ -212,24 +214,24 @@ injectable names are auto-created.
 
 Works for string/OpaqueToken/Type
 Note: Type must be decorated with one of class decorators(`@Injectable`,`@Component`,`@Directive`,`@Pipe`), otherwise it throws
- 
+
 *example:*
 
 ```typescript
 import { Injectable, Component, Pipe, getInjectableName } from 'ng-metadata/core';
 // this is given some random name like 'myService48' when it's created with `module.service`
- 
+
 @Injectable
 class MyService {}
 
-@Component({selector:'my-cmp',template:'...'})
+@Component({ selector: 'my-cmp', template: '...' })
 class MyComponent{}
 
-@Pipe({name:'kebabCase'})
+@Pipe({ name: 'kebabCase' })
 class MyPipe{}
  
  
-import {expect} from 'chai';
+import { expect } from 'chai';
 
 expect(getInjectableName(MyService)).to.equal('myService48');
 expect(getInjectableName(MyComponent)).to.equal('myCmp');
@@ -238,16 +240,16 @@ expect(getInjectableName(MyPipe)).to.equal('kebabCase');
 
 ## bundle
 
-Manually bundle component with all it's dependencies registered via `@Component` providers/viewProviders/pipes/directives property metadata.
+Manually bundle NgModule with all it's dependencies registered via `@NgModule` providers/declarations/imports property metadata.
 
 You may need this when migrating from previous ng-metadata 1.x to Angular 2 component bundling style.
 
-It returns new instance of `ngModule` which can be then registered to other ngModules or provided to `angular.bootstrap`
+It returns new instance of `angular.module` which can be then registered to other angular.modules or provided to `angular.bootstrap`
 
-returns new created `ngModule` instance (if you don't provide existing one as 3rd argument) 
+returns new created `angular.module` instance (if you don't provide existing one as 3rd argument) 
 
 | Parameter          | Type                  | Description                               |
 | -------------------| ----------------------|------------------------------------------ |
-| **ComponentClass** | `Type`                | Component class which is decorated by `@Component` |
+| **NgModuleClass** | `Type`                | NgModule class which is decorated by `@NgModule` |
 | **otherProviders?**| `Array<Type,Function,string>` | you can optionally add other providers manual way ( also function for config phase ) |
-| **ngModule?**| `ng.IModule` | you can provide existing ngModule instance, and if you do everything will be registered to this module instead of creating new one |
+| **angular.module?**| `ng.IModule` | you can provide existing angular.module instance, and if you do everything will be registered to this module instead of creating new one |

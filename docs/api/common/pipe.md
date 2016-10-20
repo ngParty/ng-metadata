@@ -1,4 +1,4 @@
-# Pipe ( back-ported from Angular 2)
+# Pipe (back-ported from Angular 2)
 
 - [AsyncPipe](#asyncpipe)
 
@@ -7,22 +7,23 @@
 
 The `async` pipe subscribes to an `Observable` or `Promise` and returns the latest value it has emitted.
 
-When a new value is emitted, the `async` pipe marks the component to be checked for changes. ( runs $scope.$digest() )
+When a new value is emitted, the `async` pipe marks the component to be checked for changes. (Runs $scope.$digest())
 
 When the component gets destroyed, the `async` pipe unsubscribes automatically to avoid potential memory leaks.
 
 ### Registration
 
-- you have to register it via `pipes` `@Component` decorator or via `bootstrap`(preferred)
+- you have to register it via the `declarations` array on an `@NgModule`.
 
 ```typescript
-// main.ts
-import { bootstrap } from 'ng-metadata/platform';
+// app.module.ts
+import { NgModule } from 'ng-metadata/core';
 import { AsyncPipe } from 'ng-metadata/common';
 
-import { AppComponent } from './app.component';
-
-bootstrap( AppComponent, [ AsyncPipe ] );
+@NgModule({
+  declarations: [ AsyncPipe ]
+})
+export class AppModule {}
 ```
 
 ### Usage
@@ -32,7 +33,7 @@ object | async:this // for observable
 
 where:
 - `object` is one of type `Observable`, `Promise`, 'ng.IPromise' or 'ng.IHttpPromise'
-- `this` is pipe parameter ( in angular 1 reference to local $Scope ( we need for Observable disposal )
+- `this` is pipe parameter (in angular 1 reference to local $Scope ( we need for Observable disposal)
 
 If you are using async with observables nad you don't provide scope we will throw Error to let you know that you forgot `this`, #perfmatters baby!
 
@@ -71,7 +72,6 @@ class AsyncTaskComponent {
 
 @Component({
   selector: 'async-example',
-  directives: [AsyncTaskComponent],
   template: `
      <button ng-click="$ctrl.renderTimers=!$ctrl.renderTimers">Show Timers</button>
      <async-task ng-if="$ctrl.renderTimers"></async-task>

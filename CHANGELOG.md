@@ -1,3 +1,179 @@
+<a name="3.0.0-beta.0"></a>
+# [3.0.0-beta.0](https://github.com/ngParty/ng-metadata/compare/2.2.1...v3.0.0-beta.0) (2016-09-20)
+
+
+### Features
+
+* **core:** Add NgModule, use it for angular1Module bundling ([ed1c326](https://github.com/ngParty/ng-metadata/commit/ed1c326))
+* **core:** Remove directives and pipes from ComponentMetadata ([ed1ca46](https://github.com/ngParty/ng-metadata/commit/ed1ca46))
+* **playground:** add NgModule type and update bootstrap defs ([9a176d4](https://github.com/ngParty/ng-metadata/commit/9a176d4))
+* **upgrade:** Update NgMetadataUpgradeAdapter to support NgModule ([0a81c13](https://github.com/ngParty/ng-metadata/commit/0a81c13))
+
+
+### BREAKING CHANGES
+
+* core: All Pipes and Components must now be registered via an
+NgModule's declarations array.
+
+**Before:**
+```ts
+import { Component, Pipe } from 'ng-metadata/core'
+
+@Component({
+  selector: 'feature'
+})
+class FeatureComponent {}
+
+@Pipe()
+class FooPipe {
+  transform() {
+    return 'foo'
+  }
+}
+
+@Component({
+  selector: 'main',
+  directives: [FeatureComponent],
+  pipes: [FooPipe]
+})
+class MainComponent {}
+```
+
+**After:**
+```ts
+import { NgModule, Component, Pipe } from 'ng-metadata/core'
+
+@Component({
+  selector: 'feature'
+})
+class FeatureComponent {}
+
+@Pipe()
+class FooPipe {
+  transform() {
+    return 'foo'
+  }
+}
+
+@Component({
+  selector: 'main'
+})
+class MainComponent {}
+
+@NgModule({
+  declarations: [MainComponent, FooPipe]
+})
+class MainModule {}
+```
+* upgrade: NgMetadataUpgradeAdapter now accepts an already
+instantiated @angular/upgrade UpgradeAdapter, which will have been
+created using an Angular 2 NgModule.
+
+**Before:**
+```ts
+import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade'
+import { UpgradeAdapter } from '@angular/upgrade'
+import { Component } from 'ng-metadata/core'
+
+const angular1Module = angular.module('ng1Module', [])
+
+@Component({
+  selector: 'app'
+})
+class AppComponent {}
+
+const upgradeAdapter = new NgMetadataUpgradeAdapter(UpgradeAdapter)
+
+upgradeAdapter.bootstrap(AppComponent, ['ng1Module'])
+```
+
+**After:**
+```ts
+import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade'
+import { UpgradeAdapter } from '@angular/upgrade'
+import { NgModule } from '@angular/core'
+
+const angular1Module = angular.module('ng1Module', [])
+
+@NgModule({
+  selector: 'ng2'
+})
+class Ng2Module {}
+
+const upgradeAdapter = new NgMetadataUpgradeAdapter( new
+UpgradeAdapter(Ng2Module) )
+
+upgradeAdapter.boostrap(document.body, ['ng1Module'])
+```
+* core: bundle() now takes an NgModule decorated class as its
+first argument instead of a Component.
+
+**Before:**
+```ts
+import { Component, bundle } from 'ng-metadata/core'
+
+@Component({
+  selector: 'foo',
+  template: '<h1>Foo!</h1>'
+})
+class FooComponent {}
+
+const angular1Module = bundle(FooComponent)
+```
+
+**After:**
+```ts
+import { NgModule, Component, bundle } from 'ng-metadata/core'
+
+@Component({
+  selector: 'foo',
+  template: '<h1>Foo!</h1>'
+})
+class FooComponent {}
+
+@NgModule({
+  declarations: [FooComponent]
+})
+class FooModule {}
+
+const angular1Module = bundle(FooModule)
+```
+* core: bootstrapping is now done on an NgModule, not on a
+Component.
+
+**Before:**
+```ts
+import { bootstrap } from 'ng-metadata/platform-browser-dynamic'
+import { Component } from 'ng-metadata/core'
+
+@Component({
+  selector: 'app'
+})
+class AppComponent {}
+
+bootstrap(AppComponent)
+```
+
+**After:**
+```ts
+import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic'
+import { NgModule, Component } from 'ng-metadata/core'
+
+@Component({
+  selector: 'app'
+})
+class AppComponent {}
+
+@NgModule({
+  declarations: [AppComponent]
+})
+class AppModule {}
+
+platformBrowserDynamic().bootstrapModule(AppModule)
+```
+
+
+
 <a name="2.2.1"></a>
 ## [2.2.1](https://github.com/ngParty/ng-metadata/compare/2.2.0...v2.2.1) (2016-09-16)
 
