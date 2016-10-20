@@ -1,3 +1,22 @@
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/ngParty/ng-metadata/compare/3.0.0-beta.0...v3.0.0) (2016-10-20)
+
+
+### Bug Fixes
+
+* **core:** Fix typo in bundle error message, relax isNgModule check (fixes #155) (#159) ([52fa571](https://github.com/ngParty/ng-metadata/commit/52fa571)), closes [#155](https://github.com/ngParty/ng-metadata/issues/155) [(#159](https://github.com/(/issues/159)
+
+### Features
+
+* **upgrade:** Dedicated NgMetadataUpgradeAdapter bootstrap function (#160) ([f941c71](https://github.com/ngParty/ng-metadata/commit/f941c71))
+
+
+### BREAKING CHANGES
+
+* The rxjs peerDependency has been updated to 5.0.0-rc.1, and this in turn requires TypeScript of 2.x and above.
+
+
+
 <a name="3.0.0-beta.0"></a>
 # [3.0.0-beta.0](https://github.com/ngParty/ng-metadata/compare/2.2.1...v3.0.0-beta.0) (2016-09-20)
 
@@ -12,11 +31,10 @@
 
 ### BREAKING CHANGES
 
-* core: All Pipes and Components must now be registered via an
-NgModule's declarations array.
+* core: All Pipes and Components must now be registered via an NgModule's declarations array.
 
 **Before:**
-```ts
+```typescript
 import { Component, Pipe } from 'ng-metadata/core'
 
 @Component({
@@ -40,7 +58,7 @@ class MainComponent {}
 ```
 
 **After:**
-```ts
+```typescript
 import { NgModule, Component, Pipe } from 'ng-metadata/core'
 
 @Component({
@@ -70,7 +88,7 @@ instantiated @angular/upgrade UpgradeAdapter, which will have been
 created using an Angular 2 NgModule.
 
 **Before:**
-```ts
+```typescript
 import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade'
 import { UpgradeAdapter } from '@angular/upgrade'
 import { Component } from 'ng-metadata/core'
@@ -88,7 +106,7 @@ upgradeAdapter.bootstrap(AppComponent, ['ng1Module'])
 ```
 
 **After:**
-```ts
+```typescript
 import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade'
 import { UpgradeAdapter } from '@angular/upgrade'
 import { NgModule } from '@angular/core'
@@ -109,7 +127,7 @@ upgradeAdapter.boostrap(document.body, ['ng1Module'])
 first argument instead of a Component.
 
 **Before:**
-```ts
+```typescript
 import { Component, bundle } from 'ng-metadata/core'
 
 @Component({
@@ -122,7 +140,7 @@ const angular1Module = bundle(FooComponent)
 ```
 
 **After:**
-```ts
+```typescript
 import { NgModule, Component, bundle } from 'ng-metadata/core'
 
 @Component({
@@ -142,7 +160,7 @@ const angular1Module = bundle(FooModule)
 Component.
 
 **Before:**
-```ts
+```typescript
 import { bootstrap } from 'ng-metadata/platform-browser-dynamic'
 import { Component } from 'ng-metadata/core'
 
@@ -155,7 +173,7 @@ bootstrap(AppComponent)
 ```
 
 **After:**
-```ts
+```typescript
 import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic'
 import { NgModule, Component } from 'ng-metadata/core'
 
