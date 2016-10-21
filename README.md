@@ -36,7 +36,7 @@ Behind the scenes it uses ES.next decorators extended by TypeScript (which adds 
 
 ## Quick start
 
-- [Plunkr][plunker-2.x] - try it out in your browser
+- [Plunkr][plunker-3.x] - try it out in your browser
 - [Playground][playground] - live docs examples and mandatory TODO app example
 - [Production ready starter kit][ngParty-Angular-1-scaffold] - Starter Kit ready for production by ngParty team powered by Webpack
 
@@ -341,5 +341,6 @@ if you aren't a member just join us [ngParty slack](https://ngparty.herokuapp.co
 
 [plunker-1.x]: https://plnkr.co/edit/s2lYnI
 [plunker-2.x]: https://plnkr.co/edit/7Fr7oO
+[plunker-3.x]: https://plnkr.co/edit/Bds0Bk
 [playground]: https://github.com/ngParty/ng-metadata/tree/master/playground
 [ngParty-Angular-1-scaffold]: https://github.com/ngParty/Angular1-scaffold
