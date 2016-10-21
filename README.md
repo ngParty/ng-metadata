@@ -218,13 +218,20 @@ ng-metadata requires certain polyfills in the application environment. We instal
 
 Install peer dependencies by running:
 
-`npm i --save reflect-metadata core-js rxjs@5.0.0-rc.1`
+`npm i --save rxjs@5.0.0-rc.1`
+
+**rxjs** - a polyfill for the Observables specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of rxjs (within a compatible version range) without waiting for ng-metadata updates.
+
+Install polyfills by runing:
+
+`npm i --save core-js`
+
+You also need to provide `Reflect.metadata` shim. This can be done by installing `npm i --save reflect-metadata` or by importing `import 'core-js/es7/reflect'` from `core-js` 
 
 **core-js** - monkey patches the global context (window) with essential features of ES2015 (ES6). Developers may substitute an alternative polyfill that provides the same core APIs. This dependency should go away once these APIs are implemented by all supported ever-green browsers.
 
 **reflect-metadata** - a dependency shared between ng-metadata and the TypeScript compiler. Developers should be able to update a TypeScript package without upgrading ng-metadata, which is why this is a dependency of the application and not a dependency of ng-metadata.
 
-**rxjs** - a polyfill for the Observables specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of rxjs (within a compatible version range) without waiting for ng-metadata updates.
 
 
 ### Configure your project

@@ -8,7 +8,12 @@ import { ListWrapper } from '../../facade/collections';
 // This will be needed when we will used Reflect APIs
 const Reflect = global.Reflect;
 if ( !isReflectMetadata(Reflect) ) {
-  throw 'reflect-metadata shim is required when using class decorators';
+  throw `
+    Reflect.*metadata shim is required when using class decorators.
+    You can use one of: 
+    - "reflect-metadata" (https://www.npmjs.com/package/reflect-metadata) 
+    - "core-js/es7/reflect" (https://github.com/zloirock/core-js)
+  `;
 }
 
 /**

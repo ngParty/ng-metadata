@@ -53,8 +53,7 @@
   },
   "peerDependencies": {
     "rxjs": "5.0.0-rc.1",
-    "angular": ">=1.4.x",
-    "reflect-metadata": "0.1.x"
+    "angular": ">=1.4.x"
   },
   "dependencies": {},
   "czConfig": {
