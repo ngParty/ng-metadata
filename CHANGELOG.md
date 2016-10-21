@@ -1,3 +1,13 @@
+<a name="3.0.2"></a>
+## [3.0.2](https://github.com/ngParty/ng-metadata/compare/3.0.1...v3.0.2) (2016-10-21)
+
+
+### Bug Fixes
+
+* **npm:** remove reflect-metadata from peerDependencies as user can use core-js or other polyfill ([0ba808c](https://github.com/ngParty/ng-metadata/commit/0ba808c))
+
+
+
 <a name="3.0.1"></a>
 ## [3.0.1](https://github.com/ngParty/ng-metadata/compare/3.0.0...v3.0.1) (2016-10-20)
 
