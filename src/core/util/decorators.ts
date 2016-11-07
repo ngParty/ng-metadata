@@ -1,7 +1,8 @@
-import { Type, isFunction, isPresent } from '../../facade/lang';
+import { isFunction, isPresent } from '../../facade/lang';
 import { reflector } from '../reflection/reflection';
 import { InjectableMetadata } from '../di/metadata';
 import { globalKeyRegistry } from '../di/key';
+import { Type } from '../../facade/type';
 
 /**
  * An interface implemented by all Angular type decorators,

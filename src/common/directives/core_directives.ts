@@ -1,4 +1,4 @@
-import { Type } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { NgForm } from './ng_form'
 import { NgModel } from './ng_model'
 import { NgSelect } from './ng_select'
@@ -43,7 +43,7 @@ import { NgSelect } from './ng_select'
  * }
  * ```
  */
-export const CORE_DIRECTIVES: Type[] = [
+export const CORE_DIRECTIVES: Function[] = [
   NgForm,
   NgModel,
   NgSelect

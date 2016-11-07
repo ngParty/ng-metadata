@@ -1,4 +1,6 @@
-import { Type, stringify, isFunction } from '../../facade/lang';
+import { stringify, isFunction } from '../../facade/lang';
+import { Type } from '../../facade/type';
+
 
 /**
  * An interface that a function passed into {@link forwardRef} has to implement.
@@ -9,7 +11,7 @@ import { Type, stringify, isFunction } from '../../facade/lang';
  */
 export interface ForwardRefFn {
   (): any;
-  __forward_ref__?: Type,
+  __forward_ref__?: Function,
   toString?():string
 }
 
@@ -27,7 +29,7 @@ export interface ForwardRefFn {
 export function forwardRef(forwardRefFn: ForwardRefFn): Type {
   forwardRefFn.__forward_ref__ = forwardRef;
   forwardRefFn.toString = function() { return stringify(this()); };
-  return forwardRefFn as Type;
+  return forwardRefFn as any as Type;
 }
 
 /**

@@ -1,4 +1,5 @@
 import { isType, isArray, isString, getFuncName, isBlank, isPresent } from '../../facade/lang';
+import { Type } from '../../facade/type';
 
 import { reflector } from '../reflection/reflection';
 
@@ -50,7 +51,7 @@ export function resolveReflectiveProvider( provider: Provider ): {method: string
  * @returns {any}
  * @private
  */
-export function _getAngular1ModuleMetadataByType( injectable: Type ): { providerName: string, providerMethod: string, moduleMethod: string} {
+export function _getAngular1ModuleMetadataByType( injectable: Type|Function ): { providerName: string, providerMethod: string, moduleMethod: string} {
   // only the first class annotations is injectable
   const [annotation] = reflector.annotations( injectable );
 

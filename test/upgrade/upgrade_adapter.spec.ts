@@ -3,6 +3,7 @@ import * as sinon from 'sinon';
 import { NgMetadataUpgradeAdapter } from '../../src/upgrade/upgrade_adapter'
 import { Component, OpaqueToken, getInjectableName, NgModule } from '../../core'
 import { reflector } from '../../src/core/reflection/reflection';
+import { Type } from '../../src/facade/type';
 
 class MockAngularUpgradeAdapter {
   constructor(ngModule: Type) {}

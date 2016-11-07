@@ -5,8 +5,7 @@ import * as angular from 'angular';
 ///////////////////////////////////////////////////////////////////////////////
 declare global {
   type StringMap = {[key: string]: string};
-  type Type = Function;
-  type ProvideSpreadType = string|Type;
+  type ProvideSpreadType = string|Function;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

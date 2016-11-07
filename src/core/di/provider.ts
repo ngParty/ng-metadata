@@ -1,5 +1,4 @@
 import {
-  Type,
   isString,
   isBlank,
   isType,
@@ -10,6 +9,7 @@ import {
   normalizeBool,
   isArray
 } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { reflector } from '../reflection/reflection';
 import { OpaqueToken } from './opaque_token';
 import {
@@ -31,7 +31,7 @@ import { isInjectMetadata } from './provider_util';
 
 export type PropMetaInst =  InputMetadata | OutputMetadata | HostBindingMetadata | HostListenerMetadata;
 export type ParamMetaInst = HostMetadata | InjectMetadata | SelfMetadata | SkipSelfMetadata;
-export type ProviderType = Type | string | OpaqueToken;
+export type ProviderType = Type | OpaqueToken | Function | string ;
 export type ProviderAliasOptions = {useClass?: Type,useValue?: any,useFactory?: Function, deps?: Object[]};
 
 export class Provider {
@@ -219,7 +219,7 @@ class ProviderBuilder{
   static createFromType(
     type: ProviderType,
     { useClass, useValue, useFactory, deps }: ProviderAliasOptions
-  ): [string,Type] {
+  ): [string,Type|Function] {
 
     // ...provide('myFactory',{useFactory: () => () => { return new Foo(); } })
     if ( isPresent( useFactory ) ) {
@@ -322,7 +322,7 @@ class ProviderBuilder{
 export function provide(
   type: ProviderType,
   { useClass, useValue, useFactory, deps }: ProviderAliasOptions = {}
-  ): [string,Type] {
+): [string,Type|Function] {
   return ProviderBuilder.createFromType( type, { useClass, useValue, useFactory, deps } );
 }
 

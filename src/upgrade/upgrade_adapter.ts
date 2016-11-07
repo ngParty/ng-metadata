@@ -3,6 +3,7 @@ import { createBootstrapFn } from '../platform/browser_utils';
 import { getInjectableName, OpaqueToken } from '../core/di';
 import { ProviderLiteral } from '../core/di/provider_util';
 import { resolveDirectiveNameFromSelector } from '../facade/lang';
+import { Type } from '../facade/type';
 
 /**
  * `UpgradeAdapterRef` controls a hybrid AngularJS v1 / Angular v2 application,

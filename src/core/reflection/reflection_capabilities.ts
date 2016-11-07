@@ -1,7 +1,8 @@
-import { Type, isPresent, global, stringify, ConcreteType } from '../../facade/lang';
+import { isPresent, global, stringify } from '../../facade/lang';
 import { GetterFn, SetterFn, MethodFn } from './types';
 import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
 import { ListWrapper } from '../../facade/collections';
+import { Type } from '../../facade/type';
 // import {BaseException} from 'angular2/src/facade/exceptions';
 
 
@@ -51,7 +52,7 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
 
   isReflectionEnabled(): boolean { return true; }
 
-  factory( t: ConcreteType ): Function {
+  factory( t: Type ): Function {
     switch ( t.length ) {
       case 0:
         return () => new t();
@@ -259,15 +260,15 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return this._reflect.getOwnMetadata( PROP_META_KEY, typeOrFunc );
   }
 
-  registerPropMetadata( propMetadata, typeOrFunc: Type ): void {
+  registerPropMetadata( propMetadata, typeOrFunc: Type|Function ): void {
     this._reflect.defineMetadata( PROP_META_KEY, propMetadata, typeOrFunc );
   }
 
-  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type ): void {
+  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type|Function ): void {
     this._reflect.defineMetadata( DOWNGRADED_COMPONENT_NAME_KEY, componentName, typeOrFunc );
   }
 
-  downgradedNg2ComponentName( typeOrFunc: Type ): string {
+  downgradedNg2ComponentName( typeOrFunc: Type|Function ): string {
     return this._reflect.getOwnMetadata( DOWNGRADED_COMPONENT_NAME_KEY, typeOrFunc );
   }
 
