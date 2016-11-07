@@ -1,3 +1,13 @@
+<a name="3.0.3"></a>
+## [3.0.3](https://github.com/ngParty/ng-metadata/compare/3.0.2...v3.0.3) (2016-11-07)
+
+
+### Bug Fixes
+
+* **manual_typings/globals:** remove Type alias from globals and add it to every module which relies on it ([9040a2c](https://github.com/ngParty/ng-metadata/commit/9040a2c)), closes [#170](https://github.com/ngParty/ng-metadata/issues/170)
+
+
+
 <a name="3.0.2"></a>
 ## [3.0.2](https://github.com/ngParty/ng-metadata/compare/3.0.1...v3.0.2) (2016-10-21)
 
