@@ -1,5 +1,6 @@
 import { assertionsEnabled } from '../facade/lang';
 import { bundle } from '../core/util/bundler';
+import { Type } from '../facade/type';
 
 type AppRoot = string | Element | Document;
 

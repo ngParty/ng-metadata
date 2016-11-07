@@ -53,7 +53,7 @@ describe( `forward_ref`, ()=> {
       } ).to.not.throw();
 
 
-      const fRef = forwardRef(()=>Foo);
+      const fRef = forwardRef(()=>Foo) as Function;
       class Foo{}
 
       expect( fRef() ).to.equal( Foo );

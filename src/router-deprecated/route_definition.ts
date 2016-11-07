@@ -1,3 +1,4 @@
+import { Type } from '../facade/type';
 /**
  * `RouteDefinition` defines a route within a {@link RouteConfig} decorator.
  *

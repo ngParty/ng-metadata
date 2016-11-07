@@ -1,5 +1,6 @@
 import { getInjectableName } from '../core/di/provider';
 import { StringWrapper } from '../facade/primitives';
+import { Type } from '../facade/type';
 
 // public helpers
 

@@ -1,6 +1,7 @@
 import { DirectiveResolver } from '../linker/directive_resolver';
 import { assign, isFunction, noop, resolveDirectiveNameFromSelector, stringify, isJsObject } from '../../facade/lang';
 import { StringMapWrapper } from '../../facade/collections';
+import { Type } from '../../facade/type';
 import { resolveImplementedLifeCycleHooks, ImplementedLifeCycleHooks } from '../linker/directive_lifecycles_reflector';
 import { ChildrenChangeHook } from '../linker/directive_lifecycle_interfaces';
 import { DirectiveMetadata, ComponentMetadata, LegacyDirectiveDefinition } from './metadata_directives';

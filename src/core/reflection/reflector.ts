@@ -1,4 +1,4 @@
-import { Type } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { ReflectorReader } from './reflector_reader';
 import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
 
@@ -93,15 +93,15 @@ export class Reflector extends ReflectorReader {
     return this.reflectionCapabilities.ownPropMetadata( typeOrFunc );
   }
 
-  registerPropMetadata( parameters, typeOrFunc: Type ): void {
-    this.reflectionCapabilities.registerPropMetadata( parameters, typeOrFunc );
+  registerPropMetadata( parameters, typeOrFunc: Type|Function ): void {
+    this.reflectionCapabilities.registerPropMetadata( parameters, typeOrFunc as Type );
   }
 
-  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type ): void {
-    this.reflectionCapabilities.registerDowngradedNg2ComponentName( componentName, typeOrFunc );
+  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type|Function ): void {
+    this.reflectionCapabilities.registerDowngradedNg2ComponentName( componentName, typeOrFunc as Type );
   }
 
-  downgradedNg2ComponentName( typeOrFunc: Type ): string {
+  downgradedNg2ComponentName( typeOrFunc: Type|Function ): string {
     return this.reflectionCapabilities.downgradedNg2ComponentName( typeOrFunc );
   }
 

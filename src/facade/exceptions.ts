@@ -1,4 +1,5 @@
 import { getFuncName } from './lang';
+import { Type } from './type';
 
 export class BaseException extends Error {
   public stack: any;

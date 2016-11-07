@@ -1,5 +1,5 @@
 import { makeDecorator, makePropDecorator, TypeDecorator } from '../util/decorators';
-import { Type } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { ContentChildrenMetadata, ContentChildMetadata, ViewChildrenMetadata, ViewChildMetadata } from './metadata_di';
 import {
   ComponentMetadata,

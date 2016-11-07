@@ -1,4 +1,4 @@
-import { Type } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { GetterFn, SetterFn, MethodFn } from './types';
 
 export interface PlatformReflectionCapabilities {
@@ -18,8 +18,8 @@ export interface PlatformReflectionCapabilities {
   ownPropMetadata( typeOrFunc: Type ): {[key: string]: any[]},
   registerPropMetadata( propMetadata, typeOrFunc: Type ): void,
 
-  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type ): void,
-  downgradedNg2ComponentName( typeOrFunc: Type ): string
+  registerDowngradedNg2ComponentName( componentName: string, typeOrFunc: Type|Function ): void,
+  downgradedNg2ComponentName( typeOrFunc: Type|Function ): string
 
   getter( name: string ): GetterFn;
   setter( name: string ): SetterFn;

@@ -131,7 +131,7 @@ describe( `di/provider`, ()=> {
           constructor( @Inject( MyService ) private mySvc ) {}
         }
 
-        const actual = provide( FooDirective );
+        const actual = provide( FooDirective ) as [string,Function];
         const [ngContainerName, filterFactory] = actual;
 
         expect( ngContainerName ).to.deep.equal( 'myFoo' );
@@ -161,7 +161,7 @@ describe( `di/provider`, ()=> {
         }
 
         const actual = provide( FooComponent );
-        const [ngContainerName, filterFactory] = actual;
+        const [ngContainerName, filterFactory] = actual as [string, Function];
 
         expect( FooComponent.$inject ).to.deep.equal( [ 'myService#1', '$element' ] );
 

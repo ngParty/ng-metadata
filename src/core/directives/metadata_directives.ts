@@ -1,4 +1,4 @@
-import { Type } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { InjectableMetadata } from '../di/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 

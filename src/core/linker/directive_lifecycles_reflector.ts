@@ -1,4 +1,4 @@
-import { Type } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { LifecycleHooks } from './directive_lifecycle_interfaces';
 
 export function hasLifecycleHook(lcInterface: LifecycleHooks, token: any): boolean {

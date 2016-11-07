@@ -1,5 +1,6 @@
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
+import { Type } from './type';
 
 export interface BrowserNodeGlobal {
   Object: typeof Object,
@@ -35,21 +36,6 @@ if ( typeof window === 'undefined' ) {
 var _global: BrowserNodeGlobal = globalScope;
 
 export {_global as global};
-
-export const Type = Function;
-
-/**
- * Runtime representation a type that a Component or other object is instances of.
- *
- * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
- * the `MyCustomComponent` constructor function.
- */
-export interface Type extends Function {}
-
-/**
- * Runtime representation of a type that is constructable (non-abstract).
- */
-export interface ConcreteType extends Type { new (...args): any; }
 
 
 // ===============

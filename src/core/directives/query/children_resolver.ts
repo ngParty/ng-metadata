@@ -13,6 +13,7 @@ import {
   ContentChildrenMetadata
 } from '../metadata_di';
 import { DirectiveCtrl } from '../constants';
+import { Type } from '../../../facade/type';
 
 
 /**
