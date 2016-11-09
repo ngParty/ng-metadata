@@ -8,8 +8,6 @@ build.xml
 node_modules/*
 npm-debug.log
 
-# ignore all typescript
-*.ts
 # allow only ambient type definitions
 !*.d.ts
 .travis.yml
