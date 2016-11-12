@@ -110,7 +110,7 @@ export function _createDirectiveBindings(
         oldValue = initialValue;
       }
       recordChanges( propName, newValue, oldValue );
-      ctrl[ propName ] = isImmutable ? angular.copy(newValue) : newValue;
+      ctrl[ propName ] = isImmutable ? global.angular.copy(newValue) : newValue;
     }, parentGet.literal );
 
   }

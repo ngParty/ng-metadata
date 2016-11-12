@@ -1,4 +1,3 @@
-import * as angular from 'angular';
 import { isArray, isFunction, assign } from '../src/facade/lang';
 
 // ============================

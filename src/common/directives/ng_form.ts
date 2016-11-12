@@ -11,11 +11,11 @@ export abstract class NgForm implements ng.IFormController {
   $name: string;
   $pending: any;
 
-  $addControl( control: angular.INgModelController ): void {}
+  $addControl( control: ng.INgModelController ): void {}
 
-  $removeControl( control: angular.INgModelController ): void {}
+  $removeControl( control: ng.INgModelController ): void {}
 
-  $setValidity( validationErrorKey: string, isValid: boolean, control: angular.INgModelController ): void {}
+  $setValidity( validationErrorKey: string, isValid: boolean, control: ng.INgModelController ): void {}
 
   $setDirty(): void {}
 
