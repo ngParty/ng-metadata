@@ -11,7 +11,7 @@ export interface BrowserNodeGlobal {
   RegExp: typeof RegExp,
   JSON: typeof JSON,
   Math: typeof Math,
-  angular: angular.IAngularStatic,
+  angular: ng.IAngularStatic,
   //assert(condition: any): void,
   Reflect: any,
   //zone: Zone,

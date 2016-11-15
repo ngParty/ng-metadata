@@ -7,7 +7,7 @@ import { Type } from '../../src/facade/type';
 
 class MockAngularUpgradeAdapter {
   constructor(ngModule: Type) {}
-  bootstrap(element: Element, modules?: any[], config?: angular.IAngularBootstrapConfig): void {
+  bootstrap(element: Element, modules?: any[], config?: ng.IAngularBootstrapConfig): void {
     return void 0
   }
   downgradeNg2Provider(token: any): Function {

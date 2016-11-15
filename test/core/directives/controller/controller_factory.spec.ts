@@ -19,7 +19,7 @@ describe( `directives/controller/controller_factory`, () => {
     let $attrs;
     let $transclude = function $transclude(){};
     let locals;
-    let $injector: angular.auto.IInjectorService;
+    let $injector: ng.auto.IInjectorService;
     let jqParentStub;
     let jqDataStub;
     let jqInheritedDataStub;

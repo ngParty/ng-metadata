@@ -10,15 +10,19 @@
     "pretty": true,
     "preserveConstEnums": true,
     "moduleResolution": "node",
+    "skipLibCheck": true,
+    "stripInternal": true,
+    "suppressImplicitAnyIndexErrors": true,
     "lib": [
       "es5",
       "dom",
       "es2015.promise"
+    ],
+    "typeRoots": [
+      "manual_typings/overrides",
+      "node_modules/@types"
     ]
   },
-  "include": [
-    "manual_typings/globals.d.ts"
-  ],
   "exclude": [
     "_book",
     "playground",

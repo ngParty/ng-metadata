@@ -1,11 +1,16 @@
 import { isType, isArray, isString, getFuncName, isBlank, isPresent } from '../../facade/lang';
 import { Type } from '../../facade/type';
-
 import { reflector } from '../reflection/reflection';
-
 import { Provider, provide } from './provider';
-import { isPipe, isDirectiveLike, isService, isProviderLiteral, createProvider, ProviderLiteral } from './provider_util';
-import { isDirective } from './provider_util';
+import {
+  isPipe,
+  isDirectiveLike,
+  isService,
+  isProviderLiteral,
+  createProvider,
+  ProviderLiteral,
+  isDirective
+} from './provider_util';
 
 /**
  * process provider literals and return map for angular1Module consumption
@@ -100,6 +105,11 @@ export function _getAngular1ModuleMetadataByType( injectable: Type|Function ): {
 
 
 /**
+ * @internal
+ */
+export type RawProvider<T> = Array<string|Type|ProviderLiteral|Function|Array<T>>
+
+/**
  * run through Component tree and register everything that is registered via Metadata
  * - works for nested arrays like angular 2 does ;)
  * @param angular1Module
@@ -107,9 +117,10 @@ export function _getAngular1ModuleMetadataByType( injectable: Type|Function ): {
  * @returns {ng.IModule}
  * @private
  */
+
 export function _normalizeProviders(
   angular1Module: ng.IModule,
-  providers: Array<string|Type|ProviderLiteral|any[]>
+  providers: RawProvider<any>
 ): ng.IModule {
 
   providers.forEach( ( providerType ) => {

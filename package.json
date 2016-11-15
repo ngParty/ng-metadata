@@ -50,7 +50,7 @@
     "sinon": "1.17.6",
     "systemjs": "0.19.6",
     "ts-node": "1.7.0",
-    "typescript": "2.0.9",
+    "typescript": "2.2.0-dev.20161115",
     "validate-commit-msg": "2.0.0"
   },
   "peerDependencies": {

@@ -117,7 +117,7 @@ function __injectionArgs(fn, locals, serviceName){
  * @internal
  * @returns {any}
  */
-export function getNg1InjectorMock(): angular.auto.IInjectorService {
+export function getNg1InjectorMock(): ng.auto.IInjectorService {
   return {
     instantiate( classFactory ){
       return new classFactory();
@@ -261,7 +261,6 @@ export class $Scope {
     } )
 
   }
-
 
 }
 
