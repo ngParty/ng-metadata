@@ -64,39 +64,4 @@ declare module 'angular' {
 
   }
 
-  // /**
-  //  * $rootScope - $rootScopeProvider - service in module ng
-  //  * see https://docs.angularjs.org/api/ng/type/$rootScope.Scope and https://docs.angularjs.org/api/ng/service/$rootScope
-  //  */
-  // interface IRootScopeService {
-  //
-  //   // private members
-  //   $$postDigest( callback: Function ): void,
-  //   $$postDigestQueue: Function[],
-  //   $$applyAsyncQueue: Function[],
-  //   $$asyncQueue: Function[],
-  //   $$watchers: Watchers[],
-  //   $$watchersCount: number,
-  //   $$listenerCount: Object,
-  //   $$listeners: Object,
-  //   $$destroyed: boolean,
-  //   $$childHead: ng.IScope,
-  //   $$childTail: ng.IScope,
-  //   $$prevSibling: ng.IScope,
-  //   $$nextSibling: ng.IScope,
-  //
-  //   // ngMetadata private members
-  //   $$disconnected?: boolean,
-  //
-  // }
-  //
-  // /* @private */
-  // interface Watchers {
-  //   eq: boolean,
-  //   exp: ( s: any, l: any, a: any, i: any ) => any,
-  //   fn: ( newValue: any, oldValue: any ) => any,
-  //   get: ( s: any, l: any, a: any, i: any ) => any,
-  //   last: any
-  // }
-
 }
