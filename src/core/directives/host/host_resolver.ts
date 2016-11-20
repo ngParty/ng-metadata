@@ -114,7 +114,7 @@ export function _setHostListeners(
 
       const cbParams: any[] = _getHostListenerCbParams( evt, methodParams );
 
-      scope.$applyAsync( ()=> {
+      scope.$apply( ()=> {
 
         const noPreventDefault = ctrl[ methodName ]( ...cbParams );
 
