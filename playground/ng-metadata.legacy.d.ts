@@ -1,5 +1,5 @@
-// import * as angular from 'angular';
-// import Subject = require('rxjs/Subject');
+/// <reference path="../manual_typings/angular-extension.d.ts" />
+
 declare type Observable<T> = any;
 declare type Subject<T> = any;
 
