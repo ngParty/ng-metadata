@@ -1,4 +1,5 @@
-// import Subject = require('rxjs/Subject');
+/// <reference path="../manual_typings/angular-extension.d.ts" />
+
 declare type Observable<T> = any;
 declare type Subject<T> = any;
 
@@ -1014,6 +1015,7 @@ declare module ngMetadataCommon {
     $isEmpty(value: any): boolean;
   }
   export abstract class NgForm implements ng.IFormController {
+    $name: string;
     $pristine: boolean;
     $dirty: boolean;
     $valid: boolean;
@@ -1021,9 +1023,9 @@ declare module ngMetadataCommon {
     $submitted: boolean;
     $error: any;
     $pending: any;
-    $addControl(control: angular.INgModelController): void;
-    $removeControl(control: angular.INgModelController): void;
-    $setValidity(validationErrorKey: string, isValid: boolean, control: angular.INgModelController): void;
+    $addControl(control: ng.INgModelController): void;
+    $removeControl(control: ng.INgModelController): void;
+    $setValidity(validationErrorKey: string, isValid: boolean, control: ng.INgModelController): void;
     $setDirty(): void;
     $setPristine(): void;
     $commitViewValue(): void;
@@ -1067,14 +1069,3 @@ declare module "ng-metadata/common" {
   export = ngMetadataCommon
 }
 declare type Type = Function;
-declare type ProvideSpreadType = string|Type;
-
-declare module angular {
-  interface IModule {
-    // constant(object: Object): IModule;
-    // value(object: Object): IModule;
-    directive(...args: ProvideSpreadType[]): IModule;
-    filter(...args: ProvideSpreadType[]): IModule;
-    service(...args: ProvideSpreadType[]): IModule;
-  }
-}

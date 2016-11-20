@@ -21,7 +21,7 @@ export interface OnActivate {
   $routerOnActivate(
     nextInstruction: ComponentInstruction,
     prevInstruction: ComponentInstruction
-  ): any |ng.IPromise<any>;
+  ): any | ng.IPromise<any>;
 }
 
 /**

@@ -19,7 +19,7 @@ export interface UpgradeAdapterInstance {
   /**
    * Bootstrap a hybrid AngularJS v1 / Angular v2 application.
    */
-  bootstrap(element: Element, modules?: any[], config?: angular.IAngularBootstrapConfig): UpgradeAdapterRef;
+  bootstrap(element: Element, modules?: any[], config?: ng.IAngularBootstrapConfig): UpgradeAdapterRef;
   /**
    * Allows Angular v2 service to be accessible from AngularJS v1.
    */

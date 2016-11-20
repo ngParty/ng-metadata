@@ -228,7 +228,7 @@ describe( `di/reflective_provider`, () => {
         return internalRef;
       }
 
-      const updatedAngular1Module = _normalizeProviders( angular1Module, [ stateConfig, createProvider( {} ) ] ) as any;
+      const updatedAngular1Module = _normalizeProviders( angular1Module, [ stateConfig, createProvider( {} ) as any ] ) as any;
 
       expect( updatedAngular1Module._configBlocks ).to.deep.equal(
         [

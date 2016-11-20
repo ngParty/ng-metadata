@@ -11,7 +11,7 @@ export interface BrowserNodeGlobal {
   RegExp: typeof RegExp,
   JSON: typeof JSON,
   Math: typeof Math,
-  angular: angular.IAngularStatic,
+  angular: ng.IAngularStatic,
   //assert(condition: any): void,
   Reflect: any,
   //zone: Zone,
@@ -20,10 +20,10 @@ export interface BrowserNodeGlobal {
   setTimeout: Function,
   clearTimeout: Function,
   setInterval: Function,
-  clearInterval: Function
+  clearInterval: Function,
 }
 
-var globalScope: BrowserNodeGlobal;
+let globalScope: BrowserNodeGlobal;
 
 if ( typeof window === 'undefined' ) {
   globalScope = global as any;
@@ -33,7 +33,7 @@ if ( typeof window === 'undefined' ) {
 
 // Need to declare a new variable for global here since TypeScript
 // exports the original value of the symbol.
-var _global: BrowserNodeGlobal = globalScope;
+const _global: BrowserNodeGlobal = globalScope;
 
 export {_global as global};
 

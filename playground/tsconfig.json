@@ -6,11 +6,15 @@
     "sourceMap": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "pretty": true
+    "pretty": true,
+    "lib": [
+      "es5",
+      "dom",
+      "es2015.promise"
+    ]
   },
   "files": [
-    "app/main.ts",
-    "../typings/index.d.ts",
-    "ng-metadata.legacy.d.ts"
+    "./app/main.ts",
+    "./ng-metadata.legacy.d.ts"
   ]
 }
