@@ -131,11 +131,32 @@ export class NgMetadataUpgradeAdapter {
    * When using the upgraded Provider for DI, either the string name can be used with @Inject, or
    * a given token can be injected by type.
    *
-   * E.g.
-   * class $state {}
+   * @example
+   * ```typescript
+   * import {Injectable, NgModule} from 'ng-metadata/core';
+   * import * as angular from 'angular';
    *
-   * upgradeAdapter.upgradeNg1Provider('$state', { asToken: $state })
-   * upgradeAdapter.upgradeNg1Provider('$rootScope')
+   * class MyCoolService {}
+   *
+   * angular.module('myApp',[])
+   *  .service('myCoolSvc',MyCoolService)
+   *
+   * @Injectable()
+   * class MyService{}
+   *
+   * @NgModule({
+   *  providers: [MyService]
+   * })
+   * class AppModule{}
+   *
+   * // upgrade.module.ts
+   * upgradeAdapter.upgradeNg1Provider(MyService)
+   * upgradeAdapter.upgradeNg1Provider('myCoolSvc', { asToken: MyCoolService })
+   * // angular 1 core services
+   * upgradeAdapter.upgradeNg1Provider('$routeParams')
+   *
+   * // angular 2 Component
+   * import { Component } from '@angular/core';
    *
    * @Component({
    *  selector: 'ng2',
@@ -143,14 +164,18 @@ export class NgMetadataUpgradeAdapter {
    * })
    * class Ng2Component {
    *  constructor(
-   *    @Inject('$rootScope') private $rootScope: any, // by name using @Inject
-   *    private $state: $state // by type using the user defined token
+   *    @Inject('$routeParams') private $routeParams: any, // by name using @Inject
+   *    private myCoolSvc: MyCoolService // by type using the user defined token
+   *    private mySvc: MyService // by type using ngMetadata @Injectable service class
    *  ) {}
    * }
-   *
+   *```
    */
-  upgradeNg1Provider( name: string, options?: { asToken: any; } ): void {
-    return this._upgradeAdapter.upgradeNg1Provider( name, options );
+  upgradeNg1Provider(
+    name: string|OpaqueToken|Type,
+    options: { asToken: string|OpaqueToken|Type|Function } = { asToken: name }
+  ) {
+    return this._upgradeAdapter.upgradeNg1Provider( getInjectableName(name), options );
   }
 
 }
