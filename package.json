@@ -11,7 +11,8 @@
     "playground": "concurrently --kill-others \"tsc -p playground -w\" \"live-server --no-browser\"",
     "uglify": "uglifyjs test/host.spec.js --beautify --mangle --compress --output test/__uglifyTest.js",
     "changelog": "conventional-changelog -p angular -i CHANGELOG.md -w",
-    "bump": "conventional-recommended-bump -p angular -v"
+    "bump": "conventional-recommended-bump -p angular -v",
+    "release": "scripts/release.sh"
   },
   "repository": {
     "type": "git",
