@@ -48,9 +48,9 @@ describe('Hero service test', () => {
 });
 ```
 
-**Componant Testing**
+**Component Testing**
 
-For exemple with these components : 
+For example with these components : 
 ```typescript
 @Component({
   selector: 'sub-component',
