@@ -171,7 +171,7 @@ export function stringify( token ): string {
   var newLineIndex = res.indexOf( "\n" );
   return (newLineIndex === -1)
     ? res
-    : res.substring( 0, newLineIndex );
+    : res.substring( 0, newLineIndex ).replace('\r', '');
 }
 
 /**
