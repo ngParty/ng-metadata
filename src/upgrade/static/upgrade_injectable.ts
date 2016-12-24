@@ -71,7 +71,7 @@ import { getInjectableName } from '../../core/di/provider';
  * and now we can use it within angular 2 Component:
  * ```typescript
  * // hero.component.ng2.ts
- * import { Component } from '@angular/core';
+ * import { Component, Inject } from '@angular/core';
  *
  * @Component({
  *  selector: 'my-hero',
@@ -80,7 +80,7 @@ import { getInjectableName } from '../../core/di/provider';
  * class HeroComponent {
  *  constructor(
  *    @Inject('$routeParams') private $routeParams: any, // by name using @Inject
- *    private myCoolSvc: MyCoolService // by type using the user defined token
+ *    private myCoolSvc: MyCoolService, // by type using the user defined token
  *    private heroesSvc: HeroesService // by type using ngMetadata @Injectable service class
  *  ) {}
  * }
@@ -118,7 +118,7 @@ import { getInjectableName } from '../../core/di/provider';
  *  ]
  * })
  * export class AppModule {
- *    // preventig automatic Bootstrap
+ *    // preventing automatic Bootstrap
  *    ngDoBootstrap() {}
  * }
  *  ```

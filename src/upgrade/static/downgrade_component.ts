@@ -26,6 +26,8 @@ export type downgradeComponent = (info: {
  * import { downgradeNg2Component } from 'ng-metadata/upgrade';
  * import { provide } from 'ng-metadata/core';
  *
+ * import { Ng2Component } from './components/ng2.component';
+ *
  * export const AppModule = angular
  *  .module('myApp',[])
  *  .directive(...downgradeNg2Component({component:Ng2Component,downgradeFn:downgradeComponent}))
@@ -46,6 +48,8 @@ export function downgradeNg2Component({component,downgradeFn}: ProvideNg2Compone
  * import { downgradeComponent } from '@angular/upgrade/static/';
  * import { provideNg2Component } from 'ng-metadata/upgrade';
  * import { NgModule } from 'ng-metadata/core';
+ *
+ * import { Ng2Component } from './components/ng2.component';
  *
  * @NgModule({
  *  declarations:[

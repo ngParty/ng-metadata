@@ -7,7 +7,7 @@ export type ProvideNg2InjectableParams = {
   injectable: Function | Type,
   downgradeFn: Function,
   /**
-   * We need token only if downgraded ANgular 2 Service is not Decorated with both ng2 @Injectable and ngMetadata @Injectable
+   * We need token only if downgraded Angular 2 Service is not Decorated with both ng2 @Injectable and ngMetadata @Injectable
    *
    */
   token?: string | OpaqueToken,
@@ -17,7 +17,7 @@ export type ProvideNg2InjectableParams = {
  * Downgrades an Angular 2 Injectable so that it can be registered as an Angular 1
  * factory. Either a string or an ng-metadata OpaqueToken can be used for the name.
  *
- * **NOTE:** downgraded service must also be registered within Angular 2 Component or NgModule
+ * **NOTE:** downgraded service must also be registered within Angular 2 `@Component` or `@NgModule`
  *
  * @example
  * ```typescript
@@ -27,8 +27,8 @@ export type ProvideNg2InjectableParams = {
  * import { downgradeNg2Injectable } from 'ng-metadata/upgrade';
  * import { provide } from 'ng-metadata/core';
  *
- * import { Ng2Service } from './services/ng2.service;
- * import { Ng2ServiceDecorated } from './services/ng2decorated.service
+ * import { Ng2Service } from './services/ng2.service';
+ * import { Ng2ServiceDecorated } from './services/ng2decorated.service';
  *
  * export const OtherServiceToken = new OpaqueToken('otherService')
  *
@@ -50,11 +50,15 @@ export function downgradeNg2Injectable( { injectable, downgradeFn, token }: Prov
 
 
 /**
- * Returns a ProviderLiteral which can be used to register an Angular 2 Provider/Injectable
- * by including it in the providers array of an ng-metadata annotated Angular 1
- * Component or NgModule. Either a string or an ng-metadata OpaqueToken can be used for the name.
+ *
+ * Used to register an Angular 2 Service by including it in the `providers` array of an ng-metadata `@NgModule`,
+ * where the service name and downgraded factory functions are automatically generated.
  *
  * **NOTE:** downgraded service must also be registered within Angular 2 Component or NgModule
+ *
+ * Returns a `ProviderLiteral` which can be used to register an Angular 2 Provider/Injectable
+ * by including it in the providers array of an ng-metadata annotated Angular 1
+ * `@Component` or `@NgModule`. Either a string or an ng-metadata OpaqueToken can be used for the name.
  *
  * @example
  * ```
@@ -63,8 +67,8 @@ export function downgradeNg2Injectable( { injectable, downgradeFn, token }: Prov
  * import { provideNg2Injectable } from 'ng-metadata/upgrade';
  * import { Component } from 'ng-metadata/core';
  *
- * import { Ng2Service } from './services/ng2.service;
- * import { Ng2ServiceDecorated } from './services/ng2decorated.service;
+ * import { Ng2Service } from './services/ng2.service';
+ * import { Ng2ServiceDecorated } from './services/ng2decorated.service';
  *
  * const OtherServiceToken = new OpaqueToken('otherService')
  *
@@ -90,8 +94,8 @@ export function downgradeNg2Injectable( { injectable, downgradeFn, token }: Prov
  * import { provideNg2Injectable } from 'ng-metadata/upgrade';
  * import { NgModule } from 'ng-metadata/core';
  *
- * import { Ng2Service } from './services/ng2.service;
- * import { Ng2ServiceDecorated } from './services/ng2decorated.service
+ * import { Ng2Service } from './services/ng2.service';
+ * import { Ng2ServiceDecorated } from './services/ng2decorated.service';
  *
  * const OtherServiceToken = new OpaqueToken('otherService')
  *
