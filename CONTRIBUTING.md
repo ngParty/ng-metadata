@@ -26,7 +26,7 @@ ngMetadata channel or [StackOverflow][stackoverflow] or just ping us on [twitter
 ## <a name="issue"></a> Found an Issue?
 If you find a bug in the source code or a mistake in the documentation, you can help us by
 submitting an issue to our [GitHub Repository][github]. Even better you can submit a Pull Request
-with a fix. We would appreciate if you provide a [Plunker][plunker-3.x] with simulated bug that you've found
+with a fix. We would appreciate if you provide a [Plunker][plunker-4.x] with simulated bug that you've found
 
 
 **Please see the Submission Guidelines below**.
@@ -67,7 +67,7 @@ chances of your issue being dealt with quickly:
 * **Motivation for or Use Case** - explain why this is a bug for you
 * **Angular/ngMetadata/Typescript Version(s)** - is it a regression?
 * **Browsers and Operating System** - is this a problem with all browsers or only IE8?
-* **Reproduce the Error** - provide a live example (using [Plunker][plunker-3.x] or an unambiguous set of steps.
+* **Reproduce the Error** - provide a live example (using [Plunker][plunker-4.x] or an unambiguous set of steps.
 * **Related Issues** - has a similar issue been reported before?
 * **Suggest a Fix** - if you can't fix the bug yourself, perhaps you can point to what might be
   causing the problem (line of code or commit)
@@ -250,4 +250,5 @@ You can find out more detailed information about contributing in the
 [plunker-1.x]: https://plnkr.co/edit/s2lYnI
 [plunker-2.x]: https://plnkr.co/edit/7Fr7oO
 [plunker-3.x]: https://plnkr.co/edit/Bds0Bk
+[plunker-4.x]: https://plnkr.co/edit/hsz8KF
 
