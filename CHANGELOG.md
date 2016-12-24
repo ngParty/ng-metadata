@@ -1,3 +1,56 @@
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/ngParty/ng-metadata/compare/3.0.3...v4.0.0) (2016-12-24)
+
+
+### Bug Fixes
+
+* **build:** create angular typings override so we don't have to import them to source ([3153bca](https://github.com/ngParty/ng-metadata/commit/3153bca)), closes [#175](https://github.com/ngParty/ng-metadata/issues/175) [#177](https://github.com/ngParty/ng-metadata/issues/177)
+* **core/directives/host:** execute HostListener method within sync $apply instead of next tick ([96bf124](https://github.com/ngParty/ng-metadata/commit/96bf124)), closes [#171](https://github.com/ngParty/ng-metadata/issues/171)
+* **facade/lang:** support Node 6 and Windows environments (#182) ([821b772](https://github.com/ngParty/ng-metadata/commit/821b772))
+* **playground:** add new angular-extensions and fix provide errors ([81217cf](https://github.com/ngParty/ng-metadata/commit/81217cf))
+
+### Features
+
+* **packages:** update to rxjs@5.0.1 and unpin the rxjs peerDeps via ^5.0.1. Also move to stable ([2ea1299](https://github.com/ngParty/ng-metadata/commit/2ea1299)), closes [#185](https://github.com/ngParty/ng-metadata/issues/185)
+* **playground:** add example for preventing user input via directive HostListener ([947078c](https://github.com/ngParty/ng-metadata/commit/947078c))
+* **upgrade:** add support for AOT via '@angular/upgrade/static' api ([3d3f724](https://github.com/ngParty/ng-metadata/commit/3d3f724)), closes [#178](https://github.com/ngParty/ng-metadata/issues/178)
+
+
+### BREAKING CHANGES
+
+* build: We now officialy support only angular typings provided via npm `@types/*` and also typescript 2.x
+
+- your existing typings provided by `typings` might not work
+- from now on if you wanna use deprecated `provide` function from `ng-metadata/core` with registration within `angular.module().directive|service|filter` you have to explicitly include angular types extension provided by ng-metadata from `node_modules/ng-metadata/manual_typings/angular-extension.d.ts`
+
+Before:
+```typescript
+// global.d.ts
+/// <reference path="../node_modules/ng-metadata/manual_typings/globals.d.ts" />
+```
+
+After:
+```typescript
+/// <reference path="../node_modules/ng-metadata/manual_typings/angular-extension.d.ts" />
+```
+
+or you can include it from within your tsconfig.json like this:
+```json
+{
+  "include":[
+    "src/**/*.ts"
+  ],
+  "files": [
+    "node_modules/ng-metadata/manual_typings/angular-extension.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+```
+
+
+
 <a name="3.0.3"></a>
 ## [3.0.3](https://github.com/ngParty/ng-metadata/compare/3.0.2...v3.0.3) (2016-11-07)
 
