@@ -35,6 +35,7 @@
       * [Class](/docs/api/router-deprecated/class.md)
       * [Interface](/docs/api/router-deprecated/interface.md)
     * [ng-metadata/upgrade](/docs/api/upgrade/README.md)
+      * [Function](/docs/api/upgrade/function.md)
       * [Class](/docs/api/upgrade/class.md)
     * [angular 1 specific api](/docs/api/ng-1-misc/README.md)
 4.  [Contributing](/CONTRIBUTING.md)
