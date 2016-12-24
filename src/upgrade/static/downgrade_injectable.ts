@@ -40,7 +40,7 @@ export type ProvideNg2InjectableParams = {
  * ```
  */
 export function downgradeNg2Injectable( { injectable, downgradeFn, token }: ProvideNg2InjectableParams ): [string|Function] {
-  const { name, factoryFn } = downgradeInjectable( {
+  const { name, factoryFn } = _downgradeInjectable( {
     token: token || injectable as any,
     injectable,
     downgradeFn
@@ -126,7 +126,7 @@ export function downgradeNg2Injectable( { injectable, downgradeFn, token }: Prov
  * ```
  */
 export function provideNg2Injectable( { injectable, downgradeFn, token }: ProvideNg2InjectableParams ): ProviderLiteral {
-  const { name, factoryFn, deps } = downgradeInjectable( {
+  const { name, factoryFn, deps } = _downgradeInjectable( {
     token: token || injectable as any,
     injectable,
     downgradeFn
@@ -139,8 +139,12 @@ export function provideNg2Injectable( { injectable, downgradeFn, token }: Provid
   };
 }
 
-
-function downgradeInjectable( { token, injectable, downgradeFn }: ProvideNg2InjectableParams ): {name: string, factoryFn: Function, deps: string[]} {
+/**
+ *
+ * @private
+ * @internal
+ */
+export function _downgradeInjectable( { token, injectable, downgradeFn }: ProvideNg2InjectableParams ): {name: string, factoryFn: Function, deps: string[]} {
   const downgradedInjectableFactory = downgradeFn( injectable );
   const { $inject = [] } = downgradedInjectableFactory;
   const name = getInjectableName( token );

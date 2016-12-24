@@ -1,7 +1,7 @@
-import {Type} from '../../facade/type';
-import {reflector} from '../../core/reflection/reflection';
+import { Type } from '../../facade/type';
+import { reflector } from '../../core/reflection/reflection';
 import { resolveDirectiveNameFromSelector, isString } from '../../facade/lang';
-import { StringMapWrapper, ListWrapper } from '../../facade/collections';
+import { StringMapWrapper } from '../../facade/collections';
 
 export type ProvideNg2ComponentParams = {
   component:Type,
@@ -32,7 +32,7 @@ export type downgradeComponent = (info: {
  * ```
  */
 export function downgradeNg2Component({component,downgradeFn}: ProvideNg2ComponentParams): [string,Function] {
-  const {name,factoryFn} = downgradeComponent({component,downgradeFn});
+  const {name,factoryFn} = _downgradeComponent({component,downgradeFn});
   return [name,factoryFn]
 }
 
@@ -56,23 +56,28 @@ export function downgradeNg2Component({component,downgradeFn}: ProvideNg2Compone
  * ```
  */
 export function provideNg2Component({component,downgradeFn}: ProvideNg2ComponentParams): Function {
-  const {name,factoryFn} = downgradeComponent({component,downgradeFn});
+  const {name,factoryFn} = _downgradeComponent({component,downgradeFn});
 
   reflector.registerDowngradedNg2ComponentName(name, factoryFn);
   return factoryFn;
 }
 
-function downgradeComponent({component,downgradeFn}: ProvideNg2ComponentParams): {name:string, factoryFn:Function} {
+/**
+ *
+ * @private
+ * @internal
+ */
+export function _downgradeComponent({component,downgradeFn}: ProvideNg2ComponentParams): {name:string, factoryFn:Function} {
   // process inputs,outputs
   const propAnnotations = reflector.propMetadata(component);
-  const {inputs=[],outputs=[]} = _getOnlyInputOutputMetadata(propAnnotations);
+  const {inputs=[],outputs=[]} = _getOnlyInputOutputMetadata(propAnnotations) || {};
 
   // process @Component
   const annotations = reflector.annotations(component);
   const cmpAnnotation = annotations[0];
   const directiveName = resolveDirectiveNameFromSelector(cmpAnnotation.selector);
 
-  const donwgradedDirectiveFactory = downgradeFn(
+  const downgradedDirectiveFactory = downgradeFn(
     StringMapWrapper.assign(
       {},
       inputs.length ? {inputs: inputs} : {},
@@ -82,7 +87,7 @@ function downgradeComponent({component,downgradeFn}: ProvideNg2ComponentParams):
   );
   return {
     name: directiveName,
-    factoryFn: donwgradedDirectiveFactory
+    factoryFn: downgradedDirectiveFactory
   };
 }
 

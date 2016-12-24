@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/ngParty/ng-metadata#readme",
   "devDependencies": {
+    "@angular/core": "2.4.1",
     "@types/angular": "1.5.19",
     "@types/chai": "3.4.34",
     "@types/jquery": "2.0.34",
@@ -52,7 +53,8 @@
     "systemjs": "0.19.6",
     "ts-node": "1.7.0",
     "typescript": "2.2.0-dev.20161115",
-    "validate-commit-msg": "2.0.0"
+    "validate-commit-msg": "2.0.0",
+    "zone.js": "0.7.4"
   },
   "peerDependencies": {
     "rxjs": "5.0.0-rc.1",
