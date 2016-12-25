@@ -1,3 +1,13 @@
+<a name="4.0.1"></a>
+## [4.0.1](https://github.com/ngParty/ng-metadata/compare/4.0.0...v4.0.1) (2016-12-25)
+
+
+### Bug Fixes
+
+* **common/async_pipe:** return immediately every value if it exist in subscriptions ([189770e](https://github.com/ngParty/ng-metadata/commit/189770e)), closes [#187](https://github.com/ngParty/ng-metadata/issues/187)
+
+
+
 <a name="4.0.0"></a>
 # [4.0.0](https://github.com/ngParty/ng-metadata/compare/3.0.3...v4.0.0) (2016-12-24)
 
