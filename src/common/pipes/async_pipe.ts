@@ -4,7 +4,7 @@ import { Observable } from 'rxjs/Observable';
 import { Pipe } from '../../core/pipes/decorators';
 import { PipeTransform } from '../../core/pipes/pipe_interfaces';
 
-import { isObservable, isScope, isSubscription, isPromiseOrObservable } from '../../facade/lang';
+import { isObservable, isScope, isSubscription, isPromiseOrObservable, isPresent } from '../../facade/lang';
 
 type StoredSubscription = ng.IPromise<any>|ng.IHttpPromise<any>|Subscription;
 
@@ -92,7 +92,7 @@ export class AsyncPipe implements PipeTransform {
 
     // return cached immediately
     if ( inputId in AsyncPipe.subscriptions ) {
-      return AsyncPipe.values[ inputId ] || undefined;
+      return AsyncPipe.values[ inputId ];
     }
 
     const subscriptionStrategy = AsyncPipe._getSubscriptionStrategy( input );
