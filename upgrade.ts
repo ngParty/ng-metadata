@@ -1,1 +1,1 @@
-export { NgMetadataUpgradeAdapter } from './src/upgrade/upgrade_adapter';
+export * from './src/upgrade/upgrade'

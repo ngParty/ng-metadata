@@ -1,4 +1,4 @@
-# Class
+# Class ( Deprecated - use [upgrade/static](/docs/recipes/function.md))
 
 - [NgMetadataUpgradeAdapter](#NgMetadataUpgradeAdapter)
 

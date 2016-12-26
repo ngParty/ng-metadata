@@ -1,3 +1,4 @@
+import * as angular from 'angular';
 import { Directive, Input, Output, Attr, HostListener } from 'ng-metadata/core';
 
 @Directive({

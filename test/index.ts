@@ -1,4 +1,7 @@
+// 3rd party dependencies
 import 'reflect-metadata';
+
+// Load test files
 import './core/change_detection/changes_queue.spec';
 import './core/change_detection/change_detection_util.spec';
 import './core/di/decorators.spec';
@@ -21,12 +24,17 @@ import './core/directives/controller/controller_factory.spec';
 import './core/directives/host/host_parser.spec';
 import './core/directives/host/host_resolver.spec';
 import './core/directives/query/children_resolver.spec';
+
 import './facade/lang.spec';
 import './facade/primitives.spec';
 import './facade/collections.spec';
 import './facade/async.spec';
-import './common/pipes/async_pipe.spec';
-import './upgrade/upgrade_adapter.spec';
 
-describe( 'ng-metadata', ()=> {
-} );
+import './common/pipes/async_pipe.spec';
+
+import './upgrade/upgrade_adapter.spec';
+import './upgrade/static/upgrade_injectable.spec';
+import './upgrade/static/downgrade_injectable.spec';
+import './upgrade/static/downgrade_component.spec';
+
+describe( 'ng-metadata', ()=> {} );

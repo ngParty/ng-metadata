@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter } from 'ng-metadata/core';
-import { TodoModel } from './todo-store.service.ts';
+import { TodoModel } from './todo-store.service';
 
 @Component({
   selector: 'add-todo',

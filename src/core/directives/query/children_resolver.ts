@@ -13,6 +13,7 @@ import {
   ContentChildrenMetadata
 } from '../metadata_di';
 import { DirectiveCtrl } from '../constants';
+import { Type } from '../../../facade/type';
 
 
 /**
@@ -293,8 +294,8 @@ export function _getSelector( selector: string|Type ): string {
  */
 export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Object[] ): Function[] {
 
-  const parentCheckedNotifiers = requiredCtrls.reduce(
-    ( acc, requiredCtrl: DirectiveCtrl )=> {
+  const parentCheckedNotifiers = requiredCtrls.reduce<Function[]>(
+    ( acc, requiredCtrl: DirectiveCtrl ) => {
 
       if ( !isJsObject( requiredCtrl ) ) {
         return acc;
@@ -312,11 +313,11 @@ export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Ob
         return acc;
       }
 
-      const _parentCheckedNotifiers = [];
+      const _parentCheckedNotifiers: Function[] = [];
       StringMapWrapper.forEach( propMeta, ( propMetaPropArr: any[] )=> {
 
         propMetaPropArr
-          .filter( ( propMetaInstance: any )=> {
+          .filter( ( propMetaInstance: any ) => {
 
             // check if propMeta is one of @Query types and that it queries for Directive/Component ( typeof selector == function )
             if ( !((propMetaInstance instanceof QueryMetadata ) && isType( (propMetaInstance as QueryMetadata).selector )) ) {
@@ -332,7 +333,7 @@ export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Ob
             if ( !propMetaInstance.isViewQuery ) {
 
               _parentCheckedNotifiers.push(
-                ()=>requiredCtrl._ngOnChildrenChanged(
+                () => requiredCtrl._ngOnChildrenChanged(
                   ChildrenChangeHook.FromContent,
                   [ requiredCtrl.ngAfterContentChecked.bind( requiredCtrl ) ]
                 )
@@ -343,7 +344,7 @@ export function _getParentCheckNotifiers( ctrl: DirectiveCtrl, requiredCtrls: Ob
             if ( propMetaInstance.isViewQuery ) {
 
               _parentCheckedNotifiers.push(
-                ()=>requiredCtrl._ngOnChildrenChanged(
+                () => requiredCtrl._ngOnChildrenChanged(
                   ChildrenChangeHook.FromView,
                   [ requiredCtrl.ngAfterViewChecked.bind( requiredCtrl ) ]
                 )

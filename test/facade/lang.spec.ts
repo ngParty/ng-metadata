@@ -72,14 +72,14 @@ describe( `facade/lang`, ()=> {
 
     it( 'should return first line string of function definition if the function is anonymous',  ()=> {
 
-      let anonFn = function () {};
-      let anonFnMultiLine = function () {
+      let anonFn = stringify(function () {});
+      let anonFnMultiLine = stringify(function () {
         console.log( 'yoo' );
         return null;
-      };
+      });
 
-      expect( stringify(anonFn) ).to.equal( 'function () { }' );
-      expect( stringify(anonFnMultiLine) ).to.equal( 'function () {' );
+      expect( anonFn ).to.equal( 'function () { }' );
+      expect( anonFnMultiLine ).to.equal( 'function () {' );
 
     } );
 

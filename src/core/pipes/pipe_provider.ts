@@ -1,7 +1,8 @@
-import {Type, isFunction} from "../../facade/lang";
+import {isFunction} from "../../facade/lang";
 import {PipeResolver} from '../linker/pipe_resolver';
 import {PipeMetadata} from "./metadata";
 import {PipeTransform} from "./pipe_interfaces";
+import { Type } from '../../facade/type';
 
 /**
  * @internal

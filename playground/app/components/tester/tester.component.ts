@@ -1,3 +1,4 @@
+import * as angular from 'angular';
 import { Component, Input, Output } from 'ng-metadata/core';
 
 @Component({

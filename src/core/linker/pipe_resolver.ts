@@ -1,8 +1,9 @@
-import { Type, isPresent, stringify } from '../../facade/lang';
+import { isPresent, stringify } from '../../facade/lang';
 import { ListWrapper } from '../../facade/collections';
 import { PipeMetadata } from '../pipes/metadata';
 import { reflector } from '../reflection/reflection';
 import { resolveForwardRef } from '../di/forward_ref';
+import { Type } from '../../facade/type';
 
 function _isPipeMetadata( type: any ): boolean {
   return type instanceof PipeMetadata;

@@ -118,7 +118,7 @@ describe( `directives/host/host_resolver`, () => {
     beforeEach( ()=> {
       $element = ElementFactory();
       $scope = new $Scope();
-      _setHostListeners( $scope, $element, ctrl, hostListeners );
+      _setHostListeners( $scope as any, $element as any, ctrl, hostListeners );
     } );
 
     afterEach( ()=> {

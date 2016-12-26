@@ -1,4 +1,5 @@
 import { StringMapWrapper } from '../../../facade/collections';
+import { Type } from '../../../facade/type';
 import { EventEmitter } from '../../../facade/async';
 import { DirectiveMetadata, ComponentMetadata } from '../metadata_directives';
 import { ChangeDetectorRef } from '../../change_detection/change_detector_ref';

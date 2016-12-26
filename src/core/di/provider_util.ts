@@ -1,4 +1,5 @@
 import { isString, isPresent } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { DirectiveMetadata, ComponentMetadata, NgModuleMetadata } from '../directives/metadata_directives';
 import { PipeMetadata } from '../pipes/metadata';
 

@@ -36,7 +36,7 @@ Behind the scenes it uses ES.next decorators extended by TypeScript (which adds 
 
 ## Quick start
 
-- [Plunkr][plunker-2.x] - try it out in your browser
+- [Plunkr][plunker-4.x] - try it out in your browser
 - [Playground][playground] - live docs examples and mandatory TODO app example
 - [Production ready starter kit][ngParty-Angular-1-scaffold] - Starter Kit ready for production by ngParty team powered by Webpack
 
@@ -218,13 +218,20 @@ ng-metadata requires certain polyfills in the application environment. We instal
 
 Install peer dependencies by running:
 
-`npm i --save reflect-metadata core-js rxjs@5.0.0-rc.1`
+`npm i --save rxjs@5.0.1`
+
+**rxjs** - a polyfill for the Observables specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of rxjs (within a compatible version range) without waiting for ng-metadata updates.
+
+Install polyfills by runing:
+
+`npm i --save core-js`
+
+You also need to provide `Reflect.metadata` shim. This can be done by installing `npm i --save reflect-metadata` or by importing `import 'core-js/es7/reflect'` from `core-js` 
 
 **core-js** - monkey patches the global context (window) with essential features of ES2015 (ES6). Developers may substitute an alternative polyfill that provides the same core APIs. This dependency should go away once these APIs are implemented by all supported ever-green browsers.
 
 **reflect-metadata** - a dependency shared between ng-metadata and the TypeScript compiler. Developers should be able to update a TypeScript package without upgrading ng-metadata, which is why this is a dependency of the application and not a dependency of ng-metadata.
 
-**rxjs** - a polyfill for the Observables specification currently before the TC39 committee that determines standards for the JavaScript language. Developers should be able to pick a preferred version of rxjs (within a compatible version range) without waiting for ng-metadata updates.
 
 
 ### Configure your project
@@ -264,7 +271,8 @@ We typically add a TypeScript configuration file (`tsconfig.json`) to our projec
 
 #### TypeScript Declaration Files
 
-Many JavaScript libraries such as jQuery, the Jasmine testing library, and Angular itself, extend the JavaScript environment with features and syntax that the TypeScript compiler doesn't recognize natively. When the compiler doesn't recognize something, it throws an error.
+Many JavaScript libraries such as jQuery, the Jasmine testing library, and Angular itself, extend the JavaScript environment with features and syntax that the TypeScript compiler doesn't recognize natively. 
+When the compiler doesn't recognize something, it throws an error.
 
 We use TypeScript type declaration files — *d.ts files* — to tell the compiler about the libraries we load.
 
@@ -291,21 +299,7 @@ That's it! You are good to go!
 
 ## Why?
 
-There is already an existing project, which gives us Angular 2 like syntax for Angular 1, [ng-forward](https://github.com/ngUpgraders/ng-forward)
-
-While I respect all the hard work of the `ng-forward` team, there were things that I didn't like about their solution. 
-
-Anyway that project (ngForward) is unmaintained with old/wrong angular 2 API's and isn't production ready at all.
-
-- it tries to mirror angular 2 with lots of under the hood abstractions which is just not feasible because there are major differences, how things work in ng1 an ng2 
-- it tries to do a lot unnecessary work, which was never finished ( support ES5/ES6  like angular 2 does )
-- doesn't provides angular 2 like DI via constructor parameters because `babel` just won't support parameter decorators
-- forces you to rewrite templates, so you can't be just 100% sure that your code will work as before 
-
-> although we started a discussion about [collaboration](https://github.com/ngUpgraders/ng-forward/issues/138) I just don't think after further analysis, that we can merge 
-our project one way or another.'
- 
-so those are just few reasons why I made **ng-metadata**.
+those are just few reasons why I made **ng-metadata**.
 
 **ng-metadata:**
 - can be used as part of an upgrade strategy, which may also include *ng-upgrade*, when migrating to Angular 2
@@ -334,5 +328,7 @@ if you aren't a member just join us [ngParty slack](https://ngparty.herokuapp.co
 
 [plunker-1.x]: https://plnkr.co/edit/s2lYnI
 [plunker-2.x]: https://plnkr.co/edit/7Fr7oO
+[plunker-3.x]: https://plnkr.co/edit/Bds0Bk
+[plunker-4.x]: https://plnkr.co/edit/hsz8KF
 [playground]: https://github.com/ngParty/ng-metadata/tree/master/playground
 [ngParty-Angular-1-scaffold]: https://github.com/ngParty/Angular1-scaffold

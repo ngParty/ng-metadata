@@ -239,6 +239,6 @@ export function _parseBindings({ inputs=[], outputs=[], attrs=[] }: { inputs: st
 
       return acc;
 
-    }, {} as StringMap );
+    }, {} );
   }
 }

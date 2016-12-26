@@ -9,6 +9,7 @@ import {
   _registerTypeProvider
 } from '../di/reflective_provider';
 import { ListWrapper } from '../../facade/collections';
+import { Type } from '../../facade/type';
 
 function _bundleComponent( ComponentClass: Type, otherProviders: any[] = [], existingAngular1Module?: ng.IModule ): ng.IModule {
 

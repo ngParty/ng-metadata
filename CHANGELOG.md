@@ -1,3 +1,115 @@
+<a name="4.0.1"></a>
+## [4.0.1](https://github.com/ngParty/ng-metadata/compare/4.0.0...v4.0.1) (2016-12-25)
+
+
+### Bug Fixes
+
+* **common/async_pipe:** return immediately every value if it exist in subscriptions ([189770e](https://github.com/ngParty/ng-metadata/commit/189770e)), closes [#187](https://github.com/ngParty/ng-metadata/issues/187)
+
+
+
+<a name="4.0.0"></a>
+# [4.0.0](https://github.com/ngParty/ng-metadata/compare/3.0.3...v4.0.0) (2016-12-24)
+
+
+### Bug Fixes
+
+* **build:** create angular typings override so we don't have to import them to source ([3153bca](https://github.com/ngParty/ng-metadata/commit/3153bca)), closes [#175](https://github.com/ngParty/ng-metadata/issues/175) [#177](https://github.com/ngParty/ng-metadata/issues/177)
+* **core/directives/host:** execute HostListener method within sync $apply instead of next tick ([96bf124](https://github.com/ngParty/ng-metadata/commit/96bf124)), closes [#171](https://github.com/ngParty/ng-metadata/issues/171)
+* **facade/lang:** support Node 6 and Windows environments (#182) ([821b772](https://github.com/ngParty/ng-metadata/commit/821b772))
+* **playground:** add new angular-extensions and fix provide errors ([81217cf](https://github.com/ngParty/ng-metadata/commit/81217cf))
+
+### Features
+
+* **packages:** update to rxjs@5.0.1 and unpin the rxjs peerDeps via ^5.0.1. Also move to stable ([2ea1299](https://github.com/ngParty/ng-metadata/commit/2ea1299)), closes [#185](https://github.com/ngParty/ng-metadata/issues/185)
+* **playground:** add example for preventing user input via directive HostListener ([947078c](https://github.com/ngParty/ng-metadata/commit/947078c))
+* **upgrade:** add support for AOT via '@angular/upgrade/static' api ([3d3f724](https://github.com/ngParty/ng-metadata/commit/3d3f724)), closes [#178](https://github.com/ngParty/ng-metadata/issues/178)
+
+
+### BREAKING CHANGES
+
+* build: We now officialy support only angular typings provided via npm `@types/*` and also typescript 2.x
+
+- your existing typings provided by `typings` might not work
+- from now on if you wanna use deprecated `provide` function from `ng-metadata/core` with registration within `angular.module().directive|service|filter` you have to explicitly include angular types extension provided by ng-metadata from `node_modules/ng-metadata/manual_typings/angular-extension.d.ts`
+
+Before:
+```typescript
+// global.d.ts
+/// <reference path="../node_modules/ng-metadata/manual_typings/globals.d.ts" />
+```
+
+After:
+```typescript
+/// <reference path="../node_modules/ng-metadata/manual_typings/angular-extension.d.ts" />
+```
+
+or you can include it from within your tsconfig.json like this:
+```json
+{
+  "include":[
+    "src/**/*.ts"
+  ],
+  "files": [
+    "node_modules/ng-metadata/manual_typings/angular-extension.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
+```
+
+
+
+<a name="3.0.3"></a>
+## [3.0.3](https://github.com/ngParty/ng-metadata/compare/3.0.2...v3.0.3) (2016-11-07)
+
+
+### Bug Fixes
+
+* **manual_typings/globals:** remove Type alias from globals and add it to every module which relies on it ([9040a2c](https://github.com/ngParty/ng-metadata/commit/9040a2c)), closes [#170](https://github.com/ngParty/ng-metadata/issues/170)
+
+
+
+<a name="3.0.2"></a>
+## [3.0.2](https://github.com/ngParty/ng-metadata/compare/3.0.1...v3.0.2) (2016-10-21)
+
+
+### Bug Fixes
+
+* **npm:** remove reflect-metadata from peerDependencies as user can use core-js or other polyfill ([0ba808c](https://github.com/ngParty/ng-metadata/commit/0ba808c))
+
+
+
+<a name="3.0.1"></a>
+## [3.0.1](https://github.com/ngParty/ng-metadata/compare/3.0.0...v3.0.1) (2016-10-20)
+
+
+### Bug Fixes
+
+* **manual_typings:** make custom global angular overrides work with both global and module type defin ([3eb047d](https://github.com/ngParty/ng-metadata/commit/3eb047d))
+
+
+
+<a name="3.0.0"></a>
+# [3.0.0](https://github.com/ngParty/ng-metadata/compare/3.0.0-beta.0...v3.0.0) (2016-10-20)
+
+
+### Bug Fixes
+
+* **core:** Fix typo in bundle error message, relax isNgModule check (fixes #155) (#159) ([52fa571](https://github.com/ngParty/ng-metadata/commit/52fa571)), closes [#155](https://github.com/ngParty/ng-metadata/issues/155) [(#159](https://github.com/(/issues/159)
+
+### Features
+
+* **upgrade:** Dedicated NgMetadataUpgradeAdapter bootstrap function (#160) ([f941c71](https://github.com/ngParty/ng-metadata/commit/f941c71))
+
+
+### BREAKING CHANGES
+
+* The rxjs peerDependency has been updated to 5.0.0-rc.1, and this in turn requires TypeScript of 2.x and above.
+
+
+
 <a name="3.0.0-beta.0"></a>
 # [3.0.0-beta.0](https://github.com/ngParty/ng-metadata/compare/2.2.1...v3.0.0-beta.0) (2016-09-20)
 
@@ -12,11 +124,10 @@
 
 ### BREAKING CHANGES
 
-* core: All Pipes and Components must now be registered via an
-NgModule's declarations array.
+* core: All Pipes and Components must now be registered via an NgModule's declarations array.
 
 **Before:**
-```ts
+```typescript
 import { Component, Pipe } from 'ng-metadata/core'
 
 @Component({
@@ -40,7 +151,7 @@ class MainComponent {}
 ```
 
 **After:**
-```ts
+```typescript
 import { NgModule, Component, Pipe } from 'ng-metadata/core'
 
 @Component({
@@ -70,7 +181,7 @@ instantiated @angular/upgrade UpgradeAdapter, which will have been
 created using an Angular 2 NgModule.
 
 **Before:**
-```ts
+```typescript
 import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade'
 import { UpgradeAdapter } from '@angular/upgrade'
 import { Component } from 'ng-metadata/core'
@@ -88,7 +199,7 @@ upgradeAdapter.bootstrap(AppComponent, ['ng1Module'])
 ```
 
 **After:**
-```ts
+```typescript
 import { NgMetadataUpgradeAdapter } from 'ng-metadata/upgrade'
 import { UpgradeAdapter } from '@angular/upgrade'
 import { NgModule } from '@angular/core'
@@ -109,7 +220,7 @@ upgradeAdapter.boostrap(document.body, ['ng1Module'])
 first argument instead of a Component.
 
 **Before:**
-```ts
+```typescript
 import { Component, bundle } from 'ng-metadata/core'
 
 @Component({
@@ -122,7 +233,7 @@ const angular1Module = bundle(FooComponent)
 ```
 
 **After:**
-```ts
+```typescript
 import { NgModule, Component, bundle } from 'ng-metadata/core'
 
 @Component({
@@ -142,7 +253,7 @@ const angular1Module = bundle(FooModule)
 Component.
 
 **Before:**
-```ts
+```typescript
 import { bootstrap } from 'ng-metadata/platform-browser-dynamic'
 import { Component } from 'ng-metadata/core'
 
@@ -155,7 +266,7 @@ bootstrap(AppComponent)
 ```
 
 **After:**
-```ts
+```typescript
 import { platformBrowserDynamic } from 'ng-metadata/platform-browser-dynamic'
 import { NgModule, Component } from 'ng-metadata/core'
 

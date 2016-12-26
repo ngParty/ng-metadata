@@ -1,4 +1,4 @@
-import { Type } from '../../facade/lang';
+import { Type } from '../../facade/type';
 import { InjectableMetadata } from '../di/metadata';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
 
@@ -1225,7 +1225,7 @@ export class HostListenerMetadata {
  */
 export interface NgModuleMetadataType {
   providers?: any[]; // Decorated providers
-  declarations?: Array<Type|Type[]>; // Decorated Components, Directives or Pipes
+  declarations?: Array<Type|Type[]|Function|Function[]>; // Decorated Components, Directives or Pipes or downgrade ng2 components/pipe via upgradeAdapter(functions)
   imports?: Array<Type|string>; // Other NgModules or string names of Angular 1 modules
   exports?: Array<Type|any[]>; // Not used, only here for interface compatibility
   entryComponents?: Array<Type|any[]>; // Not used, only here for interface compatibility
@@ -1241,7 +1241,7 @@ export class NgModuleMetadata extends InjectableMetadata implements NgModuleMeta
   get providers(): any[] { return this._providers; }
   private _providers: any[];
 
-  declarations: Array<Type|Type[]>;
+  declarations: Array<Type|Type[]|Function|Function[]>;
 
   imports: Array<Type|string>;
 

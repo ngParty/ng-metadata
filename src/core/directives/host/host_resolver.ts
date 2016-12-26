@@ -1,4 +1,5 @@
 import { HostBindingsProcessed, HostListenersProcessed } from './constants';
+import { global } from '../../../facade/lang';
 import { StringMapWrapper } from '../../../facade/collections';
 import { StringWrapper } from '../../../facade/primitives';
 /**
@@ -113,7 +114,7 @@ export function _setHostListeners(
 
       const cbParams: any[] = _getHostListenerCbParams( evt, methodParams );
 
-      scope.$applyAsync( ()=> {
+      scope.$apply( ()=> {
 
         const noPreventDefault = ctrl[ methodName ]( ...cbParams );
 
@@ -171,11 +172,11 @@ function _getGlobalTargetReference( $injector: ng.auto.IInjectorService, targetN
   }
 
   if ( targetName === 'window' ) {
-    return angular.element( $injector.get<ng.IWindowService>( `$${targetName}` ) );
+    return global.angular.element( $injector.get<ng.IWindowService>( `$${targetName}` ) );
   }
 
   if ( targetName === 'body' ) {
-    return angular.element($document[ 0 ][ targetName ]);
+    return global.angular.element($document[ 0 ][ targetName ]);
   }
 
   throw new Error(`unsupported global target '${targetName}', only '${globalEventTargets}' are supported`)

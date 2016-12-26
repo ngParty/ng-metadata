@@ -1,5 +1,6 @@
 import { Subscription } from 'rxjs/Subscription';
 import { Observable } from 'rxjs/Observable';
+import { Type } from './type';
 
 export interface BrowserNodeGlobal {
   Object: typeof Object,
@@ -10,7 +11,7 @@ export interface BrowserNodeGlobal {
   RegExp: typeof RegExp,
   JSON: typeof JSON,
   Math: typeof Math,
-  angular: angular.IAngularStatic,
+  angular: ng.IAngularStatic,
   //assert(condition: any): void,
   Reflect: any,
   //zone: Zone,
@@ -19,10 +20,10 @@ export interface BrowserNodeGlobal {
   setTimeout: Function,
   clearTimeout: Function,
   setInterval: Function,
-  clearInterval: Function
+  clearInterval: Function,
 }
 
-var globalScope: BrowserNodeGlobal;
+let globalScope: BrowserNodeGlobal;
 
 if ( typeof window === 'undefined' ) {
   globalScope = global as any;
@@ -32,24 +33,9 @@ if ( typeof window === 'undefined' ) {
 
 // Need to declare a new variable for global here since TypeScript
 // exports the original value of the symbol.
-var _global: BrowserNodeGlobal = globalScope;
+const _global: BrowserNodeGlobal = globalScope;
 
 export {_global as global};
-
-export const Type = Function;
-
-/**
- * Runtime representation a type that a Component or other object is instances of.
- *
- * An example of a `Type` is `MyCustomComponent` class, which in JavaScript is be represented by
- * the `MyCustomComponent` constructor function.
- */
-export interface Type extends Function {}
-
-/**
- * Runtime representation of a type that is constructable (non-abstract).
- */
-export interface ConcreteType extends Type { new (...args): any; }
 
 
 // ===============
@@ -185,7 +171,7 @@ export function stringify( token ): string {
   var newLineIndex = res.indexOf( "\n" );
   return (newLineIndex === -1)
     ? res
-    : res.substring( 0, newLineIndex );
+    : res.substring( 0, newLineIndex ).replace('\r', '');
 }
 
 /**

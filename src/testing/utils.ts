@@ -1,5 +1,7 @@
 import { getInjectableName } from '../core/di/provider';
 import { StringWrapper } from '../facade/primitives';
+import { Type } from '../facade/type';
+import { global } from '../facade/lang';
 
 // public helpers
 
@@ -41,7 +43,7 @@ export function renderFactory( $compile: ng.ICompileService, $scope: any ) {
       // is Component
 
       const hostElement = `<${selector}></${selector}>`;
-      jqHost = angular.element( hostElement );
+      jqHost = global.angular.element( hostElement );
 
     }
     // since attributes can be undefined we check them

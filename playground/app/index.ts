@@ -1,3 +1,6 @@
+// @FIXME remove this line when https://github.com/ngParty/ng-metadata/issues/175 is resolved
+///<reference path="../../manual_typings/globals.d.ts"/>
+
 import * as angular from 'angular';
 import { provide, OpaqueToken, Injectable } from 'ng-metadata/core';
 

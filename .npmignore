@@ -12,6 +12,8 @@ npm-debug.log
 *.ts
 # allow only ambient type definitions
 !*.d.ts
+manual_typings/globals.d.ts
+manual_typings/overrides
 .travis.yml
 .editorconfig
 .npmignore

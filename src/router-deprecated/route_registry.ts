@@ -2,6 +2,7 @@ import { Injectable } from '../core/di/decorators';
 import { RouteDefinition } from './route_definition';
 import { Instruction } from './instructions';
 import { OpaqueToken } from '../core/di/opaque_token';
+import { Type } from '../facade/type';
 
 
 /**

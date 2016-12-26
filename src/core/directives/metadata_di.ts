@@ -1,6 +1,7 @@
-import { Type, stringify, isString } from '../../facade/lang';
+import { stringify, isString } from '../../facade/lang';
 import { resolveForwardRef } from '../di/forward_ref';
 import { DependencyMetadata } from '../di/metadata';
+import { Type } from '../../facade/type';
 
 /**
  * Declares an injectable parameter to be a live list of directives or variable

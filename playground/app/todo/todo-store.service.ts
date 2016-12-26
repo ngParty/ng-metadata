@@ -1,3 +1,4 @@
+import * as angular from 'angular';
 import {Injectable} from 'ng-metadata/core';
 
 export type TodoModel = {

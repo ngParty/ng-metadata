@@ -1,4 +1,4 @@
-import { Type, isPresent, stringify, assign, isType, getFuncName, isBlank } from '../../facade/lang';
+import { isPresent, stringify, assign, isType, getFuncName, isBlank } from '../../facade/lang';
 import { StringMapWrapper, ListWrapper } from '../../facade/collections';
 import { reflector } from '../reflection/reflection';
 import {
@@ -21,6 +21,7 @@ import { ParamMetaInst, PropMetaInst, getInjectableName } from '../di/provider';
 import { resolveForwardRef } from '../di/forward_ref';
 import { getErrorMsg } from '../../facade/exceptions';
 import { ChangeDetectionStrategy } from '../change_detection/constants';
+import { Type } from '../../facade/type';
 
 
 // asset:<package-name>/<realm>/<path-to-module>

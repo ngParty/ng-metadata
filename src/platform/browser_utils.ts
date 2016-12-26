@@ -1,5 +1,6 @@
-import { assertionsEnabled } from '../facade/lang';
+import { global, assertionsEnabled } from '../facade/lang';
 import { bundle } from '../core/util/bundler';
+import { Type } from '../facade/type';
 
 type AppRoot = string | Element | Document;
 
@@ -18,7 +19,7 @@ function prodModeConfig( $compileProvider: ng.ICompileProvider, $httpProvider: n
   $httpProvider.useApplyAsync( true );
 }
 
-export function createBootstrapFn(bootstrapFn: Function = angular.bootstrap.bind(angular)): Function {
+export function createBootstrapFn(bootstrapFn: Function = global.angular.bootstrap.bind(global.angular)): Function {
 
   /**
    * bootstrap angular app
@@ -39,12 +40,12 @@ export function createBootstrapFn(bootstrapFn: Function = angular.bootstrap.bind
         'Angular is running in the development mode. Call enableProdMode() to enable the production mode.'
       );
     } else {
-      angular.module( angular1ModuleName ).config( prodModeConfig );
+      global.angular.module( angular1ModuleName ).config( prodModeConfig );
     }
 
     const appRoot = _getAppRoot( element );
 
-    angular.element( document ).ready( ()=> {
+    global.angular.element( document ).ready( ()=> {
       bootstrapFn( appRoot, [ angular1ModuleName ], {
         strictDi
       } )
