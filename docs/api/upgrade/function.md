@@ -344,7 +344,7 @@ and we can upgrade it to Angular 2 like this:
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { UpgradeModule } from '@angular/upgrade/static/';
-import { provideNg1Injectable } from 'ng-metadata/upgrade';
+import { upgradeInjectable } from 'ng-metadata/upgrade';
 
 import { HeroComponent } from './heroes/hero.component.ng2';
 import { HeroesService } from './heroes/heroes.service';
@@ -358,8 +358,8 @@ import { HeroesService } from './heroes/heroes.service';
    HeroComponent
  ],
  providers: [
-   provideNg1Injectable('$routeParams'),
-   provideNg1Injectable(HeroesService),
+   upgradeInjectable('$routeParams'),
+   upgradeInjectable(HeroesService),
  ],
  entryComponents: [
    HeroComponent
