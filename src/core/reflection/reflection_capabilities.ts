@@ -230,7 +230,7 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
   }
 
   rawParameters( typeOrFunc: Type ): any[][] {
-    return this._reflect.getMetadata( PARAM_META_KEY, typeOrFunc );
+    return this._reflect.getOwnMetadata( PARAM_META_KEY, typeOrFunc );
   }
 
   registerParameters( parameters, type: Type ): void {
