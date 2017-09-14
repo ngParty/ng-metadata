@@ -48,6 +48,36 @@ describe( `reflection/reflector`, ()=> {
       expect(actual).to.deep.equal(expected);
 
     } );
+    it ( `should respect parent property metadata`, () => {
+      class FooMetadata{
+        toString(): string { return `@Foo()`; }
+      }
+      const Foo = makePropDecorator(FooMetadata);
+      class BarMetadata{
+        toString(): string { return `@Bar()`; }
+      }
+      const Bar = makePropDecorator(BarMetadata);
+
+      class Test{
+        @Foo() jedi: string;
+
+        constructor(){
+          this.jedi = 'Obi-wan Kenobi';
+        }
+      }
+      class TestA extends Test{
+        @Bar() luke: string;
+
+        constructor(){
+          super();
+          this.luke = 'Obi-wan Kenobi';
+        }
+      }
+      const actual = reflector.propMetadata(TestA);
+      const expected = { luke: [ BarMetadata.prototype ], jedi: [ FooMetadata.prototype ] };
+
+      expect(actual).to.deep.equal(expected);
+    });
     it( `should extract constructor params metadata if present`, ()=> {
 
       function _createProto( Type, props ) {
