@@ -2,6 +2,10 @@
 
 > Angular 2 decorators for Angular 1.x
 
+> **Enjoying/Using ngMetadata ? 💪✅**
+>
+> <a href="https://paypal.me/martinhochel" style="display: block;text-align: center;">Buy me a ☕️<br/><img src="https://img.shields.io/badge/Donate-PayPal-green.svg" alt="donate"></a>
+
 someone on the Internet:
 
 > The best Angular 1 yet!
