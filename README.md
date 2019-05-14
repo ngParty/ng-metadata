@@ -1,6 +1,6 @@
 # <a href='https://hotell.gitbooks.io/ng-metadata' style="display:flex;align-items:center;justify-content:center"><img src='https://github.com/ngParty/ng-metadata/blob/master/assets/logo/ngMetadata.png?raw=true' height='150'>ng-metadata</a>
- 
-> Angular 2 decorators for Angular 1.x 
+
+> Angular 2 decorators for Angular 1.x
 
 someone on the Internet:
 
@@ -25,7 +25,7 @@ Upgrading your codebase is really easy and highly flexible, you can apply 3 stra
 Advantages of `ng-metadata`:
 
 - clean Angular 2 style DI with Angular 1
-- write your apps in Angular 2 style today and be more productive! 
+- write your apps in Angular 2 style today and be more productive!
 - removes the overhead of Angular 1 API's like link function, $scope, $element and what not and other strange angular 1 api syntax
 - no abstractions, just pure Angular 1.x under the hood and power of ES.next decorators
 - leads you, to to write **clean and component driven** code without complicated DDO definition APIs
@@ -67,8 +67,8 @@ angular.module('hero',[]);
 // hero.service.js
 angular.module('hero')
   .service('heroSvc', HeroService);
- 
-HeroService.$inject = ['$http']; 
+
+HeroService.$inject = ['$http'];
 function HeroService($http){ this.$http = $http; }
 HeroService.prototype.fetchAll = function(){
   return this.$http.get('/api/heroes');
@@ -168,9 +168,9 @@ export class HeroComponent implements OnInit {
     // is defined as a class
     private heroSvc: HeroService
   ){}
-  
+
   ngOnInit(){ /* your init logic */ }
-  
+
 }
 ```
 
@@ -182,7 +182,7 @@ export class HeroComponent implements OnInit {
 
 ### Dependencies
 
-Angular applications with ng-metadata depend upon features and functionality provided by a variety of third-party packages (including ng-metadata itself). 
+Angular applications with ng-metadata depend upon features and functionality provided by a variety of third-party packages (including ng-metadata itself).
 These packages are maintained and installed with the Node Package Manager (npm).
 
 All those dependencies will be stored in `package.json`.
@@ -201,7 +201,7 @@ There are three package categories in the dependencies section of the applicatio
 
 **angular-mocks** - You are testing your code right? right?
 
-**ng-metadata** - Critical runtime parts of ng-metadata needed by every application. Includes all metadata decorators, Component, Directive, dependency injection, and the component lifecycle hooks. 
+**ng-metadata** - Critical runtime parts of ng-metadata needed by every application. Includes all metadata decorators, Component, Directive, dependency injection, and the component lifecycle hooks.
 Includes 4 modules:
 - [`ng-metadata/core`](docs/api/core/README.md),
 - [`ng-metadata/platform-browser-dynamic`](docs/api/platform-browser-dynamic/README.md),
@@ -226,7 +226,7 @@ Install polyfills by runing:
 
 `npm i --save core-js`
 
-You also need to provide `Reflect.metadata` shim. This can be done by installing `npm i --save reflect-metadata` or by importing `import 'core-js/es7/reflect'` from `core-js` 
+You also need to provide `Reflect.metadata` shim. This can be done by installing `npm i --save reflect-metadata` or by importing `import 'core-js/es7/reflect'` from `core-js`
 
 **core-js** - monkey patches the global context (window) with essential features of ES2015 (ES6). Developers may substitute an alternative polyfill that provides the same core APIs. This dependency should go away once these APIs are implemented by all supported ever-green browsers.
 
@@ -244,7 +244,7 @@ We need 3 things:
 
 - tsconfig.json - TypeScript compiler configuration.
 - typings - TypesScript declaration files.
-- module loader/bundler - ES2015 modules are not natively in the browser so we need a tool for that 
+- module loader/bundler - ES2015 modules are not natively in the browser so we need a tool for that
 
 #### [tsconfig.json](http://www.typescriptlang.org/docs/handbook/tsconfig-json.html)
 
@@ -271,7 +271,7 @@ We typically add a TypeScript configuration file (`tsconfig.json`) to our projec
 
 #### TypeScript Declaration Files
 
-Many JavaScript libraries such as jQuery, the Jasmine testing library, and Angular itself, extend the JavaScript environment with features and syntax that the TypeScript compiler doesn't recognize natively. 
+Many JavaScript libraries such as jQuery, the Jasmine testing library, and Angular itself, extend the JavaScript environment with features and syntax that the TypeScript compiler doesn't recognize natively.
 When the compiler doesn't recognize something, it throws an error.
 
 We use TypeScript type declaration files — *d.ts files* — to tell the compiler about the libraries we load.
@@ -290,7 +290,7 @@ TypeScript 2 will automatically include any installed packages under the @types 
 
 #### Module loader / bundler
 
-We prefer `webpack` but you can also go with `SystemJS`, which reminds me of RequireJS configuration hell, but yeah it's up to you ;) 
+We prefer `webpack` but you can also go with `SystemJS`, which reminds me of RequireJS configuration hell, but yeah it's up to you ;)
 
 - For Webpack configuration see our [Angular 1 Starter](https://github.com/ngParty/Angular1-scaffold)
 - For SystemJS configuration see [Plnkr Quickstart](https://plnkr.co/edit/s2lYnI?p=preview)
@@ -304,7 +304,7 @@ those are just few reasons why I made **ng-metadata**.
 **ng-metadata:**
 - can be used as part of an upgrade strategy, which may also include *ng-upgrade*, when migrating to Angular 2
 - uses only pure angular 1 API under the hood
-- templates are the same as in angular 1 + optionally binding type determined by template ( ng2 like ) 
+- templates are the same as in angular 1 + optionally binding type determined by template ( ng2 like )
 - supports all kind of angular 1 api like creating providers/configuration/runBlocks and much more
 
 ## Support
@@ -315,14 +315,14 @@ Jump into the [ngParty Slack team](https://ngparty.herokuapp.com/) to join the d
 
 ### Think You Found a Bug?
 
-First check the [issues](https://github.com/ngParty/ng-metadata/issues) list to see if someone else has already 
+First check the [issues](https://github.com/ngParty/ng-metadata/issues) list to see if someone else has already
 found it and there's an ongoing discussion. If not, submit an [issue](https://github.com/ngParty/ng-metadata/issues).
  Thanks!
 
 ## Contributing to the Project
 
-We want help! Please take a look at the [Contribution Guide](CONTRIBUTING.md) for guidelines and jump in the Slack 
-team to discuss how you can help: http://ngparty.slack.com... 
+We want help! Please take a look at the [Contribution Guide](CONTRIBUTING.md) for guidelines and jump in the Slack
+team to discuss how you can help: http://ngparty.slack.com...
 if you aren't a member just join us [ngParty slack](https://ngparty.herokuapp.com)
 
 
