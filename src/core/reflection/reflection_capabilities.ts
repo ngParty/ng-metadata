@@ -181,6 +181,27 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return result;
   }
 
+  /** @internal */
+  _getParent( typeOrFunc: any ): any {
+    const parent = Object.getPrototypeOf(typeOrFunc.prototype);
+
+    return parent && parent.constructor ?
+      parent.constructor :
+      null;
+  }
+
+  /** @internal */
+  _assign<T, U>( target: T, source: U ): T & U {
+    const merged: any = target;
+    for (let key in source) {
+      if (Object.prototype.hasOwnProperty.call(source, key)) {
+        merged[key] = source[key];
+      }
+    }
+    return merged;
+  }
+
+
   parameters( typeOrFunc: Type ): any[][] {
     // // Prefer the direct API.
     // if (isPresent((<any>typeOrFunc).parameters)) {
@@ -209,7 +230,7 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
   }
 
   rawParameters( typeOrFunc: Type ): any[][] {
-    return this._reflect.getMetadata( PARAM_META_KEY, typeOrFunc );
+    return this._reflect.getOwnMetadata( PARAM_META_KEY, typeOrFunc );
   }
 
   registerParameters( parameters, type: Type ): void {
@@ -250,7 +271,12 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     //   return propMetadata;
     // }
     if ( isReflectMetadata( this._reflect ) ) {
-      const propMetadata = this._reflect.getMetadata( PROP_META_KEY, typeOrFunc );
+      const propMetadata = {};
+      // Loop type and type parents
+      while (typeOrFunc) {
+        this._assign(propMetadata, this._reflect.getMetadata( PROP_META_KEY, typeOrFunc ));
+        typeOrFunc = this._getParent(typeOrFunc);
+      }
       if ( isPresent( propMetadata ) ) return propMetadata;
     }
     return {};
