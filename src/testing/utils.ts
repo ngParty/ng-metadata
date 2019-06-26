@@ -56,6 +56,7 @@ export function renderFactory( $compile: ng.ICompileService, $scope: any ) {
 
     // angular api
     const compiledElement = $compile(jqHost)($scope);
+    $scope.$digest();
     const ctrl = compiledElement.controller(ctrlName) as T;
     $scope.$apply();
 
