@@ -48,6 +48,7 @@ export class AsyncTaskComponent {
       </ul>
       <pre style="overflow:auto;max-height:250px;">{{ $ctrl.repos | async | json }}</pre>
     </div>
+    <async-destroy class="clearfix"></async-destroy>
     `
   )
 })

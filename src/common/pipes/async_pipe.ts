@@ -45,6 +45,7 @@ export class AsyncPipe implements PipeTransform {
   private static nextObjectID: number = 0;
   private static values: {[key: string]: any} = {};
   private static subscriptions: {[key: string]: StoredSubscription} = {};
+  private static timeouts: {[key: string]: number} = {};
   private static TRACK_PROP_NAME = '__asyncFilterObjectID__';
 
   private static _objectId( obj: any ): any {
@@ -60,17 +61,24 @@ export class AsyncPipe implements PipeTransform {
       || input.then.bind( input ); // To make it work with Promise
   }
 
-  private static _markForCheck( scope: ng.IScope ) {
+  private static _markForCheck( scope: ng.IScope, inputId: number ) {
     if ( isScope( scope ) ) {
+      // clear previous timeout before starting new
+      clearTimeout(AsyncPipe.timeouts[inputId]);
       // #perfmatters
       // wait till event loop is free and run just local digest so we don't get in conflict with other local $digest
-      setTimeout( ()=>scope.$digest() );
+      AsyncPipe.timeouts[inputId] = setTimeout( ()=> {
+        scope.$digest();
+      });
       // we can't run local scope.$digest, because if we have multiple async pipes on the same scope 'infdig' error would occur :(
       // scope.$applyAsync(); // Automatic safe apply, if scope provided
     }
   }
 
   private static _dispose( inputId: number ): void {
+    // should prevent digest of destroyed scope
+    clearTimeout(AsyncPipe.timeouts[inputId]);
+    delete AsyncPipe.timeouts[inputId];
     if ( isSubscription( AsyncPipe.subscriptions[ inputId ] ) ) {
       (AsyncPipe.subscriptions[ inputId ] as Subscription).unsubscribe();
     }
@@ -106,7 +114,7 @@ export class AsyncPipe implements PipeTransform {
     function _setSubscriptionValue( value: any ): void {
       AsyncPipe.values[ inputId ] = value;
       // this is needed only for Observables
-      AsyncPipe._markForCheck( scope );
+      AsyncPipe._markForCheck( scope, inputId );
     }
 
   }
