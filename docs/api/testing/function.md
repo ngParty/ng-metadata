@@ -2,10 +2,48 @@
 
 **Testing helpers**
 
+- [inject](#inject)
 - [renderFactory](#renderfactory)
 - [getInput](#getinput)
 
 ---
+
+## inject
+
+Helper to get an injectable instance.
+
+*Example:*
+
+```typescript
+// my-injectable.service.ts
+import { Injectable } from 'ng-metadata/core';
+
+@Injectable()
+class MyInjectableService {
+  constructor(private complexService: MyComplexService) {}
+}
+
+@Injectable()
+class MyComplexService {
+  constructor(private anotherService) {}
+}
+
+// my-injectable.service.spec.ts
+import { TestBed, inject } from 'ng-metadata/testing';
+
+describe('MyInjectableService', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [ MyInjectableService, MyComplexService ]
+    });
+  });
+
+  it('should inject the two services', inject([MyInjectableService, MyComplexService, '$log'],
+  (myInjectable, myComplex, $log) => {
+    $log.log('Instance is available here');
+  }));
+});
+```
 
 ## renderFactory
  
